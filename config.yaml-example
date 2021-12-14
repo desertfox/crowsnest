@@ -1,0 +1,20 @@
+host: ""
+jobs:
+  - name: "DB Errors"
+    frequency: 15
+    options:
+        streamid: "adfasdfasdf"
+        query: "region:production AND DBI AND error"
+        fields:
+          - "message"
+          - "region"
+          - "kubernetes_namespace_name"
+  - name: "API Errors"
+    frequency: 15
+    options:
+        streamid: "adfasdfasdf"
+        query: ""
+        fields:
+          - "message"
+          - "region"
+          - "kubernetes_namespace_name"
