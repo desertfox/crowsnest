@@ -24,7 +24,7 @@ func (q query) urlEncode() string {
 
 	params.Add("query", q.query)
 	params.Add("range", strconv.Itoa(q.frequnecy))
-	params.Add("filter", q.filter)
+	params.Add("filter", fmt.Sprintf("streams:%s", q.streamid))
 	params.Add("sort", q.sort)
 	params.Add("fields", strings.Join(q.fields, ", "))
 	params.Add("limit", q.limit)
