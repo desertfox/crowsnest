@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	opsys "os"
 	"time"
 
 	"github.com/go-co-op/gocron"
@@ -12,12 +11,12 @@ import (
 var c config = loadConfig(os.Args[1])
 
 func init() {
-	if opsys.Getenv("CROWSNEST_USERNAME") == "" || opsys.Getenv("CROWSNEST_PASSWORD") == "" {
+	if os.Getenv("CROWSNEST_USERNAME") == "" || os.Getenv("CROWSNEST_PASSWORD") == "" {
 		fmt.Println("Missing CROWSNEST_USERNAME or CROWSNEST_PASSWORD ENV variable.")
-		opsys.Exit(1)
+		os.Exit(1)
 	}
 
-	c.InitSession(opsys.Getenv("CROWSNEST_USERNAME"), opsys.Getenv("CROWSNEST_PASSWORD"))
+	c.InitSession(os.Getenv("CROWSNEST_USERNAME"), os.Getenv("CROWSNEST_PASSWORD"))
 }
 
 func main() {
@@ -32,5 +31,5 @@ func main() {
 
 func bailOut(err error) {
 	fmt.Println(err.Error())
-	opsys.Exit(1)
+	os.Exit(1)
 }

@@ -19,13 +19,13 @@ type config struct {
 type job struct {
 	Name      string `yaml:"name"`
 	Frequency int    `yaml:"frequency"`
-	option    option
+	Option    option `yaml:"options"`
 }
 
 type option struct {
-	Steamid string   `yaml:"steamid"`
-	Query   string   `yaml:"query"`
-	Fields  []string `yaml:"fields"`
+	Streamid string   `yaml:"streamid"`
+	Query    string   `yaml:"query"`
+	Fields   []string `yaml:"fields"`
 }
 
 type auth struct {
@@ -67,7 +67,7 @@ func (j job) getFunc(c config) func() {
 	return func() {
 		fmt.Println("ExecuteJob " + j.Name)
 
-		q := graylog.NewGLQ(c.Host, j.Name, j.option.Query, "", j.option.Steamid, c.auth.basicAuth, j.Frequency, j.option.Fields)
+		q := graylog.NewGLQ(c.Host, j.Name, j.Option.Query, "", j.Option.Streamid, c.auth.basicAuth, j.Frequency, j.Option.Fields)
 
 		q.Execute()
 	}
