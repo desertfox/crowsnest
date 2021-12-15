@@ -11,21 +11,21 @@ import (
 )
 
 type config struct {
-	host string `yaml:"host"`
-	jobs []job  `yaml:"jobs"`
+	Host string `yaml:"host"`
+	Jobs []job  `yaml:"jobs"`
 	auth auth
 }
 
 type job struct {
-	name      string `yaml:"name"`
-	frequency int    `yaml:"frequency"`
+	Name      string `yaml:"name"`
+	Frequency int    `yaml:"frequency"`
 	option    option
 }
 
 type option struct {
-	steamid string   `yaml:"steamid"`
-	query   string   `yaml:"query"`
-	fields  []string `yaml:"fields"`
+	Steamid string   `yaml:"steamid"`
+	Query   string   `yaml:"query"`
+	Fields  []string `yaml:"fields"`
 }
 
 type auth struct {
@@ -39,17 +39,21 @@ func newAuth(s string) auth {
 
 func loadConfig(filePath string) config {
 	file, err := ioutil.ReadFile(filePath)
-	bailOut(err)
+	if err != nil {
+		bailOut(err)
+	}
 
 	var c config
 	err = yaml.Unmarshal(file, &c)
-	bailOut(err)
+	if err != nil {
+		bailOut(err)
+	}
 
 	return c
 }
 
 func (c *config) InitSession(u, p string) {
-	lr := graylog.NewLoginRequest(u, p, c.host, &http.Client{})
+	lr := graylog.NewLoginRequest(u, p, c.Host, &http.Client{})
 
 	basicAuth, err := lr.CreateAuthHeader()
 	if err != nil {
@@ -61,14 +65,14 @@ func (c *config) InitSession(u, p string) {
 
 func (j job) getFunc(c config) func() {
 	return func() {
-		fmt.Println("ExecuteJob " + j.name)
+		fmt.Println("ExecuteJob " + j.Name)
 
-		q := graylog.NewGLQ(c.host, j.name, j.option.query, "", j.option.steamid, c.auth.basicAuth, j.frequency, j.option.fields)
+		q := graylog.NewGLQ(c.Host, j.Name, j.option.Query, "", j.option.Steamid, c.auth.basicAuth, j.Frequency, j.option.Fields)
 
 		q.Execute()
 	}
 }
 
 func (j job) getFrequency() int {
-	return j.frequency
+	return j.Frequency
 }

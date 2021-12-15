@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-const sessionsPath string = "/system/sessions"
+const sessionsPath string = "system/sessions"
 
 type loginRequest struct {
 	Username string `json:"username"`

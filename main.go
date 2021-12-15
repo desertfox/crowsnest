@@ -2,15 +2,14 @@ package main
 
 import (
 	"fmt"
+	"os"
 	opsys "os"
 	"time"
 
 	"github.com/go-co-op/gocron"
 )
 
-const configPathDefault string = "/etc/crowsnest/config.yaml"
-
-var c config = loadConfig(configPathDefault)
+var c config = loadConfig(os.Args[1])
 
 func init() {
 	if opsys.Getenv("CROWSNEST_USERNAME") == "" || opsys.Getenv("CROWSNEST_PASSWORD") == "" {
@@ -24,7 +23,7 @@ func init() {
 func main() {
 	s := gocron.NewScheduler(time.UTC)
 
-	for _, j := range c.jobs {
+	for _, j := range c.Jobs {
 		s.Every(j.getFrequency()).Minutes().Do(j.getFunc(c))
 	}
 

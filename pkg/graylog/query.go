@@ -52,5 +52,7 @@ func (q query) Execute() (string, error) {
 
 	body, _ := ioutil.ReadAll(response.Body)
 
+	fmt.Println(string(body))
+
 	return string(body), nil
 }
