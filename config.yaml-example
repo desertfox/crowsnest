@@ -2,6 +2,7 @@ host: ""
 jobs:
   - name: "DB Errors"
     frequency: 15
+    threshold: 20
     teamsurl: ""
     options:
         streamid: "adfasdfasdf"
@@ -12,6 +13,7 @@ jobs:
           - "kubernetes_namespace_name"
   - name: "API Errors"
     frequency: 15
+    threshold: 0
     teamsurl: ""
     options:
         streamid: "adfasdfasdf"

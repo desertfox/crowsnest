@@ -22,6 +22,7 @@ type job struct {
 	Frequency int    `yaml:"frequency"`
 	Option    option `yaml:"options"`
 	TeamsURL  string `yaml:"teamsurl"`
+	Threshold int    `yaml:"threshold"`
 }
 
 type option struct {
@@ -69,17 +70,24 @@ func (j job) getFunc(c config) func() {
 	return func() {
 		fmt.Println("ExecuteJob " + j.Name)
 
-		q := graylog.NewGLQ(c.Host, j.Name, j.Option.Query, "", j.Option.Streamid, c.auth.basicAuth, j.Frequency, j.Option.Fields)
+		q := graylog.NewGLQ(c.Host, j.Name, j.Option.Query, j.Option.Streamid, c.auth.basicAuth, j.Frequency, j.Option.Fields)
 
-		raw, err := q.Execute()
+		count, err := q.Execute()
 		if err != nil {
 			bailOut(err)
 		}
 
-		fmt.Println(raw, q.BuildHumanURL())
+		fmt.Println(count, q.BuildHumanURL())
+
+		var status string
+		if count >= j.Threshold {
+			status = "ALERT"
+		} else {
+			status = "OK"
+		}
 
 		outputService := teams.BuildClient(j.TeamsURL)
-		outputService.Send(j.Name, fmt.Sprintf("Count: %s\n\nLink: %s\n\n", raw, q.BuildHumanURL()))
+		outputService.Send(j.Name, fmt.Sprintf("Status: %s\nCount: %d\nLink: [GrayLog Query](%s)\n", status, count, q.BuildHumanURL()))
 	}
 }
 

@@ -11,13 +11,13 @@ import (
 )
 
 type query struct {
-	host, name, query, filter, sort, limit, streamid, authToken string
-	frequnecy                                                   int
-	fields                                                      []string
+	host, name, query, streamid, authToken string
+	frequnecy                              int
+	fields                                 []string
 }
 
-func NewGLQ(host, name, q, filter, streamid, authToken string, frequency int, fields []string) query {
-	return query{host, name, q, filter, "order:desc", "10000", streamid, authToken, frequency, fields}
+func NewGLQ(host, name, q, streamid, authToken string, frequency int, fields []string) query {
+	return query{host, name, q, streamid, authToken, frequency, fields}
 }
 
 func (q query) urlEncode() string {
@@ -28,7 +28,7 @@ func (q query) urlEncode() string {
 	params.Add("filter", fmt.Sprintf("streams:%s", q.streamid))
 	params.Add("sort", "timestamp:desc")
 	params.Add("fields", strings.Join(q.fields, ", "))
-	params.Add("limit", q.limit)
+	params.Add("limit", "10000")
 
 	return params.Encode()
 }
@@ -37,7 +37,7 @@ func (q query) String() string {
 	return q.urlEncode()
 }
 
-func (q query) Execute() (string, error) {
+func (q query) Execute() (int, error) {
 	url := fmt.Sprintf("%v/api/search/universal/relative?%v", q.host, q)
 	request, _ := http.NewRequest("GET", url, nil)
 
@@ -47,7 +47,7 @@ func (q query) Execute() (string, error) {
 	client := &http.Client{}
 	response, err := client.Do(request)
 	if err != nil {
-		return "", err
+		return 0, err
 	}
 	defer response.Body.Close()
 
@@ -63,11 +63,11 @@ func (q query) Execute() (string, error) {
 			break
 		}
 		if err != nil {
-			return "", err
+			return 0, err
 		}
 	}
 
-	return strconv.Itoa(count), nil
+	return count, nil
 }
 
 func (q query) BuildHumanURL() string {
