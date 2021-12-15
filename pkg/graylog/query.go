@@ -1,9 +1,8 @@
 package graylog
 
 import (
-	"bytes"
+	"bufio"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -51,20 +50,13 @@ func (q query) Execute() (int, error) {
 	}
 	defer response.Body.Close()
 
-	buf := make([]byte, 32*1024)
 	count := 0
-	lineSep := []byte{'\n'}
-
-	for {
-		c, err := response.Body.Read(buf)
-		count += bytes.Count(buf[:c], lineSep)
-
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return 0, err
-		}
+	scanner := bufio.NewScanner(response.Body)
+	for scanner.Scan() {
+		count++
+	}
+	if err := scanner.Err(); err != nil {
+		return 0, err
 	}
 
 	return count, nil
