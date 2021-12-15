@@ -1,8 +1,9 @@
 package graylog
 
 import (
+	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -25,7 +26,7 @@ func (q query) urlEncode() string {
 	params.Add("query", q.query)
 	params.Add("range", strconv.Itoa(q.frequnecy*60))
 	params.Add("filter", fmt.Sprintf("streams:%s", q.streamid))
-	params.Add("sort", q.sort)
+	params.Add("sort", "timestamp:desc")
 	params.Add("fields", strings.Join(q.fields, ", "))
 	params.Add("limit", q.limit)
 
@@ -50,9 +51,21 @@ func (q query) Execute() (string, error) {
 	}
 	defer response.Body.Close()
 
-	body, _ := ioutil.ReadAll(response.Body)
+	buf := make([]byte, 32*1024)
+	count := 0
+	lineSep := []byte{'\n'}
 
-	fmt.Println(string(body))
+	for {
+		c, err := response.Body.Read(buf)
+		count += bytes.Count(buf[:c], lineSep)
 
-	return string(body), nil
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return strconv.Itoa(count), nil
 }
