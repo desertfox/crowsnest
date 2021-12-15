@@ -69,7 +69,12 @@ func (j job) getFunc(c config) func() {
 
 		q := graylog.NewGLQ(c.Host, j.Name, j.Option.Query, "", j.Option.Streamid, c.auth.basicAuth, j.Frequency, j.Option.Fields)
 
-		q.Execute()
+		raw, err := q.Execute()
+		if err != nil {
+			bailOut(err)
+		}
+
+		fmt.Println(raw, q.BuildHumanURL())
 	}
 }
 

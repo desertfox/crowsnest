@@ -69,3 +69,14 @@ func (q query) Execute() (string, error) {
 
 	return strconv.Itoa(count), nil
 }
+
+func (q query) BuildHumanURL() string {
+	params := url.Values{}
+
+	params.Add("q", q.query)
+	params.Add("interval", "hour")
+	params.Add("rangetype", "relative")
+	params.Add("relative", strconv.Itoa(q.frequnecy*60))
+
+	return q.host + "/streams/" + q.streamid + "/search?" + params.Encode()
+}
