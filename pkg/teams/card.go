@@ -31,7 +31,7 @@ type body struct {
 func newCard(reportTitle, reportText string) msCard {
 	b := body{
 		"TextBlock",
-		fmt.Sprintf("%v\n\rErrors\n\r- %v", reportTitle, reportText),
+		fmt.Sprintf("%v\n\r%v", reportTitle, reportText),
 		"Medium",
 		true,
 		true,
