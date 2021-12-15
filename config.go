@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/desertfox/crowsnest/pkg/graylog"
+	"github.com/desertfox/crowsnest/pkg/teams"
 	"gopkg.in/yaml.v2"
 )
 
@@ -20,6 +21,7 @@ type job struct {
 	Name      string `yaml:"name"`
 	Frequency int    `yaml:"frequency"`
 	Option    option `yaml:"options"`
+	TeamsURL  string `yaml:"teamsurl"`
 }
 
 type option struct {
@@ -75,6 +77,9 @@ func (j job) getFunc(c config) func() {
 		}
 
 		fmt.Println(raw, q.BuildHumanURL())
+
+		outputService := teams.BuildClient(j.TeamsURL)
+		outputService.Send(j.Name, fmt.Sprintf("Count: %s\n\nLink: %s\n\n", raw, q.BuildHumanURL()))
 	}
 }
 

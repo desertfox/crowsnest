@@ -8,6 +8,6 @@ func BuildClient(teamsUrl string) *Client {
 	return &Client{teamsUrl}
 }
 
-func (c Client) Send(text string) error {
-	return NewReport("", text).sendReport(c.url)
+func (c Client) Send(title, text string) error {
+	return NewReport(title, text).sendReport(c.url)
 }
