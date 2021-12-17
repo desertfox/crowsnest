@@ -4,6 +4,7 @@ jobs:
     frequency: 15
     threshold: 20
     teamsurl: ""
+    type: "relative"
     options:
         streamid: "adfasdfasdf"
         query: "region:production AND DBI AND error"
@@ -15,6 +16,7 @@ jobs:
     frequency: 15
     threshold: 0
     teamsurl: ""
+    type: "relative"
     options:
         streamid: "adfasdfasdf"
         query: ""

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"reflect"
 	"time"
 
 	"github.com/desertfox/crowsnest/pkg/graylog"
@@ -38,6 +40,39 @@ type auth struct {
 
 func newAuth(s string) auth {
 	return auth{s, time.Now()}
+}
+
+type reqParams struct {
+	username, password, configPath string
+}
+
+func buildReqParams() reqParams {
+	cs := "CROWSNEST_"
+
+	return reqParams{
+		username:   os.Getenv(cs + "USERNAME"),
+		password:   os.Getenv(cs + "PASSWORD"),
+		configPath: os.Getenv(cs + "CONFIG"),
+	}
+}
+
+func buildConfigFromENV() config {
+	rp := buildReqParams()
+
+	value := reflect.ValueOf(rp)
+	for i := 0; i < value.NumField(); i++ {
+		field := value.Field(i).Interface()
+		if field == "" {
+			fmt.Println("Missing ENV variable: " + "CROWSNEST_" + value.Field(i).Type().Name())
+		}
+
+	}
+
+	c := loadConfig(rp.configPath)
+
+	c.InitSession(rp.username, rp.password)
+
+	return c
 }
 
 func loadConfig(filePath string) config {
@@ -77,7 +112,7 @@ func (j job) getFunc(c config) func() {
 			bailOut(err)
 		}
 
-		fmt.Println(count, q.BuildHumanURL())
+		fmt.Println(time.Now(), count, q.BuildHumanURL())
 
 		var status string
 		if count >= j.Threshold {
@@ -93,4 +128,9 @@ func (j job) getFunc(c config) func() {
 
 func (j job) getFrequency() int {
 	return j.Frequency
+}
+
+func bailOut(err error) {
+	fmt.Println(err.Error())
+	os.Exit(1)
 }

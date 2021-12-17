@@ -12,4 +12,4 @@ WORKDIR /root/
 
 COPY --from=builder /opt/crowsnest/crowsnest ./
 
-CMD [ "./crowsnest" ]
+CMD [ "./crowsnest", "$CROWSNEST_CONFIG" ]
