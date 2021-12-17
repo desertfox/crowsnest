@@ -7,12 +7,15 @@ import (
 )
 
 func main() {
+	c, err := buildConfigFromENV()
+	if err != nil {
+		bailOut(err)
+	}
+
 	s := gocron.NewScheduler(time.UTC)
 
-	c := buildConfigFromENV()
-
 	for _, j := range c.Jobs {
-		s.Every(j.getFrequency()).Minutes().Do(j.getFunc(c))
+		s.Every(j.Frequency).Minutes().Do(j.getJob(c))
 	}
 
 	s.StartBlocking()

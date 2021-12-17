@@ -1,11 +1,13 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"reflect"
+	"strings"
 	"time"
 
 	"github.com/desertfox/crowsnest/pkg/graylog"
@@ -25,6 +27,7 @@ type job struct {
 	Option    option `yaml:"options"`
 	TeamsURL  string `yaml:"teamsurl"`
 	Threshold int    `yaml:"threshold"`
+	Type      string `yaml:"type"`
 }
 
 type option struct {
@@ -38,70 +41,70 @@ type auth struct {
 	lastUpdated time.Time
 }
 
-func newAuth(s string) auth {
-	return auth{s, time.Now()}
-}
-
 type reqParams struct {
-	username, password, configPath string
+	Username, Password, ConfigPath string
 }
 
-func buildReqParams() reqParams {
+func buildConfigFromENV() (config, error) {
 	cs := "CROWSNEST_"
 
-	return reqParams{
-		username:   os.Getenv(cs + "USERNAME"),
-		password:   os.Getenv(cs + "PASSWORD"),
-		configPath: os.Getenv(cs + "CONFIG"),
+	rp := reqParams{
+		Username:   os.Getenv(cs + "USERNAME"),
+		Password:   os.Getenv(cs + "PASSWORD"),
+		ConfigPath: os.Getenv(cs + "CONFIG"),
 	}
-}
 
-func buildConfigFromENV() config {
-	rp := buildReqParams()
-
-	value := reflect.ValueOf(rp)
+	value := reflect.Indirect(reflect.ValueOf(rp))
 	for i := 0; i < value.NumField(); i++ {
 		field := value.Field(i).Interface()
 		if field == "" {
-			fmt.Println("Missing ENV variable: " + "CROWSNEST_" + value.Field(i).Type().Name())
+			return config{}, errors.New("Missing ENV variable: " + cs + strings.ToUpper(value.Type().Field(i).Name))
 		}
 
 	}
 
-	c := loadConfig(rp.configPath)
+	c, err := loadConfig(rp.ConfigPath)
+	if err != nil {
+		return config{}, err
+	}
 
-	c.InitSession(rp.username, rp.password)
+	err = c.InitSession(rp.Username, rp.Password)
+	if err != nil {
+		return config{}, err
+	}
 
-	return c
+	return c, nil
 }
 
-func loadConfig(filePath string) config {
+func loadConfig(filePath string) (config, error) {
 	file, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		bailOut(err)
+		return config{}, err
 	}
 
 	var c config
 	err = yaml.Unmarshal(file, &c)
 	if err != nil {
-		bailOut(err)
+		return config{}, err
 	}
 
-	return c
+	return c, nil
 }
 
-func (c *config) InitSession(u, p string) {
+func (c *config) InitSession(u, p string) error {
 	lr := graylog.NewLoginRequest(u, p, c.Host, &http.Client{})
 
 	basicAuth, err := lr.CreateAuthHeader()
 	if err != nil {
-		bailOut(err)
+		return err
 	}
 
-	c.auth = newAuth(basicAuth)
+	c.auth = auth{basicAuth, time.Now()}
+
+	return nil
 }
 
-func (j job) getFunc(c config) func() {
+func (j job) getJob(c config) func() {
 	return func() {
 		fmt.Println("ExecuteJob " + j.Name)
 
@@ -124,10 +127,6 @@ func (j job) getFunc(c config) func() {
 		outputService := teams.BuildClient(j.TeamsURL)
 		outputService.Send(j.Name, fmt.Sprintf("Status: %s\nCount: %d\nLink: [GrayLog Query](%s)\n", status, count, q.BuildHumanURL()))
 	}
-}
-
-func (j job) getFrequency() int {
-	return j.Frequency
 }
 
 func bailOut(err error) {
