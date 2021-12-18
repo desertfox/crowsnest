@@ -1,13 +1,19 @@
 package main
 
 import (
+	"os"
 	"time"
 
 	"github.com/go-co-op/gocron"
 )
 
 func main() {
-	c, err := buildConfigFromENV()
+	rp, err := newReqParams(os.Getenv("CROWSNEST_USERNAME"), os.Getenv("CROWSNEST_PASSWORD"), os.Getenv("CROWSNEST_CONFIG"))
+	if err != nil {
+		bailOut(err)
+	}
+
+	c, err := buildConfigFromENV(rp)
 	if err != nil {
 		bailOut(err)
 	}

@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"reflect"
-	"strings"
 	"time"
 
 	"github.com/desertfox/crowsnest/pkg/graylog"
@@ -45,22 +44,30 @@ type reqParams struct {
 	Username, Password, ConfigPath string
 }
 
-func buildConfigFromENV() (config, error) {
-	cs := "CROWSNEST_"
-
-	rp := reqParams{
-		Username:   os.Getenv(cs + "USERNAME"),
-		Password:   os.Getenv(cs + "PASSWORD"),
-		ConfigPath: os.Getenv(cs + "CONFIG"),
+func newReqParams(u, p, c string) (reqParams, error) {
+	if u == "" {
+		return reqParams{}, errors.New("missing username")
 	}
 
+	if p == "" {
+		return reqParams{}, errors.New("missing password")
+	}
+
+	if c == "" {
+		return reqParams{}, errors.New("missing configpath")
+	}
+
+	return reqParams{u, p, c}, nil
+
+}
+
+func buildConfigFromENV(rp reqParams) (config, error) {
 	value := reflect.Indirect(reflect.ValueOf(rp))
 	for i := 0; i < value.NumField(); i++ {
 		field := value.Field(i).Interface()
 		if field == "" {
-			return config{}, errors.New("Missing ENV variable: " + cs + strings.ToUpper(value.Type().Field(i).Name))
+			return config{}, errors.New("Missing param: " + value.Type().Field(i).Name)
 		}
-
 	}
 
 	c, err := loadConfig(rp.ConfigPath)
