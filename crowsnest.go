@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"reflect"
 	"time"
 
 	"github.com/desertfox/crowsnest/pkg/graylog"
@@ -62,21 +61,12 @@ func newReqParams(u, p, c string) (reqParams, error) {
 }
 
 func buildConfigFromENV(rp reqParams) (config, error) {
-	value := reflect.Indirect(reflect.ValueOf(rp))
-	for i := 0; i < value.NumField(); i++ {
-		field := value.Field(i).Interface()
-		if field == "" {
-			return config{}, errors.New("Missing param: " + value.Type().Field(i).Name)
-		}
-	}
-
 	c, err := loadConfig(rp.ConfigPath)
 	if err != nil {
 		return config{}, err
 	}
 
-	err = c.InitSession(rp.Username, rp.Password)
-	if err != nil {
+	if err = c.InitSession(rp.Username, rp.Password); err != nil {
 		return config{}, err
 	}
 

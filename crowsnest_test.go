@@ -2,6 +2,9 @@ package main
 
 import (
 	"errors"
+	"io/ioutil"
+	"log"
+	"os"
 	"testing"
 )
 
@@ -11,10 +14,6 @@ func newTestReqParams(u, p, c string) reqParams {
 		Password:   p,
 		ConfigPath: c,
 	}
-}
-
-func mockConfig() {
-
 }
 
 func Test_newReqParams(t *testing.T) {
@@ -59,11 +58,18 @@ func TestEmptyConfig_BuildConfigFromENV(t *testing.T) {
 
 }
 
+//loadconfig
 func TestEnv_BuildConfigFromENV(t *testing.T) {
-	rp := newTestReqParams("USER", "PASS", "TESTCONFIG")
+	file, err := ioutil.TempFile("", "Test_Config.yaml")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.Remove(file.Name())
+
+	rp := newTestReqParams("USER", "PASS", file.Name())
 	_, got := buildConfigFromENV(rp)
 
 	if got != nil {
-		t.Errorf("Error present: %v", got)
+		t.Fatalf("Error present: %v", got)
 	}
 }
