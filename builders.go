@@ -8,17 +8,15 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+var (
+	errReqParams = errors.New("missing param")
+)
+
 func newReqParams(u, p, c string) (reqParams, error) {
-	if u == "" {
-		return reqParams{}, errors.New("missing username")
-	}
-
-	if p == "" {
-		return reqParams{}, errors.New("missing password")
-	}
-
-	if c == "" {
-		return reqParams{}, errors.New("missing configpath")
+	for _, v := range []string{u, p, c} {
+		if v == "" {
+			return reqParams{}, errReqParams
+		}
 	}
 
 	return reqParams{u, p, c}, nil

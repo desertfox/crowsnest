@@ -1,13 +1,10 @@
 package main
 
 import (
-	"errors"
-	"io/ioutil"
-	"log"
-	"os"
 	"testing"
 )
 
+//Bypass empty string checks
 func newTestReqParams(u, p, c string) reqParams {
 	return reqParams{
 		Username:   u,
@@ -18,58 +15,62 @@ func newTestReqParams(u, p, c string) reqParams {
 
 func Test_newReqParams(t *testing.T) {
 	tests := []struct {
-		params []string
-		pass   bool
+		name, username, password, config string
+		want                             reqParams
+		wantErr                          error
 	}{
-		{[]string{"", "PASS", "$CONFIG"}, false},
-		{[]string{"USER", "", "$CONFIG"}, false},
-		{[]string{"USER", "PASS", ""}, false},
-		{[]string{"USER", "PASS", "CONFIG"}, true},
+		{"missing username", "", "PASS", "$CONFIG", reqParams{}, errReqParams},
+		{"missing password", "USER", "", "$CONFIG", reqParams{}, errReqParams},
+		{"missing config", "USER", "PASS", "", reqParams{}, errReqParams},
+		{"all params present", "USER", "PASS", "CONFIG", reqParams{"USER", "PASS", "CONFIG"}, nil},
 	}
 
 	for _, tt := range tests {
-		_, got := newReqParams(tt.params[0], tt.params[1], tt.params[2])
-		if !tt.pass && got == nil {
-			t.Fatalf("expected error but was nil, test: %v, got: %v", tt, got)
-			break
-		}
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			got, gotErr := newReqParams(tt.username, tt.password, tt.config)
+			if got != tt.want {
+				t.Fatalf("reqParams not expected, test: %v, got: %v", tt, got)
+			}
 
-		if tt.pass && got != nil {
-			t.Fatalf("expected pass but was nil, test: %v, got: %v", tt, got)
-			break
-		}
+			if gotErr != tt.wantErr {
+				t.Fatalf("errors expected but not returned, test: %v", tt)
+			}
+		})
 	}
-
 }
 
-func TestEmptyConfig_BuildConfig(t *testing.T) {
-	rp := newTestReqParams("USER", "PASS", "TESTCONFIG")
-	_, got := buildConfig(rp)
-
-	want := errors.New("open TESTCONFIG: The system cannot find the file specified.")
-
-	if got == nil {
-		t.Fatal("Expected error")
-	}
-
-	if got.Error() != want.Error() {
-		t.Fatalf("Error does not match expect, got: %v, want: %v", got, want)
-	}
-
-}
-
-//loadconfig
+/*
 func Test_BuildConfig(t *testing.T) {
-	file, err := ioutil.TempFile("", "Test_Config.yaml")
+	emptyFile, err := ioutil.TempFile("", "test*")
 	if err != nil {
-		log.Fatal(err)
+		t.Fatalf("error constructing test cases %v", err)
 	}
-	defer os.Remove(file.Name())
 
-	rp := newTestReqParams("USER", "PASS", file.Name())
-	_, got := buildConfig(rp)
-
-	if got != nil {
-		t.Fatalf("Error present: %v", got)
+	tests := []struct {
+		name      string
+		reqParams reqParams
+		want      config
+		wantErr   error
+	}{
+		{"cannot find file", newTestReqParams("USER", "PASS", "TESTCONFIG"), config{}, errors.New("open TESTCONFIG: The system cannot find the file specified.")},
+		{"empty config", newTestReqParams("USER", "PASS", emptyFile.Name()), config{}, nil},
 	}
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			got, gotErr := buildConfig(tt.reqParams)
+			if got.Host != tt.want.Host {
+				t.Fatalf("buildConfig not expected, got: %v, want: %v", got, tt.want)
+			}
+
+			if tt.wantErr != nil && gotErr.Error() == tt.wantErr.Error() {
+				t.Fatalf("buildConfig errors expected but not returned, got: %v, want: %v", gotErr, tt.wantErr)
+			}
+
+		})
+	}
+
 }
+*/
