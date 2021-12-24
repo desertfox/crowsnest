@@ -1,11 +1,18 @@
-package graylog
+package cron
 
 import (
 	"fmt"
+	"io/ioutil"
 	"time"
 
 	"github.com/desertfox/crowsnest/pkg/graylog/search"
+	"gopkg.in/yaml.v2"
 )
+
+type graylogService interface {
+	GetSessionHeader() string
+	GetHost() string
+}
 
 type outputService interface {
 	Send(string, string) error
@@ -26,13 +33,28 @@ type option struct {
 	Fields   []string `yaml:"fields"`
 }
 
-func (j job) GetFunc(jobService *Client, outputService outputService) func() {
+func BuildFromConfig(configPath string) *[]job {
+	file, err := ioutil.ReadFile(configPath)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	var jobs []job
+	err = yaml.Unmarshal(file, &jobs)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return &jobs
+}
+
+func (j job) GetFunc(graylogService graylogService, outputService outputService) func() {
 	return func() {
 		fmt.Println("ExecuteJob " + j.Name)
 
-		q := j.newQuery(jobService.lr.GetHost())
+		q := j.newQuery(graylogService.GetHost())
 
-		count, err := q.Execute(jobService.getSessionHeader())
+		count, err := q.Execute(graylogService.GetSessionHeader())
 		if err != nil {
 			panic(err.Error())
 		}

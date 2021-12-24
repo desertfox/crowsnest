@@ -13,10 +13,11 @@ import (
 const sessionsPath string = "api/system/sessions"
 
 type LoginRequest struct {
-	Host     string `json:"host"`
-	Username string `json:"username"`
-	Password string `json:"password"`
-	session  auth
+	Host       string `json:"host"`
+	Username   string `json:"username"`
+	Password   string `json:"password"`
+	session    auth
+	httpClient *http.Client
 }
 
 type auth struct {
@@ -24,7 +25,7 @@ type auth struct {
 	updated   time.Time
 }
 
-func NewLoginRequest(h, u, p string) *LoginRequest {
+func NewLoginRequest(h, u, p string, httpClient *http.Client) *LoginRequest {
 	for i, s := range []string{h, u, p} {
 		if s == "" {
 			switch i {
@@ -37,17 +38,17 @@ func NewLoginRequest(h, u, p string) *LoginRequest {
 			}
 		}
 	}
-	return &LoginRequest{h, u, p, auth{}}
+	return &LoginRequest{h, u, p, auth{}, httpClient}
 }
 
 func (lr LoginRequest) GetHost() string {
 	return lr.Host
 }
 
-func (lr LoginRequest) GetSessionHeader(httpClient *http.Client) string {
+func (lr LoginRequest) GetHeader() string {
 	//check if token is old
 	if 1 == 0 {
-		sessionId, err := lr.sessionIdRequest(httpClient)
+		sessionId, err := lr.request()
 		if err != nil {
 			panic(err.Error())
 		}
@@ -59,7 +60,7 @@ func (lr LoginRequest) GetSessionHeader(httpClient *http.Client) string {
 	return lr.session.basicAuth
 }
 
-func (lr LoginRequest) sessionIdRequest(httpClient *http.Client) (string, error) {
+func (lr LoginRequest) request() (string, error) {
 	jsonData, err := json.Marshal(lr)
 	if err != nil {
 		return "", err
@@ -70,7 +71,7 @@ func (lr LoginRequest) sessionIdRequest(httpClient *http.Client) (string, error)
 	request, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
 	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
 
-	response, err := httpClient.Do(request)
+	response, err := lr.httpClient.Do(request)
 	if err != nil {
 		return "", err
 	}
