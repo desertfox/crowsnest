@@ -9,8 +9,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type graylogService interface {
-	GetSessionHeader() string
+type sessionService interface {
+	GetHeader() string
 	GetHost() string
 }
 
@@ -48,13 +48,13 @@ func BuildFromConfig(configPath string) *[]job {
 	return &jobs
 }
 
-func (j job) GetFunc(graylogService graylogService, outputService outputService) func() {
+func (j job) GetFunc(sessionService sessionService, outputService outputService) func() {
 	return func() {
 		fmt.Println("ExecuteJob " + j.Name)
 
-		q := j.newQuery(graylogService.GetHost())
+		q := j.newQuery(sessionService.GetHost())
 
-		count, err := q.Execute(graylogService.GetSessionHeader())
+		count, err := q.Execute(sessionService.GetHeader())
 		if err != nil {
 			panic(err.Error())
 		}

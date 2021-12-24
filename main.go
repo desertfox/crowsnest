@@ -5,7 +5,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/desertfox/crowsnest/pkg/graylog"
 	"github.com/desertfox/crowsnest/pkg/graylog/cron"
 	"github.com/desertfox/crowsnest/pkg/graylog/session"
 	"github.com/desertfox/crowsnest/pkg/teams"
@@ -25,14 +24,12 @@ func main() {
 
 	jobService := cron.BuildFromConfig(os.Getenv("CROWSNEST_CONFIG"))
 
-	graylogClient := graylog.NewClient(sessionService)
-
 	s := gocron.NewScheduler(time.UTC)
 
 	for _, job := range *jobService {
 		outputService := teams.BuildClient(job.TeamsURL)
 
-		s.Every(job.Frequency).Minutes().Do(job.GetFunc(graylogClient, outputService))
+		s.Every(job.Frequency).Minutes().Do(job.GetFunc(sessionService, outputService))
 	}
 
 	s.StartBlocking()
