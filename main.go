@@ -15,7 +15,7 @@ func main() {
 
 	httpClient := &http.Client{}
 
-	sessionService := session.NewLoginRequest(
+	sessionService := session.NewSession(
 		os.Getenv("CROWSNEST_HOST"),
 		os.Getenv("CROWSNEST_USERNAME"),
 		os.Getenv("CROWSNEST_PASSWORD"),

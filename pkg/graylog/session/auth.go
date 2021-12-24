@@ -12,20 +12,24 @@ import (
 
 const sessionsPath string = "api/system/sessions"
 
-type LoginRequest struct {
+type session struct {
+	basicAuth    string
+	updated      time.Time
+	loginRequest *loginRequest
+}
+
+type loginRequest struct {
 	Host       string `json:"host"`
 	Username   string `json:"username"`
 	Password   string `json:"password"`
-	session    auth
 	httpClient *http.Client
 }
 
-type auth struct {
-	basicAuth string
-	updated   time.Time
+func NewSession(h, u, p string, httpClient *http.Client) *session {
+	return &session{"", time.Now(), newLoginRequest(h, u, p, httpClient)}
 }
 
-func NewLoginRequest(h, u, p string, httpClient *http.Client) *LoginRequest {
+func newLoginRequest(h, u, p string, httpClient *http.Client) *loginRequest {
 	for i, s := range []string{h, u, p} {
 		if s == "" {
 			switch i {
@@ -38,29 +42,30 @@ func NewLoginRequest(h, u, p string, httpClient *http.Client) *LoginRequest {
 			}
 		}
 	}
-	return &LoginRequest{h, u, p, auth{}, httpClient}
+
+	return &loginRequest{h, u, p, httpClient}
 }
 
-func (lr LoginRequest) GetHost() string {
-	return lr.Host
+func (s session) GetHost() string {
+	return s.loginRequest.Host
 }
 
-func (lr LoginRequest) GetHeader() string {
+func (s *session) GetHeader() string {
 	//check if token is old
 	if 1 == 0 {
-		sessionId, err := lr.request()
+		sessionId, err := s.loginRequest.do()
 		if err != nil {
 			panic(err.Error())
 		}
 
-		lr.session.basicAuth = createAuthHeader(sessionId)
-		lr.session.updated = time.Now()
+		s.basicAuth = createAuthHeader(sessionId)
+		s.updated = time.Now()
 	}
 	// Token is good
-	return lr.session.basicAuth
+	return s.basicAuth
 }
 
-func (lr LoginRequest) request() (string, error) {
+func (lr loginRequest) do() (string, error) {
 	jsonData, err := json.Marshal(lr)
 	if err != nil {
 		return "", err
