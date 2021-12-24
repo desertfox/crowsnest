@@ -1,7 +1,6 @@
 package main
 
 import (
-	"net/http"
 	"os"
 	"time"
 
@@ -11,28 +10,20 @@ import (
 )
 
 func main() {
-	rp, err := newReqParams(os.Getenv("CROWSNEST_USERNAME"), os.Getenv("CROWSNEST_PASSWORD"), os.Getenv("CROWSNEST_CONFIG"))
-	if err != nil {
-		bailOut(err)
-	}
-
-	c, err := buildConfig(rp)
-	if err != nil {
-		bailOut(err)
-	}
-
-	lr := graylog.NewLoginRequest(rp.Username, rp.Password, c.Host, &http.Client{})
-	if err = c.buildSession(lr); err != nil {
-		bailOut(err)
-	}
+	jobService := graylog.NewClient(
+		os.Getenv("CROWSNEST_HOST"),
+		os.Getenv("CROWSNEST_USERNAME"),
+		os.Getenv("CROWSNEST_PASSWORD"),
+	).BuildJobsFromConfig(
+		os.Getenv("CROWSNEST_CONFIG"),
+	)
 
 	s := gocron.NewScheduler(time.UTC)
 
-	for _, j := range c.Jobs {
-		q := graylog.NewGLQ(c.Host, j.Name, j.Option.Query, j.Option.Streamid, c.auth.basicAuth, j.Frequency, j.Option.Fields)
-		r := teams.BuildClient(j.TeamsURL)
+	for _, job := range jobService.Jobs {
+		outputService := teams.BuildClient(job.TeamsURL)
 
-		s.Every(j.Frequency).Minutes().Do(j.getJob(q, r))
+		s.Every(job.Frequency).Minutes().Do(job.GetFunc(jobService, outputService))
 	}
 
 	s.StartBlocking()

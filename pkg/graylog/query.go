@@ -10,13 +10,13 @@ import (
 )
 
 type query struct {
-	host, name, query, streamid, authToken string
-	frequnecy                              int
-	fields                                 []string
+	host, name, query, streamid string
+	frequnecy                   int
+	fields                      []string
 }
 
-func NewGLQ(host, name, q, streamid, authToken string, frequency int, fields []string) query {
-	return query{host, name, q, streamid, authToken, frequency, fields}
+func (j job) newQuery(host string) query {
+	return query{host, j.Name, j.Option.Query, j.Option.Streamid, j.Frequency, j.Option.Fields}
 }
 
 func (q query) urlEncode() string {
@@ -36,12 +36,12 @@ func (q query) String() string {
 	return q.urlEncode()
 }
 
-func (q query) Execute() (int, error) {
+func (q query) Execute(authToken string) (int, error) {
 	url := fmt.Sprintf("%v/api/search/universal/relative?%v", q.host, q)
 	request, _ := http.NewRequest("GET", url, nil)
 
 	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
-	request.Header.Set("Authorization", q.authToken)
+	request.Header.Set("Authorization", authToken)
 
 	client := &http.Client{}
 	response, err := client.Do(request)

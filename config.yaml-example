@@ -1,4 +1,3 @@
-host: ""
 jobs:
   - name: "DB Errors"
     frequency: 15
