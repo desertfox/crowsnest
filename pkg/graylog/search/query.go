@@ -1,4 +1,4 @@
-package graylog
+package search
 
 import (
 	"bufio"
@@ -9,17 +9,17 @@ import (
 	"strings"
 )
 
-type query struct {
+type Query struct {
 	host, name, query, streamid string
 	frequnecy                   int
 	fields                      []string
 }
 
-func (j job) newQuery(host string) query {
-	return query{host, j.Name, j.Option.Query, j.Option.Streamid, j.Frequency, j.Option.Fields}
+func NewQuery(host, name, query, streamid string, frequency int, fields []string) Query {
+	return Query{host, name, query, streamid, frequency, fields}
 }
 
-func (q query) urlEncode() string {
+func (q Query) urlEncode() string {
 	params := url.Values{}
 
 	params.Add("query", q.query)
@@ -32,11 +32,11 @@ func (q query) urlEncode() string {
 	return params.Encode()
 }
 
-func (q query) String() string {
+func (q Query) String() string {
 	return q.urlEncode()
 }
 
-func (q query) Execute(authToken string) (int, error) {
+func (q Query) Execute(authToken string) (int, error) {
 	url := fmt.Sprintf("%v/api/search/universal/relative?%v", q.host, q)
 	request, _ := http.NewRequest("GET", url, nil)
 
@@ -62,7 +62,7 @@ func (q query) Execute(authToken string) (int, error) {
 	return count, nil
 }
 
-func (q query) BuildHumanURL() string {
+func (q Query) BuildHumanURL() string {
 	params := url.Values{}
 
 	params.Add("q", q.query)

@@ -5,18 +5,20 @@ import (
 	"time"
 
 	"github.com/desertfox/crowsnest/pkg/graylog"
+	"github.com/desertfox/crowsnest/pkg/graylog/session"
 	"github.com/desertfox/crowsnest/pkg/teams"
 	"github.com/go-co-op/gocron"
 )
 
 func main() {
-	jobService := graylog.NewClient(
+
+	sessionService := session.NewLoginRequest(
 		os.Getenv("CROWSNEST_HOST"),
 		os.Getenv("CROWSNEST_USERNAME"),
 		os.Getenv("CROWSNEST_PASSWORD"),
-	).BuildJobsFromConfig(
-		os.Getenv("CROWSNEST_CONFIG"),
 	)
+
+	jobService := graylog.NewClient(sessionService).BuildJobsFromConfig(os.Getenv("CROWSNEST_CONFIG"))
 
 	s := gocron.NewScheduler(time.UTC)
 
