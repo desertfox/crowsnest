@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -15,12 +16,16 @@ func main() {
 
 	httpClient := &http.Client{}
 
-	sessionService := session.NewSession(
+	sessionService, err := session.NewSession(
 		os.Getenv("CROWSNEST_HOST"),
 		os.Getenv("CROWSNEST_USERNAME"),
 		os.Getenv("CROWSNEST_PASSWORD"),
 		httpClient,
 	)
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(1)
+	}
 
 	jobService := cron.BuildFromConfig(os.Getenv("CROWSNEST_CONFIG"))
 

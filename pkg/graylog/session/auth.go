@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -11,6 +12,8 @@ import (
 )
 
 const sessionsPath string = "api/system/sessions"
+
+var missingParam = errors.New("missing param")
 
 type session struct {
 	basicAuth    string
@@ -25,25 +28,23 @@ type loginRequest struct {
 	httpClient *http.Client
 }
 
-func NewSession(h, u, p string, httpClient *http.Client) *session {
-	return &session{"", time.Now(), newLoginRequest(h, u, p, httpClient)}
+func NewSession(h, u, p string, httpClient *http.Client) (*session, error) {
+	lr, err := newLoginRequest(h, u, p, httpClient)
+	if err != nil {
+		return &session{}, err
+	}
+	return &session{"", time.Now(), lr}, nil
 }
 
-func newLoginRequest(h, u, p string, httpClient *http.Client) *loginRequest {
-	for i, s := range []string{h, u, p} {
+func newLoginRequest(h, u, p string, httpClient *http.Client) (*loginRequest, error) {
+	for _, s := range []string{h, u, p} {
 		if s == "" {
-			switch i {
-			case 0:
-				panic("Missing host variable")
-			case 1:
-				panic("Missing username variable")
-			case 2:
-				panic("Missing password variable")
-			}
+			return &loginRequest{}, missingParam
+
 		}
 	}
 
-	return &loginRequest{h, u, p, httpClient}
+	return &loginRequest{h, u, p, httpClient}, nil
 }
 
 func (s session) GetHost() string {
