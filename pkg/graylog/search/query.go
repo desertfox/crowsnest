@@ -9,17 +9,17 @@ import (
 	"strings"
 )
 
-type Query struct {
+type query struct {
 	host, name, query, streamid string
 	frequnecy                   int
 	fields                      []string
 }
 
-func NewQuery(host, name, query, streamid string, frequency int, fields []string) Query {
-	return Query{host, name, query, streamid, frequency, fields}
+func NewQuery(host, name, q, streamid string, frequency int, fields []string) query {
+	return query{host, name, q, streamid, frequency, fields}
 }
 
-func (q Query) urlEncode() string {
+func (q query) urlEncode() string {
 	params := url.Values{}
 
 	params.Add("query", q.query)
@@ -32,11 +32,11 @@ func (q Query) urlEncode() string {
 	return params.Encode()
 }
 
-func (q Query) String() string {
+func (q query) String() string {
 	return q.urlEncode()
 }
 
-func (q Query) Execute(authToken string) (int, error) {
+func (q query) Execute(authToken string) (int, error) {
 	url := fmt.Sprintf("%v/api/search/universal/relative?%v", q.host, q)
 	request, _ := http.NewRequest("GET", url, nil)
 
@@ -62,7 +62,7 @@ func (q Query) Execute(authToken string) (int, error) {
 	return count, nil
 }
 
-func (q Query) BuildHumanURL() string {
+func (q query) BuildHumanURL() string {
 	params := url.Values{}
 
 	params.Add("q", q.query)
