@@ -7,18 +7,13 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type sessionService interface {
-	GetHeader() string
-	GetHost() string
+type graylogService interface {
+	BuildSearchURL() string
+	ExecuteSearch() (int, error)
 }
 
-type outputService interface {
-	Send(string, string) error
-}
-
-type Riddler interface {
-	Execute(string) (int, error)
-	BuildHumanURL() string
+type reportService interface {
+	Send(string, string, string) error
 }
 
 type job struct {
@@ -51,15 +46,20 @@ func BuildFromConfig(configPath string) *[]job {
 	return &jobs
 }
 
-func (j job) GetFunc(sessionService sessionService, outputService outputService, q Riddler) func() {
+func (j job) GetCron(graylogService graylogService, reportService reportService) func() {
 	return func() {
 		j := j //MARK
-		count, err := q.Execute(sessionService.GetHeader())
+
+		count, err := graylogService.ExecuteSearch()
 		if err != nil {
 			panic(err.Error())
 		}
 
-		outputService.Send(j.Name, fmt.Sprintf("Alert: %s\nCount: %d\nLink: [GrayLog Query](%s)\n", j.shouldAlertText(count), count, q.BuildHumanURL()))
+		reportService.Send(
+			j.TeamsURL,
+			j.Name,
+			fmt.Sprintf("Alert: %s\nCount: %d\nLink: [GrayLog Query](%s)\n", j.shouldAlertText(count), count, graylogService.BuildSearchURL()),
+		)
 	}
 }
 

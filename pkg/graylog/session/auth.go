@@ -13,7 +13,7 @@ import (
 
 const sessionsPath string = "api/system/sessions"
 
-var missingParam = errors.New("missing param")
+var errMissingParam = errors.New("missing param")
 
 type session struct {
 	basicAuth    string
@@ -28,7 +28,7 @@ type loginRequest struct {
 	httpClient *http.Client
 }
 
-func NewSession(h, u, p string, httpClient *http.Client) (*session, error) {
+func New(h, u, p string, httpClient *http.Client) (*session, error) {
 	lr, err := newLoginRequest(h, u, p, httpClient)
 	if err != nil {
 		return &session{}, err
@@ -39,7 +39,7 @@ func NewSession(h, u, p string, httpClient *http.Client) (*session, error) {
 func newLoginRequest(h, u, p string, httpClient *http.Client) (*loginRequest, error) {
 	for _, s := range []string{h, u, p} {
 		if s == "" {
-			return &loginRequest{}, missingParam
+			return &loginRequest{}, errMissingParam
 
 		}
 	}

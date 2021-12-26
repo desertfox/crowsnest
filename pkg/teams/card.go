@@ -28,7 +28,7 @@ type body struct {
 	Markdown bool   `json:"markdown"`
 }
 
-func newCard(reportTitle, reportText string) msCard {
+func NewCard(reportTitle, reportText string) msCard {
 	b := body{
 		"TextBlock",
 		fmt.Sprintf("%v\n\r%v", reportTitle, reportText),

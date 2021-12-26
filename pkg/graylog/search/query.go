@@ -13,10 +13,11 @@ type query struct {
 	host, name, query, streamid string
 	frequnecy                   int
 	fields                      []string
+	httpClient                  *http.Client
 }
 
-func NewQuery(host, name, q, streamid string, frequency int, fields []string) query {
-	return query{host, name, q, streamid, frequency, fields}
+func New(host, name, q, streamid string, frequency int, fields []string, httpClient *http.Client) query {
+	return query{host, name, q, streamid, frequency, fields, httpClient}
 }
 
 func (q query) urlEncode() string {
@@ -32,24 +33,20 @@ func (q query) urlEncode() string {
 	return params.Encode()
 }
 
-func (q query) String() string {
-	return q.urlEncode()
-}
-
 func (q query) Execute(authToken string) (int, error) {
 	url := fmt.Sprintf("%v/api/search/universal/relative?%v", q.host, q)
-	request, _ := http.NewRequest("GET", url, nil)
 
+	request, _ := http.NewRequest("GET", url, nil)
 	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
 	request.Header.Set("Authorization", authToken)
 
-	client := &http.Client{}
-	response, err := client.Do(request)
+	response, err := q.httpClient.Do(request)
 	if err != nil {
 		return 0, err
 	}
 	defer response.Body.Close()
 
+	//Count is probably off by one, the response is csv format iirc with the headers aka fields
 	count := 0
 	scanner := bufio.NewScanner(response.Body)
 	for scanner.Scan() {
@@ -62,7 +59,11 @@ func (q query) Execute(authToken string) (int, error) {
 	return count, nil
 }
 
-func (q query) BuildHumanURL() string {
+func (q query) String() string {
+	return q.urlEncode()
+}
+
+func (q query) BuildSearchURL() string {
 	params := url.Values{}
 
 	params.Add("q", q.query)
@@ -70,5 +71,5 @@ func (q query) BuildHumanURL() string {
 	params.Add("rangetype", "relative")
 	params.Add("relative", strconv.Itoa(q.frequnecy*60))
 
-	return q.host + "/streams/" + q.streamid + "/search?" + params.Encode()
+	return fmt.Sprintf("%s/streams/%s/search?%s", q.host, q.streamid, params.Encode())
 }
