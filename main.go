@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/desertfox/crowsnest/pkg/graylog/cron"
+	"github.com/desertfox/crowsnest/pkg/graylog/search"
 	"github.com/desertfox/crowsnest/pkg/graylog/session"
 	"github.com/desertfox/crowsnest/pkg/teams"
 	"github.com/go-co-op/gocron"
@@ -16,8 +17,10 @@ func main() {
 
 	httpClient := &http.Client{}
 
+	var host string = os.Getenv("CROWSNEST_HOST")
+
 	sessionService, err := session.NewSession(
-		os.Getenv("CROWSNEST_HOST"),
+		host,
 		os.Getenv("CROWSNEST_USERNAME"),
 		os.Getenv("CROWSNEST_PASSWORD"),
 		httpClient,
@@ -34,7 +37,9 @@ func main() {
 	for _, job := range *jobService {
 		outputService := teams.BuildClient(job.TeamsURL)
 
-		s.Every(job.Frequency).Minutes().Do(job.GetFunc(sessionService, outputService))
+		query := search.NewQuery(host, job.Name, job.Option.Query, job.Option.Streamid, job.Frequency, job.Option.Fields)
+
+		s.Every(job.Frequency).Minutes().Do(job.GetFunc(sessionService, outputService, query))
 	}
 
 	s.StartBlocking()

@@ -3,9 +3,7 @@ package cron
 import (
 	"fmt"
 	"io/ioutil"
-	"time"
 
-	"github.com/desertfox/crowsnest/pkg/graylog/search"
 	"gopkg.in/yaml.v2"
 )
 
@@ -16,6 +14,11 @@ type sessionService interface {
 
 type outputService interface {
 	Send(string, string) error
+}
+
+type Riddler interface {
+	Execute(string) (int, error)
+	BuildHumanURL() string
 }
 
 type job struct {
@@ -48,30 +51,22 @@ func BuildFromConfig(configPath string) *[]job {
 	return &jobs
 }
 
-func (j job) GetFunc(sessionService sessionService, outputService outputService) func() {
+func (j job) GetFunc(sessionService sessionService, outputService outputService, q Riddler) func() {
 	return func() {
-		fmt.Println("ExecuteJob " + j.Name)
-
-		q := j.newQuery(sessionService.GetHost())
-
+		j := j //MARK
 		count, err := q.Execute(sessionService.GetHeader())
 		if err != nil {
 			panic(err.Error())
 		}
 
-		fmt.Println(time.Now(), count, q.BuildHumanURL())
-
-		var status string
-		if count >= j.Threshold {
-			status = "ALERT"
-		} else {
-			status = "OK"
-		}
-
-		outputService.Send(j.Name, fmt.Sprintf("Status: %s\nCount: %d\nLink: [GrayLog Query](%s)\n", status, count, q.BuildHumanURL()))
+		outputService.Send(j.Name, fmt.Sprintf("Alert: %s\nCount: %d\nLink: [GrayLog Query](%s)\n", j.shouldAlertText(count), count, q.BuildHumanURL()))
 	}
 }
 
-func (j job) newQuery(host string) search.Query {
-	return search.NewQuery(host, j.Name, j.Option.Query, j.Option.Streamid, j.Frequency, j.Option.Fields)
+func (j job) shouldAlertText(count int) string {
+	if count >= j.Threshold {
+		return fmt.Sprintf("ALERT %d/%d", count, j.Threshold)
+	}
+
+	return fmt.Sprintf("OK %d/%d", count, j.Threshold)
 }

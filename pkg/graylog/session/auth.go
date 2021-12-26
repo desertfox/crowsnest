@@ -53,8 +53,8 @@ func (s session) GetHost() string {
 
 func (s *session) GetHeader() string {
 	//check if token is old
-	if 1 == 0 {
-		sessionId, err := s.loginRequest.do()
+	if 1 == 1 {
+		sessionId, err := s.loginRequest.execute()
 		if err != nil {
 			panic(err.Error())
 		}
@@ -66,7 +66,7 @@ func (s *session) GetHeader() string {
 	return s.basicAuth
 }
 
-func (lr loginRequest) do() (string, error) {
+func (lr loginRequest) execute() (string, error) {
 	jsonData, err := json.Marshal(lr)
 	if err != nil {
 		return "", err
