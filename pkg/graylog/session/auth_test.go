@@ -13,9 +13,9 @@ func Test_newLoginRequest(t *testing.T) {
 		want                           loginRequest
 		wantErr                        error
 	}{
-		{"missing username", "", "USER", "PASS", loginRequest{}, missingParam},
-		{"missing password", "HOST", "", "PASS", loginRequest{}, missingParam},
-		{"missing config", "HOST", "USER", "", loginRequest{}, missingParam},
+		{"missing username", "", "USER", "PASS", loginRequest{}, errMissingParam},
+		{"missing password", "HOST", "", "PASS", loginRequest{}, errMissingParam},
+		{"missing config", "HOST", "USER", "", loginRequest{}, errMissingParam},
 		{"all params present", "HOST", "USER", "PASS", loginRequest{"HOST", "USER", "PASS", client}, nil},
 	}
 
