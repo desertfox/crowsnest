@@ -28,22 +28,26 @@ type loginRequest struct {
 }
 
 var (
-	errMissingParam = errors.New("missing param")
-	sessionInstance *session
-	once            sync.Once
+	errMissingParam    = errors.New("missing param")
+	lock               = &sync.Mutex{}
+	sessionInstanceMap map[string]*session
 )
 
 func New(h, u, p string, httpClient *http.Client) *session {
-	once.Do(func() {
+	if _, exists := sessionInstanceMap[h]; !exists {
+		lock.Lock()
+		defer lock.Unlock()
+
 		lr, err := newLoginRequest(h, u, p, httpClient)
 		if err != nil {
 			panic(err.Error())
 		}
 
-		sessionInstance = &session{"", time.Now(), lr}
-	})
+		sessionInstanceMap[h] = &session{"", time.Now(), lr}
 
-	return sessionInstance
+	}
+
+	return sessionInstanceMap[h]
 }
 
 func newLoginRequest(h, u, p string, httpClient *http.Client) (*loginRequest, error) {
