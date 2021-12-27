@@ -30,15 +30,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	jobService := cron.BuildFromConfig(configPath)
+	jobs := cron.BuildJobsFromConfig(configPath)
 
-	for _, job := range *jobService {
+	for _, job := range jobs {
 		query := search.New(host, job.Name, job.Option.Query, job.Option.Streamid, job.Frequency, job.Option.Fields, httpClient)
 
 		graylogService := graylog.New(sessionService, query)
 
 		s.Every(job.Frequency).Minutes().Do(job.GetCron(graylogService, report.Report{}))
-
 	}
 
 	s.StartBlocking()

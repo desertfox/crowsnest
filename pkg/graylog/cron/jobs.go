@@ -31,7 +31,7 @@ type option struct {
 	Fields   []string `yaml:"fields"`
 }
 
-func BuildFromConfig(configPath string) *[]job {
+func BuildJobsFromConfig(configPath string) []job {
 	file, err := ioutil.ReadFile(configPath)
 	if err != nil {
 		panic(err.Error())
@@ -43,7 +43,7 @@ func BuildFromConfig(configPath string) *[]job {
 		panic(err.Error())
 	}
 
-	return &jobs
+	return jobs
 }
 
 func (j job) GetCron(graylogService graylogService, reportService reportService) func() {
