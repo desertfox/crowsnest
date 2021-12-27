@@ -8,12 +8,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"sync"
 	"time"
 )
 
 const sessionsPath string = "api/system/sessions"
-
-var errMissingParam = errors.New("missing param")
 
 type session struct {
 	basicAuth    string
@@ -28,12 +27,23 @@ type loginRequest struct {
 	httpClient *http.Client
 }
 
-func New(h, u, p string, httpClient *http.Client) (*session, error) {
-	lr, err := newLoginRequest(h, u, p, httpClient)
-	if err != nil {
-		return &session{}, err
-	}
-	return &session{"", time.Now(), lr}, nil
+var (
+	errMissingParam = errors.New("missing param")
+	sessionInstance *session
+	once            sync.Once
+)
+
+func New(h, u, p string, httpClient *http.Client) *session {
+	once.Do(func() {
+		lr, err := newLoginRequest(h, u, p, httpClient)
+		if err != nil {
+			panic(err.Error())
+		}
+
+		sessionInstance = &session{"", time.Now(), lr}
+	})
+
+	return sessionInstance
 }
 
 func newLoginRequest(h, u, p string, httpClient *http.Client) (*loginRequest, error) {

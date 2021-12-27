@@ -4,24 +4,35 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 
 	"github.com/desertfox/crowsnest/pkg/graylog/search"
 	"gopkg.in/yaml.v2"
 )
 
 type job struct {
-	Name      string `yaml:"name"`
-	Frequency int    `yaml:"frequency"`
-	Option    option `yaml:"options"`
-	TeamsURL  string `yaml:"teamsurl"`
-	Threshold int    `yaml:"threshold"`
-	Type      string `yaml:"type"`
+	Name      string        `yaml:"name"`
+	Frequency int           `yaml:"frequency"`
+	Threshold int           `yaml:"threshold"`
+	TeamsURL  string        `yaml:"teamsurl"`
+	Search    searchOptions `yaml:"options"`
 }
 
-type option struct {
+type searchOptions struct {
+	Username string   `yaml:"envusername"`
+	Password string   `yaml:"envpassword"`
+	Host     string   `yaml:"host"`
+	Type     string   `yaml:"type"`
 	Streamid string   `yaml:"streamid"`
 	Query    string   `yaml:"query"`
 	Fields   []string `yaml:"fields"`
+}
+
+func (s searchOptions) getUsername() string {
+	return os.Getenv(s.Username)
+}
+func (s searchOptions) getPassword() string {
+	return os.Getenv(s.Password)
 }
 
 func BuildJobsFromConfig(configPath string) []job {
@@ -39,7 +50,11 @@ func BuildJobsFromConfig(configPath string) []job {
 	return jobs
 }
 
-func (j job) GetCron(searchService SearchService, reportService reportService) func() {
+func (j job) NewSearch(httpClient *http.Client) queryService {
+	return search.New(j.Name, j.Search.Host, j.Search.Query, j.Search.Streamid, j.Frequency, j.Search.Fields, httpClient)
+}
+
+func (j job) GetCron(searchService searchService, reportService reportService) func() {
 	return func() {
 		j := j //MARK
 
@@ -62,8 +77,4 @@ func (j job) shouldAlertText(count int) string {
 	}
 
 	return fmt.Sprintf("OK %d/%d", count, j.Threshold)
-}
-
-func (j job) NewSearch(host string, httpClient *http.Client) queryService {
-	return search.New(host, j.Name, j.Option.Query, j.Option.Streamid, j.Frequency, j.Option.Fields, httpClient)
 }

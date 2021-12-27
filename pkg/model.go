@@ -25,7 +25,7 @@ type reportService interface {
 	Send(string, string, string) error
 }
 
-type SearchService struct {
+type searchService struct {
 	sessionService
 	queryService
 }
@@ -33,27 +33,23 @@ type SearchService struct {
 type Crowsnest struct {
 	jobs       []job
 	httpClient *http.Client
-	sessionService
 }
 
-func New(host, username, password, configPath string, httpClient *http.Client) Crowsnest {
+func New(configPath string, httpClient *http.Client) Crowsnest {
 	jobs := BuildJobsFromConfig(configPath)
 
-	sessionService, err := session.New(host, username, password, httpClient)
-	if err != nil {
-		panic(err.Error())
-	}
-
-	return Crowsnest{jobs, httpClient, sessionService}
+	return Crowsnest{jobs, httpClient}
 }
 
 func (cn *Crowsnest) ScheduleJobs() {
-	for _, job := range cn.jobs {
-		query := job.NewSearch(cn.GetHost(), cn.httpClient)
+	for _, j := range cn.jobs {
+		sessionService := session.New(j.Search.Host, j.Search.getUsername(), j.Search.getPassword(), cn.httpClient)
 
-		searchService := SearchService{cn, query}
+		query := j.NewSearch(cn.httpClient)
 
-		s.Every(job.Frequency).Minutes().Do(job.GetCron(searchService, report.Report{}))
+		searchService := searchService{sessionService, query}
+
+		s.Every(j.Frequency).Minutes().Do(j.GetCron(searchService, report.Report{}))
 	}
 }
 
