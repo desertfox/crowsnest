@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/desertfox/crowsnest/pkg/teams"
+	"github.com/desertfox/crowsnest/pkg/teams/cards"
 )
 
 type Report struct{}
 
 func (r Report) Send(url, title, text string) error {
-	card := teams.NewCard(title, text)
+	card := cards.NewCard(title, text)
 
 	json_data, err := json.Marshal(card)
 	if err != nil {

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/desertfox/crowsnest/pkg/graylog/session"
-	"github.com/desertfox/crowsnest/pkg/report"
+	"github.com/desertfox/crowsnest/pkg/teams/report"
 	"github.com/go-co-op/gocron"
 )
 
@@ -13,7 +13,6 @@ var s *gocron.Scheduler = gocron.NewScheduler(time.UTC)
 
 type sessionService interface {
 	GetHeader() string
-	GetHost() string
 }
 
 type queryService interface {
