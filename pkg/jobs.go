@@ -1,20 +1,13 @@
-package cron
+package crowsnest
 
 import (
 	"fmt"
 	"io/ioutil"
+	"net/http"
 
+	"github.com/desertfox/crowsnest/pkg/graylog/search"
 	"gopkg.in/yaml.v2"
 )
-
-type graylogService interface {
-	BuildSearchURL() string
-	ExecuteSearch() (int, error)
-}
-
-type reportService interface {
-	Send(string, string, string) error
-}
 
 type job struct {
 	Name      string `yaml:"name"`
@@ -46,11 +39,11 @@ func BuildJobsFromConfig(configPath string) []job {
 	return jobs
 }
 
-func (j job) GetCron(graylogService graylogService, reportService reportService) func() {
+func (j job) GetCron(searchService SearchService, reportService reportService) func() {
 	return func() {
 		j := j //MARK
 
-		count, err := graylogService.ExecuteSearch()
+		count, err := searchService.ExecuteSearch(searchService.GetHeader())
 		if err != nil {
 			panic(err.Error())
 		}
@@ -58,7 +51,7 @@ func (j job) GetCron(graylogService graylogService, reportService reportService)
 		reportService.Send(
 			j.TeamsURL,
 			j.Name,
-			fmt.Sprintf("Alert: %s\nCount: %d\nLink: [GrayLog Query](%s)\n", j.shouldAlertText(count), count, graylogService.BuildSearchURL()),
+			fmt.Sprintf("Alert: %s\nCount: %d\nLink: [GrayLog Query](%s)\n", j.shouldAlertText(count), count, searchService.BuildSearchURL()),
 		)
 	}
 }
@@ -69,4 +62,8 @@ func (j job) shouldAlertText(count int) string {
 	}
 
 	return fmt.Sprintf("OK %d/%d", count, j.Threshold)
+}
+
+func (j job) NewSearch(host string, httpClient *http.Client) queryService {
+	return search.New(host, j.Name, j.Option.Query, j.Option.Streamid, j.Frequency, j.Option.Fields, httpClient)
 }

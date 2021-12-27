@@ -33,7 +33,7 @@ func (q query) urlEncode() string {
 	return params.Encode()
 }
 
-func (q query) Execute(authToken string) (int, error) {
+func (q query) ExecuteSearch(authToken string) (int, error) {
 	url := fmt.Sprintf("%v/api/search/universal/relative?%v", q.host, q)
 
 	request, _ := http.NewRequest("GET", url, nil)
