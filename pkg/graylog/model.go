@@ -2,7 +2,6 @@ package graylog
 
 type sessionService interface {
 	GetHeader() string
-	GetHost() string
 }
 
 type queryService interface {
