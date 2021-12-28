@@ -4,8 +4,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/desertfox/crowsnest/pkg/graylog/session"
-	"github.com/desertfox/crowsnest/pkg/teams/report"
 	"github.com/go-co-op/gocron"
 )
 
@@ -20,38 +18,39 @@ type queryService interface {
 	BuildSearchURL() string
 }
 
-type reportService interface {
-	Send(string, string, string) error
-}
-
 type searchService struct {
 	sessionService
 	queryService
 }
 
-type Crowsnest struct {
+type reportService interface {
+	Send(string, string, string) error
+}
+type crowsnest struct {
 	jobs       []job
 	httpClient *http.Client
 }
 
-func New(configPath string, httpClient *http.Client) Crowsnest {
+func New(configPath string, httpClient *http.Client) crowsnest {
 	jobs := BuildJobsFromConfig(configPath)
 
-	return Crowsnest{jobs, httpClient}
+	return crowsnest{jobs, httpClient}
 }
 
-func (cn *Crowsnest) ScheduleJobs() {
+func (cn *crowsnest) ScheduleJobs() {
 	for _, j := range cn.jobs {
-		sessionService := session.New(j.Search.Host, j.Search.getUsername(), j.Search.getPassword(), cn.httpClient)
+		sessionService := j.NewSession(cn.httpClient)
 
-		query := j.NewSearch(cn.httpClient)
+		queryService := j.NewSearch(cn.httpClient)
 
-		searchService := searchService{sessionService, query}
+		searchService := searchService{sessionService, queryService}
 
-		s.Every(j.Frequency).Minutes().Do(j.GetCron(searchService, report.Report{}))
+		reportService := j.NewReport()
+
+		s.Every(j.Frequency).Minutes().Do(j.GetCron(searchService, reportService))
 	}
 }
 
-func (cn Crowsnest) StartBlocking() {
+func (cn crowsnest) StartBlocking() {
 	s.StartBlocking()
 }

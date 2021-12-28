@@ -7,6 +7,8 @@ import (
 	"os"
 
 	"github.com/desertfox/crowsnest/pkg/graylog/search"
+	"github.com/desertfox/crowsnest/pkg/graylog/session"
+	"github.com/desertfox/crowsnest/pkg/teams/report"
 	"gopkg.in/yaml.v2"
 )
 
@@ -50,8 +52,23 @@ func BuildJobsFromConfig(configPath string) []job {
 	return jobs
 }
 
+func (j job) NewSession(httpClient *http.Client) sessionService {
+	return session.New(j.Search.Host, j.Search.getUsername(), j.Search.getPassword(), httpClient)
+}
+
 func (j job) NewSearch(httpClient *http.Client) queryService {
-	return search.New(j.Name, j.Search.Host, j.Search.Query, j.Search.Streamid, j.Frequency, j.Search.Fields, httpClient)
+	return search.New(
+		j.Search.Host,
+		j.Search.Query,
+		j.Search.Streamid,
+		j.Frequency,
+		j.Search.Fields,
+		httpClient,
+	)
+}
+
+func (j job) NewReport() reportService {
+	return report.Report{}
 }
 
 func (j job) GetCron(searchService searchService, reportService reportService) func() {

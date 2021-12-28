@@ -61,10 +61,6 @@ func newLoginRequest(h, u, p string, httpClient *http.Client) (*loginRequest, er
 	return &loginRequest{h, u, p, httpClient}, nil
 }
 
-func (s session) GetHost() string {
-	return s.loginRequest.Host
-}
-
 func (s *session) GetHeader() string {
 	//check if token is old
 	if 1 == 1 {

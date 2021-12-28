@@ -10,14 +10,14 @@ import (
 )
 
 type query struct {
-	name, host, query, streamid string
-	frequnecy                   int
-	fields                      []string
-	httpClient                  *http.Client
+	host, query, streamid string
+	frequnecy             int
+	fields                []string
+	httpClient            *http.Client
 }
 
-func New(name, host, q, streamid string, frequency int, fields []string, httpClient *http.Client) query {
-	return query{name, host, q, streamid, frequency, fields, httpClient}
+func New(host, q, streamid string, frequency int, fields []string, httpClient *http.Client) query {
+	return query{host, q, streamid, frequency, fields, httpClient}
 }
 
 func (q query) urlEncode() string {
