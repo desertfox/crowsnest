@@ -30,7 +30,7 @@ type loginRequest struct {
 var (
 	errMissingParam    = errors.New("missing param")
 	lock               = &sync.Mutex{}
-	sessionInstanceMap map[string]*session
+	sessionInstanceMap = make(map[string]*session)
 )
 
 func New(h, u, p string, httpClient *http.Client) *session {
@@ -44,7 +44,6 @@ func New(h, u, p string, httpClient *http.Client) *session {
 		}
 
 		sessionInstanceMap[h] = &session{"", time.Now(), lr}
-
 	}
 
 	return sessionInstanceMap[h]
@@ -54,7 +53,6 @@ func newLoginRequest(h, u, p string, httpClient *http.Client) (*loginRequest, er
 	for _, s := range []string{h, u, p} {
 		if s == "" {
 			return &loginRequest{}, errMissingParam
-
 		}
 	}
 

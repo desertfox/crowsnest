@@ -43,13 +43,13 @@ func BuildJobsFromConfig(configPath string) []job {
 		panic(err.Error())
 	}
 
-	var jobs []job
-	err = yaml.Unmarshal(file, &jobs)
+	data := make(map[string][]job)
+	err = yaml.Unmarshal(file, &data)
 	if err != nil {
 		panic(err.Error())
 	}
 
-	return jobs
+	return data["jobs"]
 }
 
 func (j job) NewSession(httpClient *http.Client) sessionService {
