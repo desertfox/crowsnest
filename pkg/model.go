@@ -1,9 +1,11 @@
 package crowsnest
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/go-co-op/gocron"
 )
 
@@ -34,11 +36,15 @@ type crowsnest struct {
 func New(configPath string, httpClient *http.Client) crowsnest {
 	jobs := BuildJobsFromConfig(configPath)
 
+	for i, job := range jobs {
+		color.Yellow(fmt.Sprintf("Loaded Job %d: %s", i, job.Name))
+	}
+
 	return crowsnest{jobs, httpClient}
 }
 
 func (cn *crowsnest) ScheduleJobs() {
-	for _, j := range cn.jobs {
+	for i, j := range cn.jobs {
 		sessionService := j.NewSession(cn.httpClient)
 
 		queryService := j.NewSearch(cn.httpClient)
@@ -48,6 +54,8 @@ func (cn *crowsnest) ScheduleJobs() {
 		reportService := j.NewReport()
 
 		s.Every(j.Frequency).Minutes().Do(j.GetCron(searchService, reportService))
+
+		color.Green(fmt.Sprintf("Scheduled Job %d: %s", i, j.Name))
 	}
 }
 

@@ -9,6 +9,7 @@ import (
 	"github.com/desertfox/crowsnest/pkg/graylog/search"
 	"github.com/desertfox/crowsnest/pkg/graylog/session"
 	"github.com/desertfox/crowsnest/pkg/teams/report"
+	"github.com/fatih/color"
 	"gopkg.in/yaml.v2"
 )
 
@@ -75,16 +76,22 @@ func (j job) GetCron(searchService searchService, reportService reportService) f
 	return func() {
 		j := j //MARK
 
+		color.Yellow("Starting Job: " + j.Name)
+
 		count, err := searchService.ExecuteSearch(searchService.GetHeader())
 		if err != nil {
 			panic(err.Error())
 		}
+
+		color.Blue("Search Complete: " + j.Name)
 
 		reportService.Send(
 			j.TeamsURL,
 			j.Name,
 			fmt.Sprintf("Alert: %s\nCount: %d\nLink: [GrayLog Query](%s)\n", j.shouldAlertText(count), count, searchService.BuildSearchURL()),
 		)
+
+		color.Green("Finished Job: " + j.Name)
 	}
 }
 
