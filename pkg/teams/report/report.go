@@ -8,17 +8,20 @@ import (
 	"github.com/desertfox/crowsnest/pkg/teams/cards"
 )
 
-type Report struct{}
+type Report struct {
+	Url string
+}
 
-func (r Report) Send(url, title, text string) error {
-	card := cards.NewCard(title, text)
+func (r Report) Send(title, subtitle, text string) error {
+	//card := cards.NewCard(title, text)
+	card := cards.NewThumbnailCard(title, subtitle, text)
 
 	json_data, err := json.Marshal(card)
 	if err != nil {
 		return err
 	}
 
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(json_data))
+	resp, err := http.Post(r.Url, "application/json", bytes.NewBuffer(json_data))
 	if err != nil {
 		return err
 	}

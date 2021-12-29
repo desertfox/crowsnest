@@ -69,7 +69,9 @@ func (j job) NewSearch(httpClient *http.Client) queryService {
 }
 
 func (j job) NewReport() reportService {
-	return report.Report{}
+	return report.Report{
+		Url: j.TeamsURL,
+	}
 }
 
 func (j job) GetCron(searchService searchService, reportService reportService) func() {
@@ -86,9 +88,10 @@ func (j job) GetCron(searchService searchService, reportService reportService) f
 		color.Blue("Search Complete: " + j.Name)
 
 		reportService.Send(
-			j.TeamsURL,
 			j.Name,
-			fmt.Sprintf("Alert: %s\nCount: %d\nLink: [GrayLog Query](%s)\n", j.shouldAlertText(count), count, searchService.BuildSearchURL()),
+			searchService.BuildSearchURL(),
+			fmt.Sprintf("Alert: %s\nCount: %d\n", j.shouldAlertText(count), count),
+			//fmt.Sprintf("Alert: %s\nCount: %d\nLink: [GrayLog Query](%s)\n", j.shouldAlertText(count), count, searchService.BuildSearchURL()),
 		)
 
 		color.Green("Finished Job: " + j.Name)
