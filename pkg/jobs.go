@@ -17,15 +17,19 @@ type job struct {
 	Frequency int           `yaml:"frequency"`
 	Threshold int           `yaml:"threshold"`
 	TeamsURL  string        `yaml:"teamsurl"`
-	Search    SearchOptions `yaml:"options"`
+	Search    searchOptions `yaml:"options"`
 }
 
-type SearchOptions struct {
+type searchOptions struct {
 	Host     string   `yaml:"host"`
 	Type     string   `yaml:"type"`
 	Streamid string   `yaml:"streamid"`
 	Query    string   `yaml:"query"`
 	Fields   []string `yaml:"fields"`
+}
+
+func NewJob() job {
+	return job{}
 }
 
 func BuildJobsFromConfig(configPath string) []job {
