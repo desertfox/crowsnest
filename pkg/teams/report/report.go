@@ -13,8 +13,8 @@ type Report struct {
 }
 
 func (r Report) Send(title, subtitle, text string) error {
-	//card := cards.NewCard(title, text)
-	card := cards.NewThumbnailCard(title, subtitle, text)
+	card := cards.NewCard(title, text)
+	//card := cards.NewThumbnailCard(title, subtitle, text)
 
 	json_data, err := json.Marshal(card)
 	if err != nil {

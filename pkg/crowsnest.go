@@ -43,9 +43,9 @@ func New(configPath string, httpClient *http.Client) crowsnest {
 	return crowsnest{jobs, httpClient}
 }
 
-func (cn *crowsnest) ScheduleJobs() {
+func (cn *crowsnest) ScheduleJobs(un, pw string) {
 	for i, j := range cn.jobs {
-		sessionService := j.NewSession(cn.httpClient)
+		sessionService := j.NewSession(un, pw, cn.httpClient)
 
 		queryService := j.NewSearch(cn.httpClient)
 

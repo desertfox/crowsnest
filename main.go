@@ -10,6 +10,8 @@ import (
 
 var (
 	httpClient *http.Client = &http.Client{}
+	un         string       = os.Getenv("CROWSNEST_USERNAME")
+	pw         string       = os.Getenv("CROWSNEST_PASSWORd")
 	configPath string       = os.Getenv("CROWSNEST_CONFIG")
 )
 
@@ -23,7 +25,7 @@ func main() {
 
 	color.Yellow("Crowsnest ScheduleJobs")
 
-	cn.ScheduleJobs()
+	cn.ScheduleJobs(un, pw)
 
 	color.Green("Crowsnest Daemon...")
 

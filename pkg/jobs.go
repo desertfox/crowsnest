@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 
 	"github.com/desertfox/crowsnest/pkg/graylog/search"
 	"github.com/desertfox/crowsnest/pkg/graylog/session"
@@ -18,24 +17,15 @@ type job struct {
 	Frequency int           `yaml:"frequency"`
 	Threshold int           `yaml:"threshold"`
 	TeamsURL  string        `yaml:"teamsurl"`
-	Search    searchOptions `yaml:"options"`
+	Search    SearchOptions `yaml:"options"`
 }
 
-type searchOptions struct {
-	Username string   `yaml:"envusername"`
-	Password string   `yaml:"envpassword"`
+type SearchOptions struct {
 	Host     string   `yaml:"host"`
 	Type     string   `yaml:"type"`
 	Streamid string   `yaml:"streamid"`
 	Query    string   `yaml:"query"`
 	Fields   []string `yaml:"fields"`
-}
-
-func (s searchOptions) getUsername() string {
-	return os.Getenv(s.Username)
-}
-func (s searchOptions) getPassword() string {
-	return os.Getenv(s.Password)
 }
 
 func BuildJobsFromConfig(configPath string) []job {
@@ -53,8 +43,8 @@ func BuildJobsFromConfig(configPath string) []job {
 	return data["jobs"]
 }
 
-func (j job) NewSession(httpClient *http.Client) sessionService {
-	return session.New(j.Search.Host, j.Search.getUsername(), j.Search.getPassword(), httpClient)
+func (j job) NewSession(un, pw string, httpClient *http.Client) sessionService {
+	return session.New(j.Search.Host, un, pw, httpClient)
 }
 
 func (j job) NewSearch(httpClient *http.Client) queryService {

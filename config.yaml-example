@@ -4,8 +4,6 @@ jobs:
     threshold: 20
     teamsurl: ""
     options:
-        envusername: "user"
-        envpassword: "pass"
         host: "http://catfacts.com"
         type: "relative"
         streamid: "adfasdfasdf"
@@ -19,8 +17,6 @@ jobs:
     threshold: 0
     teamsurl: ""
     options:
-        envusername: "user"
-        envpassword: "pass"
         host: "http://catfacts.com"
         type: "relative"
         streamid: "adfasdfasdf"
