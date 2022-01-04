@@ -11,7 +11,7 @@ import (
 var (
 	httpClient *http.Client = &http.Client{}
 	un         string       = os.Getenv("CROWSNEST_USERNAME")
-	pw         string       = os.Getenv("CROWSNEST_PASSWORd")
+	pw         string       = os.Getenv("CROWSNEST_PASSWORD")
 	configPath string       = os.Getenv("CROWSNEST_CONFIG")
 )
 

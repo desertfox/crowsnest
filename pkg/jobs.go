@@ -26,6 +26,8 @@ type searchOptions struct {
 	Streamid string   `yaml:"streamid"`
 	Query    string   `yaml:"query"`
 	Fields   []string `yaml:"fields"`
+	From     string   `yaml:"from"`
+	To       string   `yaml:"to"`
 }
 
 func NewJob() job {
@@ -84,8 +86,7 @@ func (j job) GetCron(searchService searchService, reportService reportService) f
 		reportService.Send(
 			j.Name,
 			searchService.BuildSearchURL(),
-			fmt.Sprintf("Alert: %s\nCount: %d\n", j.shouldAlertText(count), count),
-			//fmt.Sprintf("Alert: %s\nCount: %d\nLink: [GrayLog Query](%s)\n", j.shouldAlertText(count), count, searchService.BuildSearchURL()),
+			fmt.Sprintf("Alert: %s\nCount: %d\nLink: [GrayLog Query](%s)\n", j.shouldAlertText(count), count, searchService.BuildSearchURL()),
 		)
 
 		color.Green("Finished Job: " + j.Name)
