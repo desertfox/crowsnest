@@ -12,6 +12,7 @@ jobs:
           - "message"
           - "region"
           - "kubernetes_namespace_name"
+          
   - name: "API Errors"
     frequency: 15
     threshold: 0
