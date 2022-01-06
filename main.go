@@ -18,10 +18,7 @@ var (
 func main() {
 	color.Yellow("Crowsnest Startup")
 
-	cn := crowsnest.New(
-		configPath,
-		httpClient,
-	)
+	cn := crowsnest.New(configPath)
 
 	color.Yellow("Crowsnest ScheduleJobs")
 

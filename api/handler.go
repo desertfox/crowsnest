@@ -28,4 +28,8 @@ func (s Server) createJob(r *http.Request) {
 		log.Fatal(err)
 	}
 
+	job := translate(njr)
+
+	log.Println(job)
+
 }

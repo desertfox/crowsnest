@@ -12,15 +12,15 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type job struct {
+type Job struct {
 	Name      string        `yaml:"name"`
 	Frequency int           `yaml:"frequency"`
 	Threshold int           `yaml:"threshold"`
 	TeamsURL  string        `yaml:"teamsurl"`
-	Search    searchOptions `yaml:"options"`
+	Search    SearchOptions `yaml:"options"`
 }
 
-type searchOptions struct {
+type SearchOptions struct {
 	Host     string   `yaml:"host"`
 	Type     string   `yaml:"type"`
 	Streamid string   `yaml:"streamid"`
@@ -30,17 +30,22 @@ type searchOptions struct {
 	To       string   `yaml:"to"`
 }
 
-func NewJob() job {
-	return job{}
+func NewJob(n string, f, t int, teamurl string, so SearchOptions) Job {
+	return Job{n, f, t, teamurl, so}
 }
 
-func BuildJobsFromConfig(configPath string) []job {
+func NewSearchOptions(h, t, streamid, q string, fields []string, from, to string) SearchOptions {
+	return SearchOptions{h, t, streamid, q, fields, from, to}
+
+}
+
+func BuildJobsFromConfig(configPath string) []Job {
 	file, err := ioutil.ReadFile(configPath)
 	if err != nil {
 		panic(err.Error())
 	}
 
-	data := make(map[string][]job)
+	data := make(map[string][]Job)
 	err = yaml.Unmarshal(file, &data)
 	if err != nil {
 		panic(err.Error())
@@ -49,11 +54,11 @@ func BuildJobsFromConfig(configPath string) []job {
 	return data["jobs"]
 }
 
-func (j job) NewSession(un, pw string, httpClient *http.Client) sessionService {
+func (j Job) NewSession(un, pw string, httpClient *http.Client) sessionService {
 	return session.New(j.Search.Host, un, pw, httpClient)
 }
 
-func (j job) NewSearch(httpClient *http.Client) queryService {
+func (j Job) NewSearch(httpClient *http.Client) queryService {
 	return search.New(
 		j.Search.Host,
 		j.Search.Query,
@@ -64,13 +69,13 @@ func (j job) NewSearch(httpClient *http.Client) queryService {
 	)
 }
 
-func (j job) NewReport() reportService {
+func (j Job) NewReport() reportService {
 	return report.Report{
 		Url: j.TeamsURL,
 	}
 }
 
-func (j job) GetCron(searchService searchService, reportService reportService) func() {
+func (j Job) GetCron(searchService searchService, reportService reportService) func() {
 	return func() {
 		j := j //MARK
 
@@ -93,7 +98,7 @@ func (j job) GetCron(searchService searchService, reportService reportService) f
 	}
 }
 
-func (j job) shouldAlertText(count int) string {
+func (j Job) shouldAlertText(count int) string {
 	if count >= j.Threshold {
 		return fmt.Sprintf("ALERT %d/%d", count, j.Threshold)
 	}

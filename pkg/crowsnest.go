@@ -29,18 +29,18 @@ type reportService interface {
 	Send(string, string, string) error
 }
 type crowsnest struct {
-	jobs       []job
+	jobs       []Job
 	httpClient *http.Client
 }
 
-func New(configPath string, httpClient *http.Client) crowsnest {
+func New(configPath string) crowsnest {
 	jobs := BuildJobsFromConfig(configPath)
 
 	for i, job := range jobs {
 		color.Yellow(fmt.Sprintf("Loaded Job %d: %s", i, job.Name))
 	}
 
-	return crowsnest{jobs, httpClient}
+	return crowsnest{jobs, &http.Client{}}
 }
 
 func (cn *crowsnest) ScheduleJobs(un, pw string) {
