@@ -1,16 +1,30 @@
-package crowsnest
+package jobs
 
 import (
 	"fmt"
 	"io/ioutil"
-	"net/http"
 
-	"github.com/desertfox/crowsnest/pkg/graylog/search"
-	"github.com/desertfox/crowsnest/pkg/graylog/session"
-	"github.com/desertfox/crowsnest/pkg/teams/report"
 	"github.com/fatih/color"
 	"gopkg.in/yaml.v2"
 )
+
+type SessionService interface {
+	GetHeader() string
+}
+
+type QueryService interface {
+	ExecuteSearch(string) (int, error)
+	BuildSearchURL() string
+}
+
+type SearchService struct {
+	SessionService
+	QueryService
+}
+
+type ReportService interface {
+	Send(string, string, string) error
+}
 
 type Job struct {
 	Name      string        `yaml:"name"`
@@ -39,7 +53,7 @@ func NewSearchOptions(h, t, streamid, q string, fields []string, from, to string
 
 }
 
-func BuildJobsFromConfig(configPath string) []Job {
+func BuildFromConfig(configPath string) []Job {
 	file, err := ioutil.ReadFile(configPath)
 	if err != nil {
 		panic(err.Error())
@@ -54,28 +68,7 @@ func BuildJobsFromConfig(configPath string) []Job {
 	return data["jobs"]
 }
 
-func (j Job) NewSession(un, pw string, httpClient *http.Client) sessionService {
-	return session.New(j.Search.Host, un, pw, httpClient)
-}
-
-func (j Job) NewSearch(httpClient *http.Client) queryService {
-	return search.New(
-		j.Search.Host,
-		j.Search.Query,
-		j.Search.Streamid,
-		j.Frequency,
-		j.Search.Fields,
-		httpClient,
-	)
-}
-
-func (j Job) NewReport() reportService {
-	return report.Report{
-		Url: j.TeamsURL,
-	}
-}
-
-func (j Job) GetCron(searchService searchService, reportService reportService) func() {
+func (j Job) GetCron(searchService SearchService, reportService ReportService) func() {
 	return func() {
 		j := j //MARK
 

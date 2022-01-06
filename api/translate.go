@@ -6,10 +6,10 @@ import (
 	"strconv"
 	"strings"
 
-	crowsnest "github.com/desertfox/crowsnest/pkg"
+	"github.com/desertfox/crowsnest/pkg/jobs"
 )
 
-func translate(njr NewJobReq) crowsnest.Job {
+func translate(njr NewJobReq) jobs.Job {
 	var (
 		frequency            int
 		typeSearch, from, to string
@@ -37,9 +37,9 @@ func translate(njr NewJobReq) crowsnest.Job {
 		fields = strings.Split(parsedQuery["fields"][0], ",")
 	}
 
-	so := crowsnest.NewSearchOptions("https://"+urlObj.Hostname(), typeSearch, getSteamId(urlObj.EscapedPath()), parsedQuery["q"][0], fields, from, to)
+	so := jobs.NewSearchOptions("https://"+urlObj.Hostname(), typeSearch, getSteamId(urlObj.EscapedPath()), parsedQuery["q"][0], fields, from, to)
 
-	return crowsnest.NewJob(njr.Name, frequency, njr.Threshold, njr.OutputLink, so)
+	return jobs.NewJob(njr.Name, frequency, njr.Threshold, njr.OutputLink, so)
 }
 
 func getSteamId(s string) string {
