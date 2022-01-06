@@ -30,6 +30,6 @@ func (s Server) createJob(r *http.Request) {
 
 	job := translate(njr)
 
-	log.Println(job)
+	log.Printf("%#v", job)
 
 }
