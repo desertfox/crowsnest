@@ -5,6 +5,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+
+	"github.com/desertfox/crowsnest/pkg/jobs"
 )
 
 type NewJobReq struct {
@@ -21,6 +23,7 @@ func (s Server) createJob(r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer r.Body.Close()
 
 	var njr NewJobReq
 	err = json.Unmarshal(data, &njr)
@@ -30,6 +33,9 @@ func (s Server) createJob(r *http.Request) {
 
 	job := translate(njr)
 
-	log.Printf("%#v", job)
+	err = jobs.AddToConfig(s.configPath, job)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 }

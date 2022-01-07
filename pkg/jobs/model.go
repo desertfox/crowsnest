@@ -2,10 +2,8 @@ package jobs
 
 import (
 	"fmt"
-	"io/ioutil"
 
 	"github.com/fatih/color"
-	"gopkg.in/yaml.v2"
 )
 
 type SessionService interface {
@@ -50,22 +48,6 @@ func NewJob(n string, f, t int, teamurl string, so SearchOptions) Job {
 
 func NewSearchOptions(h, t, streamid, q string, fields []string, from, to string) SearchOptions {
 	return SearchOptions{h, t, streamid, q, fields, from, to}
-
-}
-
-func BuildFromConfig(configPath string) []Job {
-	file, err := ioutil.ReadFile(configPath)
-	if err != nil {
-		panic(err.Error())
-	}
-
-	data := make(map[string][]Job)
-	err = yaml.Unmarshal(file, &data)
-	if err != nil {
-		panic(err.Error())
-	}
-
-	return data["jobs"]
 }
 
 func (j Job) GetCron(searchService SearchService, reportService ReportService) func() {

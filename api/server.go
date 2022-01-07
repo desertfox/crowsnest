@@ -6,7 +6,8 @@ import (
 )
 
 type Server struct {
-	mux *http.ServeMux
+	mux        *http.ServeMux
+	configPath string
 }
 
 func (s Server) Run() {
