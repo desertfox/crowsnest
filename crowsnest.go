@@ -23,20 +23,23 @@ var (
 )
 
 type crowsnest struct {
-	jobs       []jobs.Job
+	jobs       jobs.JobList
 	httpClient *http.Client
 }
 
 func main() {
 	color.Yellow("Crowsnest Startup")
 
-	jobs := jobs.BuildFromConfig(configPath)
+	jobList, err := jobs.BuildFromConfig(configPath)
+	if err != nil {
+		panic(err.Error())
+	}
 
-	for i, job := range jobs {
+	for i, job := range jobList {
 		color.Yellow(fmt.Sprintf("Loaded Job %d: %s", i, job.Name))
 	}
 
-	cn := crowsnest{jobs, httpClient}
+	cn := crowsnest{jobList, httpClient}
 
 	color.Yellow("Crowsnest ScheduleJobs")
 

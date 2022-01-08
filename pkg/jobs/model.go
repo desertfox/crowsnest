@@ -1,6 +1,7 @@
 package jobs
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/fatih/color"
@@ -42,6 +43,8 @@ type SearchOptions struct {
 	To       string   `yaml:"to"`
 }
 
+type JobList []Job
+
 func NewJob(n string, f, t int, teamurl string, so SearchOptions) Job {
 	return Job{n, f, t, teamurl, so}
 }
@@ -77,6 +80,25 @@ func (j Job) shouldAlertText(count int) string {
 	if count >= j.Threshold {
 		return fmt.Sprintf("ALERT %d/%d", count, j.Threshold)
 	}
-
 	return fmt.Sprintf("OK %d/%d", count, j.Threshold)
+}
+
+func (jl JobList) checkIfExists(j Job) bool {
+	for _, job := range jl {
+		if job.Name == j.Name {
+			fmt.Printf("Name found %v, %v", job.Name, j.Name)
+			return true
+		}
+	}
+	return false
+}
+
+func (jl *JobList) Add(j Job) error {
+	if jl.checkIfExists(j) {
+		return errors.New("job exists")
+	}
+
+	*jl = append(*jl, j)
+
+	return nil
 }

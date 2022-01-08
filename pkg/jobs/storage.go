@@ -1,58 +1,30 @@
 package jobs
 
 import (
-	"errors"
 	"io/ioutil"
 	"os"
 
 	"gopkg.in/yaml.v2"
 )
 
-type JobList []Job
-
-func BuildFromConfig(configPath string) []Job {
+func BuildFromConfig(configPath string) (JobList, error) {
 	file, err := ioutil.ReadFile(configPath)
 	if err != nil {
-		panic(err.Error())
+		return JobList{}, err
 	}
 
-	data := make(map[string][]Job)
+	data := make(map[string]JobList)
 	err = yaml.Unmarshal(file, &data)
 	if err != nil {
-		panic(err.Error())
+		return JobList{}, err
 	}
 
-	return data["jobs"]
+	return data["jobs"], nil
 }
 
-func AddToConfig(configPath string, job Job) error {
-	var jl JobList = BuildFromConfig(configPath)
-
-	if !jl.checkIfExists(job) {
-		return errors.New("job exists")
-	}
-
-	jl = append(jl, job)
-
-	if err := jl.writeConfig(configPath); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (jl JobList) checkIfExists(j Job) bool {
-	for _, job := range jl {
-		if job.Name == j.Name {
-			return true
-		}
-	}
-
-	return false
-}
-
-func (jl JobList) writeConfig(configPath string) error {
-	data, err := yaml.Marshal(jl)
+func (jl JobList) WriteConfig(configPath string) error {
+	var list = map[string]JobList{"jobs": jl}
+	data, err := yaml.Marshal(&list)
 	if err != nil {
 		return err
 	}

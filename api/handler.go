@@ -33,9 +33,18 @@ func (s Server) createJob(r *http.Request) {
 
 	job := translate(njr)
 
-	err = jobs.AddToConfig(s.configPath, job)
+	jobList, err := jobs.BuildFromConfig(s.configPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	err = jobList.Add(job)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = jobList.WriteConfig(s.configPath)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
