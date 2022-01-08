@@ -86,7 +86,6 @@ func (j Job) shouldAlertText(count int) string {
 func (jl JobList) checkIfExists(j Job) bool {
 	for _, job := range jl {
 		if job.Name == j.Name {
-			fmt.Printf("Name found %v, %v", job.Name, j.Name)
 			return true
 		}
 	}

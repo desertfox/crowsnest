@@ -5,8 +5,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-
-	"github.com/desertfox/crowsnest/pkg/jobs"
 )
 
 type NewJobReq struct {
@@ -16,7 +14,7 @@ type NewJobReq struct {
 	Threshold  int    `json:"threshold"`
 }
 
-func (s Server) createJob(r *http.Request) {
+func (s *Server) createJob(r *http.Request) {
 	log.Println("createJob")
 
 	data, err := ioutil.ReadAll(r.Body)
@@ -33,17 +31,12 @@ func (s Server) createJob(r *http.Request) {
 
 	job := translate(njr)
 
-	jobList, err := jobs.BuildFromConfig(s.configPath)
+	err = s.jobList.Add(job)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = jobList.Add(job)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = jobList.WriteConfig(s.configPath)
+	err = s.jobList.WriteConfig(s.configPath)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -1,11 +1,13 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net/http"
 	"os"
 	"time"
 
+	"github.com/desertfox/crowsnest/api"
 	"github.com/desertfox/crowsnest/pkg/graylog/search"
 	"github.com/desertfox/crowsnest/pkg/graylog/session"
 	"github.com/desertfox/crowsnest/pkg/jobs"
@@ -20,14 +22,20 @@ var (
 	pw         string            = os.Getenv("CROWSNEST_PASSWORD")
 	configPath string            = os.Getenv("CROWSNEST_CONFIG")
 	s          *gocron.Scheduler = gocron.NewScheduler(time.UTC)
+	runServer  bool
 )
 
 type crowsnest struct {
-	jobs       jobs.JobList
-	httpClient *http.Client
+	jobs jobs.JobList
+}
+
+func init() {
+	flag.BoolVar(&runServer, "server", false, "--server=true to start server instance")
 }
 
 func main() {
+	flag.Parse()
+
 	color.Yellow("Crowsnest Startup")
 
 	jobList, err := jobs.BuildFromConfig(configPath)
@@ -35,11 +43,16 @@ func main() {
 		panic(err.Error())
 	}
 
-	for i, job := range jobList {
-		color.Yellow(fmt.Sprintf("Loaded Job %d: %s", i, job.Name))
+	if runServer {
+		server := api.NewServer(&http.ServeMux{}, configPath, jobList)
+		server.Run()
+	} else {
+		cn := crowsnest{jobList}
+		cn.Run()
 	}
+}
 
-	cn := crowsnest{jobList, httpClient}
+func (cn crowsnest) Run() {
 
 	color.Yellow("Crowsnest ScheduleJobs")
 

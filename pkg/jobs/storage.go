@@ -1,9 +1,11 @@
 package jobs
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 
+	"github.com/fatih/color"
 	"gopkg.in/yaml.v2"
 )
 
@@ -17,6 +19,10 @@ func BuildFromConfig(configPath string) (JobList, error) {
 	err = yaml.Unmarshal(file, &data)
 	if err != nil {
 		return JobList{}, err
+	}
+
+	for i, job := range data["jobs"] {
+		color.Yellow(fmt.Sprintf("Loaded Job %d: %s", i, job.Name))
 	}
 
 	return data["jobs"], nil

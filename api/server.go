@@ -3,11 +3,18 @@ package api
 import (
 	"log"
 	"net/http"
+
+	"github.com/desertfox/crowsnest/pkg/jobs"
 )
 
 type Server struct {
 	mux        *http.ServeMux
 	configPath string
+	jobList    jobs.JobList
+}
+
+func NewServer(mux *http.ServeMux, configPath string, jobList jobs.JobList) *Server {
+	return &Server{mux, configPath, jobList}
 }
 
 func (s Server) Run() {
