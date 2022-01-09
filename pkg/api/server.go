@@ -26,10 +26,9 @@ func (s Server) SetupRoute() {
 	s.mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "POST":
-			s.createJob(r)
+			s.createJob(w, r)
 		case "GET":
-			log.Println("GET /")
-			s.newJobChan <- jobs.Job{Name: "GET TEST"}
+			s.getJobForm(w)
 		}
 	})
 }
