@@ -20,7 +20,7 @@ var (
 	httpClient *http.Client      = &http.Client{}
 	un         string            = os.Getenv("CROWSNEST_USERNAME")
 	pw         string            = os.Getenv("CROWSNEST_PASSWORD")
-	configPath string            = "config.yaml-example" //os.Getenv("CROWSNEST_CONFIG")
+	configPath string            = os.Getenv("CROWSNEST_CONFIG")
 	s          *gocron.Scheduler = gocron.NewScheduler(time.UTC)
 )
 
