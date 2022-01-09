@@ -45,14 +45,6 @@ type SearchOptions struct {
 
 type JobList []Job
 
-func NewJob(n string, f, t int, teamurl string, so SearchOptions) Job {
-	return Job{n, f, t, teamurl, so}
-}
-
-func NewSearchOptions(h, t, streamid, q string, fields []string, from, to string) SearchOptions {
-	return SearchOptions{h, t, streamid, q, fields, from, to}
-}
-
 func (j Job) GetCron(searchService SearchService, reportService ReportService) func() {
 	return func() {
 		j := j //MARK

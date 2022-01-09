@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/desertfox/crowsnest/api"
+	"github.com/desertfox/crowsnest/pkg/api"
 	"github.com/desertfox/crowsnest/pkg/graylog/search"
 	"github.com/desertfox/crowsnest/pkg/graylog/session"
 	"github.com/desertfox/crowsnest/pkg/jobs"
@@ -43,24 +43,21 @@ func main() {
 		panic(err.Error())
 	}
 
+	color.Yellow("Crowsnest JobRunner Startup")
+	crowsnest{jobList}.Run()
+
 	if runServer {
-		server := api.NewServer(&http.ServeMux{}, configPath, jobList)
-		server.Run()
-	} else {
-		cn := crowsnest{jobList}
-		cn.Run()
+		color.Yellow("Crowsnest Server Startup")
+		api.NewServer(&http.ServeMux{}, configPath, jobList).Run()
 	}
 }
 
 func (cn crowsnest) Run() {
-
 	color.Yellow("Crowsnest ScheduleJobs")
-
 	cn.ScheduleJobs(un, pw)
 
 	color.Green("Crowsnest Daemon...")
-
-	cn.StartBlocking()
+	cn.StartAsync()
 }
 
 func (cn *crowsnest) ScheduleJobs(un, pw string) {
@@ -96,6 +93,6 @@ func (cn *crowsnest) ScheduleJobs(un, pw string) {
 	}
 }
 
-func (cn crowsnest) StartBlocking() {
-	s.StartBlocking()
+func (cn crowsnest) StartAsync() {
+	s.StartAsync()
 }

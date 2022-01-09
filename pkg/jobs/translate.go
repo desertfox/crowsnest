@@ -1,15 +1,19 @@
-package api
+package jobs
 
 import (
-	"log"
 	"net/url"
 	"strconv"
 	"strings"
-
-	"github.com/desertfox/crowsnest/pkg/jobs"
 )
 
-func translate(njr NewJobReq) jobs.Job {
+type NewJobReq struct {
+	Name       string `json:"name"`
+	QueryLink  string `json:"query"`
+	OutputLink string `json:"output"`
+	Threshold  int    `json:"threshold"`
+}
+
+func (njr NewJobReq) TranslateToJob() (Job, error) {
 	var (
 		frequency            int
 		typeSearch, from, to string
@@ -18,7 +22,7 @@ func translate(njr NewJobReq) jobs.Job {
 
 	urlObj, err := url.Parse(njr.QueryLink)
 	if err != nil {
-		log.Fatal(err)
+		return Job{}, err
 	}
 
 	parsedQuery := urlObj.Query()
@@ -37,9 +41,21 @@ func translate(njr NewJobReq) jobs.Job {
 		fields = strings.Split(parsedQuery["fields"][0], ",")
 	}
 
-	so := jobs.NewSearchOptions("https://"+urlObj.Hostname(), typeSearch, getSteamId(urlObj.EscapedPath()), parsedQuery["q"][0], fields, from, to)
-
-	return jobs.NewJob(njr.Name, frequency, njr.Threshold, njr.OutputLink, so)
+	return Job{
+		njr.Name,
+		frequency,
+		njr.Threshold,
+		njr.OutputLink,
+		SearchOptions{
+			"https://" + urlObj.Hostname(),
+			typeSearch,
+			getSteamId(urlObj.EscapedPath()),
+			parsedQuery["q"][0],
+			fields,
+			from,
+			to,
+		},
+	}, nil
 }
 
 func getSteamId(s string) string {

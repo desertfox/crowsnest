@@ -5,14 +5,9 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-)
 
-type NewJobReq struct {
-	Name       string `json:"name"`
-	QueryLink  string `json:"query"`
-	OutputLink string `json:"output"`
-	Threshold  int    `json:"threshold"`
-}
+	"github.com/desertfox/crowsnest/pkg/jobs"
+)
 
 func (s *Server) createJob(r *http.Request) {
 	log.Println("createJob")
@@ -23,13 +18,16 @@ func (s *Server) createJob(r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	var njr NewJobReq
+	var njr jobs.NewJobReq
 	err = json.Unmarshal(data, &njr)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	job := translate(njr)
+	job, err := njr.TranslateToJob()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	err = s.jobList.Add(job)
 	if err != nil {
