@@ -29,5 +29,7 @@ func (s *Server) createJob(r *http.Request) {
 		log.Fatal(err)
 	}
 
-	s.newJob <- job
+	s.newJobChan <- job
+
+	//TODO? Add response to method signature and
 }

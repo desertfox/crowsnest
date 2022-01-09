@@ -46,7 +46,7 @@ func main() {
 
 	color.Yellow("Crowsnest Server Startup")
 
-	server := api.NewServer(&http.ServeMux{}, configPath, jobList, newJobChan)
+	server := api.NewServer(&http.ServeMux{}, newJobChan)
 	server.Run()
 }
 
