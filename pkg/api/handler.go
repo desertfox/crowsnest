@@ -29,13 +29,5 @@ func (s *Server) createJob(r *http.Request) {
 		log.Fatal(err)
 	}
 
-	err = s.jobList.Add(job)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = s.jobList.WriteConfig(s.configPath)
-	if err != nil {
-		log.Fatal(err)
-	}
+	s.newJob <- job
 }

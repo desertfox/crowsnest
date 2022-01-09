@@ -10,11 +10,12 @@ import (
 type Server struct {
 	mux        *http.ServeMux
 	configPath string
-	jobList    jobs.JobList
+	jobList    *jobs.JobList
+	newJob     chan jobs.Job
 }
 
-func NewServer(mux *http.ServeMux, configPath string, jobList jobs.JobList) *Server {
-	return &Server{mux, configPath, jobList}
+func NewServer(mux *http.ServeMux, configPath string, jobList *jobs.JobList, newJob chan jobs.Job) *Server {
+	return &Server{mux, configPath, jobList, newJob}
 }
 
 func (s Server) Run() {
@@ -28,6 +29,9 @@ func (s Server) SetupRoute() {
 		switch r.Method {
 		case "POST":
 			s.createJob(r)
+		case "GET":
+			log.Println("GET /")
+			s.newJob <- jobs.Job{Name: "GET TEST"}
 		}
 	})
 }

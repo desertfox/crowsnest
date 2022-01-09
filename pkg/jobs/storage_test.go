@@ -25,7 +25,7 @@ func Test_BuildFromConfig(t *testing.T) {
 			t.Error(gotErr.Error())
 		}
 
-		jobCopy := got[0]
+		jobCopy := (*got)[0]
 
 		jobCopy.Name = "test"
 
@@ -34,7 +34,7 @@ func Test_BuildFromConfig(t *testing.T) {
 			t.Error(gotErr.Error())
 		}
 
-		if len(got) != 2 {
+		if len(*got) != 2 {
 			t.Errorf("wrong number of jobs: %#v", got)
 		}
 
@@ -48,7 +48,7 @@ func Test_BuildFromConfig(t *testing.T) {
 			t.Error(gotErr.Error())
 		}
 
-		if len(got) != 2 {
+		if len(*got) != 2 {
 			t.Errorf("wrong number of jobs: %#v", got)
 		}
 

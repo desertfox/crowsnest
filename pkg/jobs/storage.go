@@ -9,19 +9,19 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func BuildFromConfig(configPath string) (JobList, error) {
+func BuildFromConfig(configPath string) (*JobList, error) {
 	file, err := ioutil.ReadFile(configPath)
 	if err != nil {
-		return JobList{}, err
+		return &JobList{}, err
 	}
 
-	data := make(map[string]JobList)
+	data := make(map[string]*JobList)
 	err = yaml.Unmarshal(file, &data)
 	if err != nil {
-		return JobList{}, err
+		return &JobList{}, err
 	}
 
-	for i, job := range data["jobs"] {
+	for i, job := range *data["jobs"] {
 		color.Yellow(fmt.Sprintf("Loaded Job %d: %s", i, job.Name))
 	}
 

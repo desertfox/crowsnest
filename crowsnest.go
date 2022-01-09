@@ -1,8 +1,8 @@
 package main
 
 import (
-	"flag"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -20,21 +20,16 @@ var (
 	httpClient *http.Client      = &http.Client{}
 	un         string            = os.Getenv("CROWSNEST_USERNAME")
 	pw         string            = os.Getenv("CROWSNEST_PASSWORD")
-	configPath string            = os.Getenv("CROWSNEST_CONFIG")
+	configPath string            = "config.yaml-example" //os.Getenv("CROWSNEST_CONFIG")
 	s          *gocron.Scheduler = gocron.NewScheduler(time.UTC)
-	runServer  bool
 )
 
 type crowsnest struct {
-	jobs jobs.JobList
-}
-
-func init() {
-	flag.BoolVar(&runServer, "server", false, "--server=true to start server instance")
+	jobs       *jobs.JobList
+	newJobChan chan jobs.Job
 }
 
 func main() {
-	flag.Parse()
 
 	color.Yellow("Crowsnest Startup")
 
@@ -44,12 +39,15 @@ func main() {
 	}
 
 	color.Yellow("Crowsnest JobRunner Startup")
-	crowsnest{jobList}.Run()
 
-	if runServer {
-		color.Yellow("Crowsnest Server Startup")
-		api.NewServer(&http.ServeMux{}, configPath, jobList).Run()
-	}
+	newJobChan := make(chan jobs.Job)
+	cn := crowsnest{jobList, newJobChan}
+	cn.Run()
+
+	color.Yellow("Crowsnest Server Startup")
+
+	server := api.NewServer(&http.ServeMux{}, configPath, jobList, newJobChan)
+	server.Run()
 }
 
 func (cn crowsnest) Run() {
@@ -58,10 +56,25 @@ func (cn crowsnest) Run() {
 
 	color.Green("Crowsnest Daemon...")
 	cn.StartAsync()
+
+	go func() {
+		job := <-cn.newJobChan
+
+		cn.jobs.Add(job)
+
+		cn.jobs.WriteConfig(configPath)
+
+		color.Yellow("Crowsnest New Job recv on channel to scheduler")
+		log.Println(fmt.Sprintf("%#v", cn.jobs))
+
+		cn.ScheduleJobs(un, pw)
+	}()
 }
 
-func (cn *crowsnest) ScheduleJobs(un, pw string) {
-	for i, j := range cn.jobs {
+func (cn crowsnest) ScheduleJobs(un, pw string) {
+	s.Clear()
+
+	for i, j := range *cn.jobs {
 		sessionService := session.New(
 			j.Search.Host,
 			un,

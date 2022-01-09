@@ -1,28 +1,31 @@
 jobs:
-  - name: "DB Errors"
-    frequency: 15
-    threshold: 20
-    teamsurl: ""
-    options:
-        host: "http://catfacts.com"
-        type: "relative"
-        streamid: "adfasdfasdf"
-        query: "region:production AND DBI AND error"
-        fields:
-          - "message"
-          - "region"
-          - "kubernetes_namespace_name"
-          
-  - name: "API Errors"
-    frequency: 15
-    threshold: 0
-    teamsurl: ""
-    options:
-        host: "http://catfacts.com"
-        type: "relative"
-        streamid: "adfasdfasdf"
-        query: ""
-        fields:
-          - "message"
-          - "region"
-          - "kubernetes_namespace_name"
+- name: DB Errors
+  frequency: 15
+  threshold: 20
+  teamsurl: ""
+  options:
+    host: http://catfacts.com
+    type: relative
+    streamid: adfasdfasdf
+    query: region:production AND DBI AND error
+    fields:
+    - message
+    - region
+    - kubernetes_namespace_name
+    from: ""
+    to: ""
+- name: API Errors
+  frequency: 15
+  threshold: 0
+  teamsurl: ""
+  options:
+    host: http://catfacts.com
+    type: relative
+    streamid: adfasdfasdf
+    query: ""
+    fields:
+    - message
+    - region
+    - kubernetes_namespace_name
+    from: ""
+    to: ""
