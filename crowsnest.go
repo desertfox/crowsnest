@@ -57,7 +57,7 @@ func (cn crowsnest) Run() {
 	color.Green("Crowsnest Daemon...")
 	cn.StartAsync()
 
-	go func() {
+	go func(un, pw string) {
 		job := <-cn.newJobChan
 
 		cn.jobs.Add(job)
@@ -68,7 +68,7 @@ func (cn crowsnest) Run() {
 		log.Println(fmt.Sprintf("%#v", cn.jobs))
 
 		cn.ScheduleJobs(un, pw)
-	}()
+	}(un, pw)
 }
 
 func (cn crowsnest) ScheduleJobs(un, pw string) {

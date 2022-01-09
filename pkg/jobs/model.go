@@ -3,6 +3,7 @@ package jobs
 import (
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/fatih/color"
 )
@@ -53,7 +54,7 @@ func (j Job) GetCron(searchService SearchService, reportService ReportService) f
 
 		count, err := searchService.ExecuteSearch(searchService.GetHeader())
 		if err != nil {
-			panic(err.Error())
+			log.Fatal(err.Error())
 		}
 
 		color.Blue("Search Complete: " + j.Name)

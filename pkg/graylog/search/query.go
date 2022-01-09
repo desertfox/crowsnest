@@ -49,6 +49,7 @@ func (q query) ExecuteSearch(authToken string) (int, error) {
 	//Count is probably off by one, the response is csv format iirc with the headers aka fields
 	count := 0
 	scanner := bufio.NewScanner(response.Body)
+	scanner.Buffer([]byte{}, 1024*10048)
 	for scanner.Scan() {
 		count++
 	}
