@@ -1,5 +1,7 @@
 FROM golang:1.17.5-alpine as builder
 
+RUN mkdir /opt/crowsnest
+
 WORKDIR /opt/crowsnest
 
 COPY ./ ./
@@ -12,4 +14,4 @@ WORKDIR /root/
 
 COPY --from=builder /opt/crowsnest/crowsnest ./
 
-CMD [ "./crowsnest", "$CROWSNEST_CONFIG" ]
+CMD [ "./crowsnest" ]
