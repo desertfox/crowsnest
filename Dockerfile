@@ -5,7 +5,7 @@ RUN mkdir /opt/crowsnest
 
 WORKDIR /opt/crowsnest
 
-COPY ./ ./
+COPY . .
 
 RUN go build -o crowsnest .
 
