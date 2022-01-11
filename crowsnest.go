@@ -86,8 +86,8 @@ func (cn crowsnest) ScheduleJobs(un, pw string) {
 			j.Frequency,
 			j.Search.Fields,
 			j.Search.Type,
-			time.Now().UTC().Add(time.Minute*time.Duration(-j.Frequency)),
-			time.Now().UTC(),
+			time.Now().Add(time.Hour*time.Duration(-5)+time.Minute*time.Duration(-j.Frequency)),
+			time.Now().Add(time.Hour*time.Duration(-5)),
 			httpClient,
 		)
 
