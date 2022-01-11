@@ -75,10 +75,7 @@ func (j Job) GetCron(searchService SearchService, reportService ReportService) f
 }
 
 func (j Job) shouldAlert(count int) bool {
-	if count >= j.Threshold {
-		return true
-	}
-	return false
+	return count >= j.Threshold
 }
 
 func (j Job) shouldAlertText(count int) string {

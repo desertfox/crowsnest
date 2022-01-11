@@ -45,6 +45,7 @@ func (njr NewJobReq) TranslateToJob() (Job, error) {
 		njr.Name,
 		frequency,
 		njr.Threshold,
+		0,
 		njr.OutputLink,
 		SearchOptions{
 			"https://" + urlObj.Hostname(),
