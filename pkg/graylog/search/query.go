@@ -12,6 +12,8 @@ import (
 	"time"
 )
 
+var grayLogDateFormat string = "2006-02-02T15:04:05.000Z"
+
 type query struct {
 	host, query, streamid string
 	frequnecy             int
@@ -109,8 +111,8 @@ func (q query) BuildSearchURL() string {
 
 	if q.Type == "absolute" {
 		params.Add("rangetype", "absolute")
-		params.Add("from", q.from.Format(time.RFC3339))
-		params.Add("to", q.to.Format(time.RFC3339))
+		params.Add("from", q.from.Format(grayLogDateFormat))
+		params.Add("to", q.to.Format(grayLogDateFormat))
 	}
 
 	return fmt.Sprintf("%s/streams/%s/search?%s", q.host, q.streamid, params.Encode())
