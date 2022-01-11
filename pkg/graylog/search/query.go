@@ -89,13 +89,12 @@ func (q query) ExecuteSearch(authToken string) (int, error) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		bodyString := string(body)
 
-		if os.Getenv("CROWSNEST_DEBUG") == "1" {
-			log.Println(bodyString)
+		if os.Getenv("CROWSNEST_DEBUG") == "log" {
+			log.Println(string(body))
 		}
 
-		return strings.Count(bodyString, "\n"), nil
+		return strings.Count(string(body), "\n"), nil
 	}
 
 	return 0, nil
@@ -105,9 +104,9 @@ func (q query) BuildSearchURL() string {
 	params := url.Values{}
 
 	params.Add("q", q.query)
-	params.Add("interval", "minute")
 
 	if q.Type == "relative" {
+		params.Add("interval", "minute")
 		params.Add("rangetype", "relative")
 		params.Add("relative", strconv.Itoa(q.frequnecy*60))
 	}
