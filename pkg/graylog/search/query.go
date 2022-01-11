@@ -84,20 +84,16 @@ func (q query) ExecuteSearch(authToken string) (int, error) {
 	}
 	defer response.Body.Close()
 
-	if response.StatusCode == http.StatusOK {
-		body, err := io.ReadAll(response.Body)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		if os.Getenv("CROWSNEST_DEBUG") == "log" {
-			log.Println(string(body))
-		}
-
-		return strings.Count(string(body), "\n"), nil
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	return 0, nil
+	if os.Getenv("CROWSNEST_DEBUG") == "log" {
+		log.Println(string(body))
+	}
+
+	return strings.Count(string(body), "\n"), nil
 }
 
 func (q query) BuildSearchURL() string {
