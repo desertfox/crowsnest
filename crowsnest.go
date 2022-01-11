@@ -88,6 +88,11 @@ func (cn crowsnest) ScheduleJobs(un, pw string) {
 			j.Search.Streamid,
 			j.Frequency,
 			j.Search.Fields,
+			j.Search.Type,
+			time.Now().Add(-1*time.Duration(j.Frequency)*time.Minute),
+			time.Now(),
+			//j.Search.From,
+			//j.Search.To,
 			httpClient,
 		)
 
