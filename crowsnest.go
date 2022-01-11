@@ -102,7 +102,7 @@ func (cn crowsnest) ScheduleJobs(un, pw string) {
 
 		s.Every(j.Frequency).Minutes().Do(j.GetCron(searchService, reportService))
 
-		log.Printf("Scheduled Job %d: %s", i, j.Name)
+		log.Printf("Scheduled Job %d: %s for every %d min(s)", i, j.Name, j.Frequency)
 	}
 }
 

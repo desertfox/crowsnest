@@ -95,7 +95,14 @@ func (q query) ExecuteSearch(authToken string) (int, error) {
 		log.Println(string(body))
 	}
 
-	return strings.Count(string(body), "\n"), nil
+	count := strings.Count(string(body), "\n")
+
+	//Results include CSV header row, -1 to correct count.
+	if count > 1 {
+		count -= 1
+	}
+
+	return count, nil
 }
 
 func (q query) BuildSearchURL() string {

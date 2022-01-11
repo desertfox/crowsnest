@@ -28,6 +28,7 @@ type Job struct {
 	Name      string        `yaml:"name"`
 	Frequency int           `yaml:"frequency"`
 	Threshold int           `yaml:"threshold"`
+	Verbose   int           `yaml:"verbose"`
 	TeamsURL  string        `yaml:"teamsurl"`
 	Search    SearchOptions `yaml:"options"`
 }
@@ -57,18 +58,31 @@ func (j Job) GetCron(searchService SearchService, reportService ReportService) f
 
 		log.Println("Search Complete: " + j.Name)
 
-		reportService.Send(
-			j.Name,
-			searchService.BuildSearchURL(),
-			fmt.Sprintf("Alert: %s\nCount: %d\nLink: [GrayLog Query](%s)\n", j.shouldAlertText(count), count, searchService.BuildSearchURL()),
-		)
+		output := fmt.Sprintf("Alert: %s\nCount: %d\nLink: [GrayLog Query](%s)\n", j.shouldAlertText(count), count, searchService.BuildSearchURL())
+
+		if j.Verbose > 0 || j.shouldAlert(count) {
+			reportService.Send(
+				j.Name,
+				searchService.BuildSearchURL(),
+				output,
+			)
+		} else {
+			log.Println(output)
+		}
 
 		log.Println("Finished Job: " + j.Name)
 	}
 }
 
-func (j Job) shouldAlertText(count int) string {
+func (j Job) shouldAlert(count int) bool {
 	if count >= j.Threshold {
+		return true
+	}
+	return false
+}
+
+func (j Job) shouldAlertText(count int) string {
+	if j.shouldAlert(count) {
 		return fmt.Sprintf("ALERT %d/%d", count, j.Threshold)
 	}
 	return fmt.Sprintf("OK %d/%d", count, j.Threshold)
@@ -83,6 +97,7 @@ func (jl JobList) checkIfExists(j Job) bool {
 	return false
 }
 
+//Add Job to JobList if j.Name does not already exist.
 func (jl *JobList) Add(j Job) error {
 	if jl.checkIfExists(j) {
 		return errors.New("job exists")
