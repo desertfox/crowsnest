@@ -67,7 +67,7 @@ func (q query) urlEncodeAbsolute() string {
 	}
 
 	params.Add("from", q.from.Format(time.RFC3339))
-	params.Add("from", q.to.Format(time.RFC3339))
+	params.Add("to", q.to.Format(time.RFC3339))
 	params.Add("limit", "10000")
 
 	return params.Encode()
