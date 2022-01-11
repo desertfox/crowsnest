@@ -1,11 +1,10 @@
 package jobs
 
 import (
-	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 
-	"github.com/fatih/color"
 	"gopkg.in/yaml.v2"
 )
 
@@ -22,7 +21,7 @@ func BuildFromConfig(configPath string) (*JobList, error) {
 	}
 
 	for i, job := range *data["jobs"] {
-		color.Yellow(fmt.Sprintf("Loaded Job %d: %s", i, job.Name))
+		log.Printf("Loaded Job %d: %s", i, job.Name)
 	}
 
 	return data["jobs"], nil

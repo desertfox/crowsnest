@@ -12,7 +12,6 @@ import (
 	"github.com/desertfox/crowsnest/pkg/graylog/session"
 	"github.com/desertfox/crowsnest/pkg/jobs"
 	"github.com/desertfox/crowsnest/pkg/teams/report"
-	"github.com/fatih/color"
 	"github.com/go-co-op/gocron"
 )
 
@@ -30,31 +29,30 @@ type crowsnest struct {
 }
 
 func main() {
-
-	color.Yellow("Crowsnest Startup")
+	log.Println("Crowsnest Startup")
 
 	jobList, err := jobs.BuildFromConfig(configPath)
 	if err != nil {
-		panic(err.Error())
+		panic(fmt.Sprintf("error building jobs from config: %v, error: %v", configPath, err.Error()))
 	}
 
-	color.Yellow("Crowsnest JobRunner Startup")
+	log.Println("Crowsnest JobRunner Startup")
 
 	newJobChan := make(chan jobs.Job)
 	cn := crowsnest{jobList, newJobChan}
 	cn.Run()
 
-	color.Yellow("Crowsnest Server Startup")
+	log.Println("Crowsnest Server Startup")
 
 	server := api.NewServer(&http.ServeMux{}, newJobChan)
 	server.Run()
 }
 
 func (cn crowsnest) Run() {
-	color.Yellow("Crowsnest ScheduleJobs")
+	log.Println("Crowsnest ScheduleJobs")
 	cn.ScheduleJobs(un, pw)
 
-	color.Green("Crowsnest Daemon...")
+	log.Println("Crowsnest Daemon")
 	cn.StartAsync()
 
 	go func(un, pw string) {
@@ -64,8 +62,7 @@ func (cn crowsnest) Run() {
 
 		cn.jobs.WriteConfig(configPath)
 
-		color.Yellow("Crowsnest New Job recv on channel to scheduler")
-		log.Println(fmt.Sprintf("%#v", cn.jobs))
+		log.Println(fmt.Sprintf("New Job recv on channel to scheduler %#v", cn.jobs))
 
 		cn.ScheduleJobs(un, pw)
 	}(un, pw)
@@ -91,8 +88,6 @@ func (cn crowsnest) ScheduleJobs(un, pw string) {
 			j.Search.Type,
 			time.Now().Add(-1*time.Duration(j.Frequency)*time.Minute),
 			time.Now(),
-			//j.Search.From,
-			//j.Search.To,
 			httpClient,
 		)
 
@@ -107,7 +102,7 @@ func (cn crowsnest) ScheduleJobs(un, pw string) {
 
 		s.Every(j.Frequency).Minutes().Do(j.GetCron(searchService, reportService))
 
-		color.Green(fmt.Sprintf("Scheduled Job %d: %s", i, j.Name))
+		log.Printf("Scheduled Job %d: %s", i, j.Name)
 	}
 }
 

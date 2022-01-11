@@ -4,8 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-
-	"github.com/fatih/color"
 )
 
 type SessionService interface {
@@ -50,14 +48,14 @@ func (j Job) GetCron(searchService SearchService, reportService ReportService) f
 	return func() {
 		j := j //MARK
 
-		color.Yellow("Starting Job: " + j.Name)
+		log.Println("Starting Job: " + j.Name)
 
 		count, err := searchService.ExecuteSearch(searchService.GetHeader())
 		if err != nil {
 			log.Fatal(err.Error())
 		}
 
-		color.Blue("Search Complete: " + j.Name)
+		log.Println("Search Complete: " + j.Name)
 
 		reportService.Send(
 			j.Name,
@@ -65,7 +63,7 @@ func (j Job) GetCron(searchService SearchService, reportService ReportService) f
 			fmt.Sprintf("Alert: %s\nCount: %d\nLink: [GrayLog Query](%s)\n", j.shouldAlertText(count), count, searchService.BuildSearchURL()),
 		)
 
-		color.Green("Finished Job: " + j.Name)
+		log.Println("Finished Job: " + j.Name)
 	}
 }
 

@@ -1,10 +1,12 @@
 package search
 
 import (
-	"bufio"
 	"fmt"
+	"io"
+	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -27,11 +29,16 @@ func New(host, q, streamid string, frequency int, fields []string, t string, fro
 func (q query) String() string {
 	switch q.Type {
 	case "relative":
-		return q.urlEncodeRelative()
+		if os.Getenv("CROWSNEST_DEBUG") == "1" {
+			log.Printf("%v/api/search/universal/relative?%v", q.host, q.urlEncodeRelative())
+		}
+		return fmt.Sprintf("%v/api/search/universal/relative?%v", q.host, q.urlEncodeRelative())
 	case "absolute":
-		return q.urlEncodeAbsolute()
+		if os.Getenv("CROWSNEST_DEBUG") == "1" {
+			log.Printf("%v/api/search/universal/absolute?%v", q.host, q.urlEncodeAbsolute())
+		}
+		return fmt.Sprintf("%v/api/search/universal/absolute?%v", q.host, q.urlEncodeAbsolute())
 	}
-
 	return ""
 }
 
@@ -52,7 +59,6 @@ func (q query) urlEncodeAbsolute() string {
 	params := url.Values{}
 
 	params.Add("query", q.query)
-	params.Add("range", strconv.Itoa(q.frequnecy*60))
 	params.Add("filter", fmt.Sprintf("streams:%s", q.streamid))
 	params.Add("sort", "timestamp:desc")
 
@@ -68,16 +74,7 @@ func (q query) urlEncodeAbsolute() string {
 }
 
 func (q query) ExecuteSearch(authToken string) (int, error) {
-	var url string
-
-	switch q.Type {
-	case "relative":
-		url = fmt.Sprintf("%v/api/search/universal/relative?%v", q.host, q)
-	case "absolute":
-		url = fmt.Sprintf("%v/api/search/universal/absolute?%v", q.host, q)
-	}
-
-	request, _ := http.NewRequest("GET", url, nil)
+	request, _ := http.NewRequest("GET", q.String(), nil)
 	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
 	request.Header.Set("Authorization", authToken)
 
@@ -87,18 +84,21 @@ func (q query) ExecuteSearch(authToken string) (int, error) {
 	}
 	defer response.Body.Close()
 
-	//Count is probably off by one, the response is csv format iirc with the headers aka fields
-	count := 0
-	scanner := bufio.NewScanner(response.Body)
-	scanner.Buffer([]byte{}, 1024*10048)
-	for scanner.Scan() {
-		count++
-	}
-	if err := scanner.Err(); err != nil {
-		return 0, err
+	if response.StatusCode == http.StatusOK {
+		body, err := io.ReadAll(response.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
+		bodyString := string(body)
+
+		if os.Getenv("CROWSNEST_DEBUG") == "1" {
+			log.Println(bodyString)
+		}
+
+		return strings.Count(bodyString, "\n"), nil
 	}
 
-	return count, nil
+	return 0, nil
 }
 
 func (q query) BuildSearchURL() string {
