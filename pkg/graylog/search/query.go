@@ -105,9 +105,18 @@ func (q query) BuildSearchURL() string {
 	params := url.Values{}
 
 	params.Add("q", q.query)
-	params.Add("interval", "hour")
-	params.Add("rangetype", "relative")
-	params.Add("relative", strconv.Itoa(q.frequnecy*60))
+	params.Add("interval", "minute")
+
+	if q.Type == "relative" {
+		params.Add("rangetype", "relative")
+		params.Add("relative", strconv.Itoa(q.frequnecy*60))
+	}
+
+	if q.Type == "absolute" {
+		params.Add("rangetype", "absolute")
+		params.Add("from", q.from.Format(time.RFC3339))
+		params.Add("to", q.to.Format(time.RFC3339))
+	}
 
 	return fmt.Sprintf("%s/streams/%s/search?%s", q.host, q.streamid, params.Encode())
 }
