@@ -65,6 +65,8 @@ func (cn crowsnest) Run() {
 		log.Println(fmt.Sprintf("New Job recv on channel to scheduler %#v", cn.jobs))
 
 		cn.ScheduleJobs(un, pw)
+
+		log.Println(fmt.Sprintf("Scheduler Jobs %#v", s.Jobs()))
 	}(un, pw)
 }
 
