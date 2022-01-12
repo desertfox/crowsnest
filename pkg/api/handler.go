@@ -19,11 +19,17 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 		log.Fatal("error translating threshold to int " + err.Error())
 	}
 
+	verbose, err := strconv.Atoi(r.FormValue("verbose"))
+	if err != nil {
+		log.Fatal("error translating threshold to int " + err.Error())
+	}
+
 	njr := jobs.NewJobReq{
 		Name:       r.FormValue("name"),
 		QueryLink:  r.FormValue("querylink"),
 		OutputLink: r.FormValue("outputlink"),
 		Threshold:  threshold,
+		Verbose:    verbose,
 	}
 
 	job, err := njr.TranslateToJob()
