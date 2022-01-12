@@ -44,7 +44,7 @@ func (njr NewJobReq) TranslateToJob() (Job, error) {
 
 	return Job{
 		njr.Name,
-		frequency,
+		frequency / 60,
 		njr.Threshold,
 		njr.Verbose,
 		njr.OutputLink,
