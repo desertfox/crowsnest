@@ -47,6 +47,9 @@ func (s *Server) getJobForm(w http.ResponseWriter) {
 		<input type="text" name="outputlink"><br />
 		<label>Threshold:</label><br />
 		<input type="text" name="threshold"><br />
+		<label>Verbose:</label><br />
+		<input type="text" name="verbose"><br />
+		<br />
 		<input type="submit" method="POST">
 	</form>`)
 	if err != nil {

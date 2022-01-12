@@ -11,6 +11,7 @@ type NewJobReq struct {
 	QueryLink  string `json:"query"`
 	OutputLink string `json:"output"`
 	Threshold  int    `json:"threshold"`
+	Verbose    int    `json:"verbose"`
 }
 
 func (njr NewJobReq) TranslateToJob() (Job, error) {
@@ -18,6 +19,7 @@ func (njr NewJobReq) TranslateToJob() (Job, error) {
 		frequency            int
 		typeSearch, from, to string
 		fields               []string
+		verbose              int
 	)
 
 	urlObj, err := url.Parse(njr.QueryLink)
@@ -41,11 +43,13 @@ func (njr NewJobReq) TranslateToJob() (Job, error) {
 		fields = strings.Split(parsedQuery["fields"][0], ",")
 	}
 
+	verbose, _ = strconv.Atoi(parsedQuery["verbose"][0])
+
 	return Job{
 		njr.Name,
 		frequency,
 		njr.Threshold,
-		0,
+		verbose,
 		njr.OutputLink,
 		SearchOptions{
 			"https://" + urlObj.Hostname(),

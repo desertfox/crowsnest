@@ -16,13 +16,14 @@ var (
 	streamid           string   = "5555555"
 	query              string   = "\"Error Checking Out\""
 	fields             []string = []string{"source", "message"}
+	verbose            int      = 1
 )
 
 func Test_translate(t *testing.T) {
 
 	t.Run("translate", func(t *testing.T) {
 
-		njr := NewJobReq{name, relativeQueryLink, outputLink, threshold}
+		njr := NewJobReq{name, relativeQueryLink, outputLink, threshold, verbose}
 		got, gotErr := njr.TranslateToJob()
 		if gotErr != nil {
 			t.Errorf("error got: %#v", gotErr)
