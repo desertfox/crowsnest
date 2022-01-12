@@ -19,7 +19,6 @@ func (njr NewJobReq) TranslateToJob() (Job, error) {
 		frequency            int
 		typeSearch, from, to string
 		fields               []string
-		verbose              int
 	)
 
 	urlObj, err := url.Parse(njr.QueryLink)
@@ -43,13 +42,11 @@ func (njr NewJobReq) TranslateToJob() (Job, error) {
 		fields = strings.Split(parsedQuery["fields"][0], ",")
 	}
 
-	verbose, _ = strconv.Atoi(parsedQuery["verbose"][0])
-
 	return Job{
 		njr.Name,
 		frequency,
 		njr.Threshold,
-		verbose,
+		njr.Verbose,
 		njr.OutputLink,
 		SearchOptions{
 			"https://" + urlObj.Hostname(),
