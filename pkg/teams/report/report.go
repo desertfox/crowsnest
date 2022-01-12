@@ -12,7 +12,7 @@ type Report struct {
 	Url string
 }
 
-func (r Report) Send(title, subtitle, text string) error {
+func (r Report) Send(title, text string) error {
 	card := cards.NewCard(title, text)
 	//card := cards.NewThumbnailCard(title, subtitle, text)
 

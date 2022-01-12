@@ -44,7 +44,7 @@ func main() {
 
 	log.Println("Crowsnest Server Startup")
 
-	server := api.NewServer(&http.ServeMux{}, newJobChan)
+	server := api.NewServer(&http.ServeMux{}, newJobChan, s)
 	server.Run()
 }
 
@@ -104,11 +104,9 @@ func (cn crowsnest) ScheduleJobs(un, pw string) {
 
 		log.Printf("Scheduled Job %d: %s for every %d min(s)", i, j.Name, j.Frequency)
 	}
+
 }
 
 func (cn crowsnest) StartAsync() {
 	s.StartAsync()
-	if os.Getenv("CROWSNEST_NODELAY") == "" {
-		s.RunAllWithDelay(5 * time.Second)
-	}
 }

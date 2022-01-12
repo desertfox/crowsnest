@@ -5,15 +5,17 @@ import (
 	"net/http"
 
 	"github.com/desertfox/crowsnest/pkg/jobs"
+	"github.com/go-co-op/gocron"
 )
 
 type Server struct {
 	mux        *http.ServeMux
 	newJobChan chan jobs.Job
+	s          *gocron.Scheduler
 }
 
-func NewServer(mux *http.ServeMux, newJobChan chan jobs.Job) *Server {
-	return &Server{mux, newJobChan}
+func NewServer(mux *http.ServeMux, newJobChan chan jobs.Job, s *gocron.Scheduler) *Server {
+	return &Server{mux, newJobChan, s}
 }
 
 func (s Server) Run() {
@@ -29,6 +31,13 @@ func (s Server) SetupRoute() {
 			s.createJob(w, r)
 		case "GET":
 			s.getJobForm(w)
+		}
+	})
+
+	s.mux.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case "GET":
+			s.getStatus(w)
 		}
 	})
 }

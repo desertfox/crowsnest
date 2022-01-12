@@ -21,7 +21,7 @@ type SearchService struct {
 }
 
 type ReportService interface {
-	Send(string, string, string) error
+	Send(string, string) error
 }
 
 type Job struct {
@@ -63,7 +63,6 @@ func (j Job) GetCron(searchService SearchService, reportService ReportService) f
 		if j.Verbose > 0 || j.shouldAlert(count) {
 			reportService.Send(
 				j.Name,
-				searchService.BuildSearchURL(),
 				output,
 			)
 		} else {

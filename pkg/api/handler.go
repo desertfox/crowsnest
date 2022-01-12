@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -52,4 +53,28 @@ func (s *Server) getJobForm(w http.ResponseWriter) {
 	}
 
 	tmpl.Execute(w, nil)
+}
+
+func (s *Server) getStatus(w http.ResponseWriter) {
+	var output template.HTML
+	for _, j := range s.s.Jobs() {
+		output += template.HTML(fmt.Sprintf("Tags: %v\n<br>", j.Tags()))
+		output += template.HTML(fmt.Sprintf("LastRun: %v<br>", j.LastRun()))
+		output += template.HTML(fmt.Sprintf("NextRun: %v<br>\n", j.NextRun()))
+		output += template.HTML("<br>")
+	}
+
+	tmpl, err := template.New("status_form").Parse(`
+	<html>
+	<h1>Crowsnest Status</h1>
+	{{ .Output}}</html>`)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	tmpl.Execute(w, struct {
+		Output template.HTML
+	}{
+		output,
+	})
 }
