@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/desertfox/crowsnest/pkg/jobs"
 )
@@ -32,7 +33,7 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 
 	s.newJobChan <- job
 
-	s.getStatus(w)
+	w.Write([]byte("Job Created"))
 }
 
 func (s *Server) getJobForm(w http.ResponseWriter) {
@@ -66,15 +67,17 @@ func (s *Server) getStatus(w http.ResponseWriter) {
 
 	tmpl, err := template.New("status_form").Parse(`
 	<html>
-	<h1>Crowsnest Status</h1>
+	<h1>Crowsnest Status Now: {{ .Now}}</h1>
 	{{ .Output}}</html>`)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
 
 	tmpl.Execute(w, struct {
+		Now    time.Time
 		Output template.HTML
 	}{
+		time.Now(),
 		output,
 	})
 }
