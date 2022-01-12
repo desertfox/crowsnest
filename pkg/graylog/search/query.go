@@ -12,7 +12,11 @@ import (
 	"time"
 )
 
-var grayLogDateFormat string = "2006-02-02T15:04:05.000Z"
+var (
+	grayLogDateFormat   string = "2006-02-02T15:04:05.000Z"
+	relativeStrTempalte string = "%v/api/search/universal/relative?%v"
+	absoluteStrTempalte string = "%v/api/search/universal/absolute?%v"
+)
 
 type query struct {
 	host, query, streamid string
@@ -32,14 +36,14 @@ func (q query) String() string {
 	switch q.Type {
 	case "relative":
 		if os.Getenv("CROWSNEST_DEBUG") == "1" {
-			log.Printf("%v/api/search/universal/relative?%v", q.host, q.urlEncodeRelative())
+			log.Printf(relativeStrTempalte, q.host, q.urlEncodeRelative())
 		}
-		return fmt.Sprintf("%v/api/search/universal/relative?%v", q.host, q.urlEncodeRelative())
+		return fmt.Sprintf(relativeStrTempalte, q.host, q.urlEncodeRelative())
 	case "absolute":
 		if os.Getenv("CROWSNEST_DEBUG") == "1" {
-			log.Printf("%v/api/search/universal/absolute?%v", q.host, q.urlEncodeAbsolute())
+			log.Printf(absoluteStrTempalte, q.host, q.urlEncodeAbsolute())
 		}
-		return fmt.Sprintf("%v/api/search/universal/absolute?%v", q.host, q.urlEncodeAbsolute())
+		return fmt.Sprintf(absoluteStrTempalte, q.host, q.urlEncodeAbsolute())
 	}
 	return ""
 }
@@ -92,7 +96,7 @@ func (q query) ExecuteSearch(authToken string) (int, error) {
 	}
 
 	if os.Getenv("CROWSNEST_DEBUG") == "log" {
-		log.Println(string(body))
+		log.Println("Body: " + string(body))
 	}
 
 	count := strings.Count(string(body), "\n")

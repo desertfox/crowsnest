@@ -65,8 +65,6 @@ func (cn crowsnest) Run() {
 		log.Println(fmt.Sprintf("New Job recv on channel to scheduler %#v", cn.jobs))
 
 		cn.ScheduleJobs(un, pw)
-
-		log.Println(fmt.Sprintf("Scheduler Jobs %#v", s.Jobs()))
 	}(un, pw)
 }
 
@@ -102,7 +100,7 @@ func (cn crowsnest) ScheduleJobs(un, pw string) {
 			Url: j.TeamsURL,
 		}
 
-		s.Every(j.Frequency).Minutes().Do(j.GetCron(searchService, reportService))
+		s.Every(j.Frequency).Minutes().Tag(j.Name).Do(j.GetCron(searchService, reportService))
 
 		log.Printf("Scheduled Job %d: %s for every %d min(s)", i, j.Name, j.Frequency)
 	}
@@ -110,4 +108,7 @@ func (cn crowsnest) ScheduleJobs(un, pw string) {
 
 func (cn crowsnest) StartAsync() {
 	s.StartAsync()
+	if os.Getenv("CROWSNEST_NODELAY") == "" {
+		s.RunAllWithDelay(5 * time.Second)
+	}
 }
