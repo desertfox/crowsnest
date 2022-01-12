@@ -32,7 +32,7 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 
 	s.newJobChan <- job
 
-	w.Write([]byte("Job Created"))
+	s.getStatus(w)
 }
 
 func (s *Server) getJobForm(w http.ResponseWriter) {
