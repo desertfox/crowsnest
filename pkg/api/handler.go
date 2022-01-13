@@ -77,7 +77,12 @@ func (s *Server) getStatus(w http.ResponseWriter) {
 	tmpl, err := template.New("status_form").Parse(`
 	<html>
 	<h1>Crowsnest Status Now: {{ .Now}}</h1>
-	{{ .Output}}</html>`)
+	{{ .Output}}
+	<form method="POST">
+		<label>ReloadJobs</label><br />
+		<input type="submit">
+	</form>	
+	</html>`)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -89,4 +94,10 @@ func (s *Server) getStatus(w http.ResponseWriter) {
 		time.Now(),
 		output,
 	})
+}
+
+func (s *Server) reloadJobs(w http.ResponseWriter) {
+	s.event <- "reloadjobs"
+
+	s.getStatus(w)
 }

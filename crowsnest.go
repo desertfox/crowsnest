@@ -42,9 +42,14 @@ func main() {
 	cn := crowsnest{jobList, newJobChan}
 	cn.Run()
 
+	go addNewJob(cn, un, pw)
+
+	event := make(chan string)
+	go handleEvent(&cn, event)
+
 	log.Println("Crowsnest Server Startup")
 
-	server := api.NewServer(&http.ServeMux{}, newJobChan, s)
+	server := api.NewServer(&http.ServeMux{}, newJobChan, event, s)
 	server.Run()
 }
 
@@ -54,20 +59,6 @@ func (cn crowsnest) Run() {
 
 	log.Println("Crowsnest Daemon")
 	cn.StartAsync()
-
-	go func(un, pw string) {
-		job := <-cn.newJobChan
-
-		cn.jobs.Add(job)
-
-		cn.jobs.WriteConfig(configPath)
-
-		log.Println(fmt.Sprintf("New Job recv on channel to scheduler %#v", cn.jobs))
-
-		cn.ScheduleJobs(un, pw)
-
-		cn.StartAsync()
-	}(un, pw)
 }
 
 func (cn crowsnest) ScheduleJobs(un, pw string) {
@@ -111,4 +102,34 @@ func (cn crowsnest) ScheduleJobs(un, pw string) {
 
 func (cn crowsnest) StartAsync() {
 	s.StartAsync()
+}
+
+func addNewJob(cn crowsnest, un, pw string) {
+	job := <-cn.newJobChan
+
+	log.Println(fmt.Sprintf("New Job recv on channel to scheduler: %#v", job))
+
+	cn.jobs.Add(job)
+
+	cn.jobs.WriteConfig(configPath)
+
+	cn.ScheduleJobs(un, pw)
+
+	cn.StartAsync()
+}
+
+func handleEvent(cn *crowsnest, event chan string) {
+	switch <-event {
+	case "reloadjobs":
+		log.Println("ReloadJobs event")
+
+		jobList, err := jobs.BuildFromConfig(configPath)
+		if err != nil {
+			log.Fatal(fmt.Sprintf("error building jobs from config: %v, error: %v", configPath, err.Error()))
+		}
+
+		cn.jobs = jobList
+
+		cn.Run()
+	}
 }
