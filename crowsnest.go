@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/desertfox/crowsnest/pkg/api"
@@ -20,12 +21,14 @@ var (
 	un         string            = os.Getenv("CROWSNEST_USERNAME")
 	pw         string            = os.Getenv("CROWSNEST_PASSWORD")
 	configPath string            = os.Getenv("CROWSNEST_CONFIG")
+	delayJobs  string            = os.Getenv("CROWSNEST_DELAY")
 	s          *gocron.Scheduler = gocron.NewScheduler(time.UTC)
+	newJobChan chan jobs.Job     = make(chan jobs.Job)
+	eventChan  chan string       = make(chan string)
 )
 
 type crowsnest struct {
-	jobs       *jobs.JobList
-	newJobChan chan jobs.Job
+	jobs *jobs.JobList
 }
 
 func main() {
@@ -38,18 +41,12 @@ func main() {
 
 	log.Println("Crowsnest JobRunner Startup")
 
-	newJobChan := make(chan jobs.Job)
-	cn := crowsnest{jobList, newJobChan}
+	cn := crowsnest{jobList}
 	cn.Run()
-
-	go addNewJob(cn, un, pw)
-
-	event := make(chan string)
-	go handleEvent(&cn, event)
 
 	log.Println("Crowsnest Server Startup")
 
-	server := api.NewServer(&http.ServeMux{}, newJobChan, event, s)
+	server := api.NewServer(&http.ServeMux{}, newJobChan, eventChan, s)
 	server.Run()
 }
 
@@ -59,6 +56,10 @@ func (cn crowsnest) Run() {
 
 	log.Println("Crowsnest Daemon")
 	cn.StartAsync()
+
+	go addNewJob(newJobChan, cn, un, pw)
+
+	go handleEvent(eventChan, &cn)
 }
 
 func (cn crowsnest) ScheduleJobs(un, pw string) {
@@ -96,16 +97,24 @@ func (cn crowsnest) ScheduleJobs(un, pw string) {
 		s.Every(j.Frequency).Minutes().Tag(j.Name).Do(j.GetCron(searchService, reportService))
 
 		log.Printf("Scheduled Job %d: %s for every %d min(s)", i, j.Name, j.Frequency)
-	}
 
+		if delayJobs != "" {
+			delay, err := strconv.Atoi(delayJobs)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			time.Sleep(time.Duration(delay) * time.Second)
+		}
+	}
 }
 
 func (cn crowsnest) StartAsync() {
 	s.StartAsync()
 }
 
-func addNewJob(cn crowsnest, un, pw string) {
-	job := <-cn.newJobChan
+func addNewJob(newJobChan chan jobs.Job, cn crowsnest, un, pw string) {
+	job := <-newJobChan
 
 	log.Println(fmt.Sprintf("New Job recv on channel to scheduler: %#v", job))
 
@@ -118,7 +127,7 @@ func addNewJob(cn crowsnest, un, pw string) {
 	cn.StartAsync()
 }
 
-func handleEvent(cn *crowsnest, event chan string) {
+func handleEvent(event chan string, cn *crowsnest) {
 	switch <-event {
 	case "reloadjobs":
 		log.Println("ReloadJobs event")
