@@ -45,19 +45,25 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 func (s *Server) getJobForm(w http.ResponseWriter) {
 	tmpl, err := template.New("njr_form").Parse(`<h1>New Job Request Translate Form</h1>
 	<form method="POST">
-		<label>Name:</label><br />
-		<input type="text" name="name"><br />
-		<label>QueryLink:</label><br />
-		<input type="text" name="querylink"><br />
-		<label>OutputLink:</label><br />
-		<input type="text" name="outputlink"><br />
-		<label>Threshold:</label><br />
-		<input type="text" name="threshold"><br />
-		<label>Verbose:</label><br />
-		<input type="text" name="verbose"><br />
-		<br />
-		<input type="submit" method="POST">
-	</form>`)
+	<label>Job Name:</label><br />
+	<input type="text" name="name"><br />
+
+	<label>GrayLog Query Link:</label><br />
+	<input type="text" name="querylink" value="https://graylogquery"><br />
+
+	<label>Teams URL:</label><br />
+	<input type="text" name="outputlink" value="https://teamsurl.com"><br />
+
+	<label>Threshold for alerting:</label><br />
+	<input type="text" name="threshold" value="0"><br />
+
+	<label>Verbose*:</label><br />
+	<input type="text" name="verbose" value="0"><br />
+	<span>*If set to 1, will alert channel regardless of threshold</span><br />
+
+	<br />
+	<input type="submit" method="POST">
+</form>`)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
