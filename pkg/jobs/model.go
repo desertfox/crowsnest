@@ -58,7 +58,7 @@ func (j Job) GetCron(searchService SearchService, reportService ReportService) f
 
 		log.Println("Search Complete: " + j.Name)
 
-		output := fmt.Sprintf("Alert: %s\nCount: %d\nLink: [GrayLog Query](%s)\n", j.shouldAlertText(count), count, searchService.BuildSearchURL())
+		output := fmt.Sprintf("Alert: %s\n\rCount: %d\n\rLink: [GrayLog Query](%s)\n\r", j.shouldAlertText(count), count, searchService.BuildSearchURL())
 
 		if j.Verbose > 0 || j.shouldAlert(count) {
 			reportService.Send(
