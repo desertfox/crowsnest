@@ -47,33 +47,46 @@ func (s *Server) getJobForm(w http.ResponseWriter) {
 	tmpl, err := template.New("njr_form").Parse(`<h1>New Job Request Translate Form</h1>
 	<form method="POST">
 	<label>Job Name:</label><br />
-	<input type="text" name="name"><br />
+	<input type="text" name="name"><br /><br />
 
 	<label>GrayLog Query Link:</label><br />
-	<input type="text" name="querylink" value="https://graylogquery"><br />
+	<input type="text" size="200" name="querylink" value="https://graylogquery.com?something"><br /><br />
 
-	<label>Teams URL:</label><br />
-	<input type="text" name="outputlink" value="https://teamsurl.com"><br />
+	<label>Teams URL(<a href="https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook" target="_blank">webhook instructions</a>):</label><br />
+	<input type="text" name="outputlink" value="https://teamsurl.com"><br /><br />
 
-	<label>Threshold for alerting:</label><br />
-	<input type="text" name="threshold" value="0"><br />
 
-	<label>Verbose*:</label><br />
+	<label>Verbose*:</label>
 	<select name="verbose">
     	<option value="0">0</option>
 		<option value="1">1</option>
 	</select><br />
-	<span>*If set to 1, will alert channel regardless of threshold</span><br />
+	<p>
+		*Verbose set to 0, Output msgs will only occur when # of query results is > or < than limit and condition defined above and below this form <br />
+		 Verbose set to 1, Output msgs will only occur every time Job is executed regardless of Threshold checks
+	</p><br>
 
-	<label>Condition*:</label><br />
+	<label># Of allowed query results(threshold):</label><br />
+	<input type="text" name="threshold" value="0"><br /><br />
+	<label>Condition*:</label>
 	<select name="state">
     	<option value=">">></option>
 		<option value="<"><</option>
 	</select><br />
+	
+	<p>
+		*Condition can be broken down to.<br>
+		<i>let n represent # of requests from query/search results</i><br>
+		<h4>Case ></h4><br>
+		  n >= $Threshold<br>
+		  <h4>Case <</h4><br>
+		  n <= $Threshold
+	</p>
 
 	<br />
-	<input type="submit" method="POST">
+	<input type="submit" method="POST" value="Create Job">
 </form>`)
+
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
