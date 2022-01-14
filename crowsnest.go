@@ -77,11 +77,9 @@ func (cn crowsnest) ScheduleJobs(un, pw string) {
 			j.Search.Host,
 			j.Search.Query,
 			j.Search.Streamid,
-			j.Frequency,
+			j.Search.Frequency,
 			j.Search.Fields,
 			j.Search.Type,
-			time.Now().Add(time.Hour*time.Duration(-5)+time.Minute*time.Duration(-j.Frequency)),
-			time.Now().Add(time.Hour*time.Duration(-5)+time.Minute*time.Duration(-5)),
 			httpClient,
 		)
 
@@ -91,12 +89,12 @@ func (cn crowsnest) ScheduleJobs(un, pw string) {
 		}
 
 		reportService := report.Report{
-			Url: j.TeamsURL,
+			Url: j.Output.TeamsURL,
 		}
 
-		s.Every(j.Frequency).Minutes().Tag(j.Name).Do(j.GetCron(searchService, reportService))
+		s.Every(j.Search.Frequency).Minutes().Tag(j.Name).Do(j.GetCron(searchService, reportService))
 
-		log.Printf("Scheduled Job %d: %s for every %d min(s)", i, j.Name, j.Frequency)
+		log.Printf("Scheduled Job %d: %s for every %d min(s)", i, j.Name, j.Search.Frequency)
 
 		if delayJobs != "" {
 			delay, err := strconv.Atoi(delayJobs)

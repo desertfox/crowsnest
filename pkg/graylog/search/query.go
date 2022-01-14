@@ -9,13 +9,12 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 )
 
 var (
-	grayLogDateFormat   string = "2006-02-02T15:04:05.000Z"
+	//grayLogDateFormat   string = "2006-02-02T15:04:05.000Z"
 	relativeStrTempalte string = "%v/api/search/universal/relative?%v"
-	absoluteStrTempalte string = "%v/api/search/universal/absolute?%v"
+	//absoluteStrTempalte string = "%v/api/search/universal/absolute?%v"
 )
 
 type query struct {
@@ -23,13 +22,11 @@ type query struct {
 	frequnecy             int
 	fields                []string
 	Type                  string
-	from                  time.Time
-	to                    time.Time
 	httpClient            *http.Client
 }
 
-func New(host, q, streamid string, frequency int, fields []string, t string, from, to time.Time, httpClient *http.Client) query {
-	return query{host, q, streamid, frequency, fields, t, from, to, httpClient}
+func New(host, q, streamid string, frequency int, fields []string, t string, httpClient *http.Client) query {
+	return query{host, q, streamid, frequency, fields, t, httpClient}
 }
 
 func (q query) String() string {
@@ -39,11 +36,15 @@ func (q query) String() string {
 			log.Printf(relativeStrTempalte, q.host, q.urlEncodeRelative())
 		}
 		return fmt.Sprintf(relativeStrTempalte, q.host, q.urlEncodeRelative())
-	case "absolute":
-		if os.Getenv("CROWSNEST_DEBUG") == "1" {
-			log.Printf(absoluteStrTempalte, q.host, q.urlEncodeAbsolute())
-		}
-		return fmt.Sprintf(absoluteStrTempalte, q.host, q.urlEncodeAbsolute())
+
+		/*
+			case "absolute":
+				if os.Getenv("CROWSNEST_DEBUG") == "1" {
+					log.Printf(absoluteStrTempalte, q.host, q.urlEncodeAbsolute())
+				}
+				return fmt.Sprintf(absoluteStrTempalte, q.host, q.urlEncodeAbsolute())
+
+		*/
 	}
 	return ""
 }
@@ -61,6 +62,7 @@ func (q query) urlEncodeRelative() string {
 	return params.Encode()
 }
 
+/*
 func (q query) urlEncodeAbsolute() string {
 	params := url.Values{}
 
@@ -78,6 +80,7 @@ func (q query) urlEncodeAbsolute() string {
 
 	return params.Encode()
 }
+*/
 
 func (q query) ExecuteSearch(authToken string) (int, error) {
 	request, _ := http.NewRequest("GET", q.String(), nil)
@@ -120,11 +123,13 @@ func (q query) BuildSearchURL() string {
 		params.Add("relative", strconv.Itoa(q.frequnecy*60))
 	}
 
-	if q.Type == "absolute" {
-		params.Add("rangetype", "absolute")
-		params.Add("from", q.from.Format(grayLogDateFormat))
-		params.Add("to", q.to.Format(grayLogDateFormat))
-	}
+	/*
+		if q.Type == "absolute" {
+			params.Add("rangetype", "absolute")
+			params.Add("from", q.from.Format(grayLogDateFormat))
+			params.Add("to", q.to.Format(grayLogDateFormat))
+		}
+	*/
 
 	return fmt.Sprintf("%s/streams/%s/search?%s", q.host, q.streamid, params.Encode())
 }

@@ -25,22 +25,29 @@ type ReportService interface {
 }
 
 type Job struct {
-	Name      string        `yaml:"name"`
-	Frequency int           `yaml:"frequency"`
-	Threshold int           `yaml:"threshold"`
-	Verbose   int           `yaml:"verbose"`
-	TeamsURL  string        `yaml:"teamsurl"`
-	Search    SearchOptions `yaml:"options"`
+	Name      string    `yaml:"name"`
+	Condition Condition `yaml:"condition"`
+	Output    Output    `yaml:"output"`
+	Search    Search    `yaml:"search"`
 }
 
-type SearchOptions struct {
-	Host     string   `yaml:"host"`
-	Type     string   `yaml:"type"`
-	Streamid string   `yaml:"streamid"`
-	Query    string   `yaml:"query"`
-	Fields   []string `yaml:"fields"`
-	From     string   `yaml:"from"`
-	To       string   `yaml:"to"`
+type Condition struct {
+	Threshold int    `yaml:"threshold"`
+	State     string `yaml:"state"`
+}
+
+type Output struct {
+	Verbose  int    `yaml:"verbose"`
+	TeamsURL string `yaml:"teamsurl"`
+}
+
+type Search struct {
+	Host      string   `yaml:"host"`
+	Type      string   `yaml:"type"`
+	Streamid  string   `yaml:"streamid"`
+	Query     string   `yaml:"query"`
+	Fields    []string `yaml:"fields"`
+	Frequency int      `yaml:"frequency"`
 }
 
 type JobList []Job
@@ -60,7 +67,7 @@ func (j Job) GetCron(searchService SearchService, reportService ReportService) f
 
 		output := fmt.Sprintf("Alert: %s\n\rCount: %d\n\rLink: [GrayLog Query](%s)\n\r", j.shouldAlertText(count), count, searchService.BuildSearchURL())
 
-		if j.Verbose > 0 || j.shouldAlert(count) {
+		if j.Output.Verbose > 0 || j.shouldAlert(count) {
 			reportService.Send(
 				j.Name,
 				output,
@@ -74,14 +81,14 @@ func (j Job) GetCron(searchService SearchService, reportService ReportService) f
 }
 
 func (j Job) shouldAlert(count int) bool {
-	return count >= j.Threshold
+	return count >= j.Condition.Threshold
 }
 
 func (j Job) shouldAlertText(count int) string {
 	if j.shouldAlert(count) {
-		return fmt.Sprintf("ALERT %d/%d", count, j.Threshold)
+		return fmt.Sprintf("ALERT %d/%d", count, j.Condition.Threshold)
 	}
-	return fmt.Sprintf("OK %d/%d", count, j.Threshold)
+	return fmt.Sprintf("OK %d/%d", count, j.Condition.Threshold)
 }
 
 func (jl JobList) checkIfExists(j Job) bool {

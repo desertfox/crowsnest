@@ -7,18 +7,18 @@ import (
 )
 
 type NewJobReq struct {
-	Name       string `json:"name"`
-	QueryLink  string `json:"query"`
-	OutputLink string `json:"output"`
-	Threshold  int    `json:"threshold"`
-	Verbose    int    `json:"verbose"`
+	Name       string
+	QueryLink  string
+	OutputLink string
+	Threshold  int
+	Verbose    int
 }
 
 func (njr NewJobReq) TranslateToJob() (Job, error) {
 	var (
-		frequency            int
-		typeSearch, from, to string
-		fields               []string
+		frequency  int
+		typeSearch string
+		fields     []string
 	)
 
 	urlObj, err := url.Parse(njr.QueryLink)
@@ -32,10 +32,12 @@ func (njr NewJobReq) TranslateToJob() (Job, error) {
 	case "relative":
 		typeSearch = "relative"
 		frequency, _ = strconv.Atoi(parsedQuery["relative"][0])
-	case "absolute":
-		typeSearch = "absolute"
-		from = parsedQuery["from"][0]
-		to = parsedQuery["to"][0]
+		/*
+			case "absolute":
+				typeSearch = "absolute"
+				from = parsedQuery["from"][0]
+				to = parsedQuery["to"][0]
+		*/
 	}
 
 	if _, ok := parsedQuery["fields"]; ok {
@@ -44,18 +46,21 @@ func (njr NewJobReq) TranslateToJob() (Job, error) {
 
 	return Job{
 		njr.Name,
-		frequency / 60,
-		njr.Threshold,
-		njr.Verbose,
-		njr.OutputLink,
-		SearchOptions{
+		Condition{
+			njr.Threshold,
+			"PRESENT",
+		},
+		Output{
+			njr.Verbose,
+			njr.OutputLink,
+		},
+		Search{
 			"https://" + urlObj.Hostname(),
 			typeSearch,
 			getSteamId(urlObj.EscapedPath()),
 			parsedQuery["q"][0],
 			fields,
-			from,
-			to,
+			frequency / 60,
 		},
 	}, nil
 }

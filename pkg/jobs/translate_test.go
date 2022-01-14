@@ -6,7 +6,7 @@ import (
 
 var (
 	name              string = "Test Name"
-	frequency         int    = 86400
+	frequency         int    = 1440
 	relativeQueryLink string = "https://desertfox.dev/streams/5555555/search?rangetype=relative&fields=source%2Cmessage&width=1920&highlightMessage=&relative=86400&q=%22Error+Checking+Out%22"
 	outputLink        string = "https://not.desertfox.dev"
 	threshold         int    = 5
@@ -30,16 +30,21 @@ func Test_translate(t *testing.T) {
 		}
 
 		want := Job{
-			Name:      name,
-			Frequency: frequency,
-			Threshold: threshold,
-			TeamsURL:  outputLink,
-			Search: SearchOptions{
-				Host:     host,
-				Type:     searchTypeRelative,
-				Streamid: streamid,
-				Query:    query,
-				Fields:   fields,
+			Name: name,
+			Condition: Condition{
+				Threshold: threshold,
+			},
+			Output: Output{
+				TeamsURL: outputLink,
+				Verbose:  verbose,
+			},
+			Search: Search{
+				Frequency: frequency,
+				Host:      host,
+				Type:      searchTypeRelative,
+				Streamid:  streamid,
+				Query:     query,
+				Fields:    fields,
 			},
 		}
 
@@ -47,16 +52,16 @@ func Test_translate(t *testing.T) {
 			t.Errorf("error got: %#v, want %#v", got.Name, want.Name)
 		}
 
-		if got.Frequency != want.Frequency {
-			t.Errorf("error got: %#v, want %#v", got.Frequency, want.Frequency)
+		if got.Search.Frequency != want.Search.Frequency {
+			t.Errorf("error got: %#v, want %#v", got.Search.Frequency, want.Search.Frequency)
 		}
 
-		if got.Threshold != want.Threshold {
-			t.Errorf("error got: %#v, want %#v", got.Threshold, want.Threshold)
+		if got.Condition.Threshold != want.Condition.Threshold {
+			t.Errorf("error got: %#v, want %#v", got.Condition.Threshold, want.Condition.Threshold)
 		}
 
-		if got.TeamsURL != want.TeamsURL {
-			t.Errorf("error got: %#v, want %#v", got.TeamsURL, want.TeamsURL)
+		if got.Output.TeamsURL != want.Output.TeamsURL {
+			t.Errorf("error got: %#v, want %#v", got.Output.TeamsURL, want.Output.TeamsURL)
 		}
 
 		if got.Search.Host != want.Search.Host {

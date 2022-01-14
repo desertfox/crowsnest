@@ -1,17 +1,17 @@
 jobs:
-- name: DB Errors
-  frequency: 15
-  threshold: 20
-  verbose: 1
-  teamsurl: ""
-  options:
-    host: http://catfacts.com
-    type: relative
-    streamid: adfasdfasdf
-    query: region:production AND DBI AND error
+- name: test
+  condition:
+    threshold: 0
+    state: PRESENT
+  output:
+    verbose: 0
+    teamsurl: https://teamsurl.com
+  search:
+    host: https://something.com
+    type: ""
+    streamid: 55555
+    query: '"ERROR"'
     fields:
     - message
-    - region
-    - kubernetes_namespace_name
-    from: ""
-    to: ""
+    - source
+    frequency: 0
