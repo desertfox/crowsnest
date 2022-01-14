@@ -47,4 +47,11 @@ func (s Server) SetupRoute() {
 			s.reloadJobs(w)
 		}
 	})
+
+	s.mux.HandleFunc("/delete", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case "POST":
+			s.deleteJob(w, r)
+		}
+	})
 }

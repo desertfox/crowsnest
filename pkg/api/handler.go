@@ -101,7 +101,11 @@ func (s *Server) getStatus(w http.ResponseWriter) {
 		for _, tag := range j.Tags() {
 			output += template.HTML(fmt.Sprintf("Tag: %v\n<br>", tag))
 			output += template.HTML(
-				fmt.Sprintf("<form method=\"DELETE\" action=\"/status\"><input type=\"hidden\" name=\"tag\" value=\"%v\"><input type=\"submit\" value=\"DELETE\"></form><br>", tag),
+				fmt.Sprintf(`
+				<form method="POST" action="/delete">
+					<input type="hidden" name="tag" value="%v">
+					<input type="submit" value="DELETE">
+				</form><br>`, tag),
 			)
 		}
 		output += template.HTML(fmt.Sprintf("LastRun: %v<br>", j.LastRun()))
