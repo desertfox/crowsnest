@@ -20,6 +20,10 @@ func BuildFromConfig(configPath string) (*JobList, error) {
 		return &JobList{}, err
 	}
 
+	if _, ok := data["jobs"]; !ok {
+		return &JobList{}, nil
+	}
+
 	if len(*data["jobs"]) > 0 {
 		for i, job := range *data["jobs"] {
 			log.Printf("Loaded Job %d: %s", i, job.Name)
