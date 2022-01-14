@@ -2,14 +2,14 @@ jobs:
 - name: test
   condition:
     threshold: 0
-    state: PRESENT
+    state: ">"
   output:
     verbose: 0
     teamsurl: https://teamsurl.com
   search:
     host: https://something.com
     type: ""
-    streamid: 55555
+    streamid: "55555"
     query: '"ERROR"'
     fields:
     - message

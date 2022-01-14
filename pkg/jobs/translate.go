@@ -11,6 +11,7 @@ type NewJobReq struct {
 	QueryLink  string
 	OutputLink string
 	Threshold  int
+	State      string
 	Verbose    int
 }
 
@@ -48,7 +49,7 @@ func (njr NewJobReq) TranslateToJob() (Job, error) {
 		njr.Name,
 		Condition{
 			njr.Threshold,
-			"PRESENT",
+			njr.State,
 		},
 		Output{
 			njr.Verbose,

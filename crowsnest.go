@@ -42,7 +42,11 @@ func main() {
 	log.Println("Crowsnest JobRunner Startup")
 
 	cn := crowsnest{jobList}
-	cn.Run()
+	cn.Run(un, pw)
+
+	go addNewJob(newJobChan, cn, un, pw)
+
+	go handleEvent(eventChan, &cn)
 
 	log.Println("Crowsnest Server Startup")
 
@@ -50,16 +54,12 @@ func main() {
 	server.Run()
 }
 
-func (cn crowsnest) Run() {
+func (cn crowsnest) Run(un, pw string) {
 	log.Println("Crowsnest ScheduleJobs")
 	cn.ScheduleJobs(un, pw)
 
 	log.Println("Crowsnest Daemon")
 	cn.StartAsync()
-
-	go addNewJob(newJobChan, cn, un, pw)
-
-	go handleEvent(eventChan, &cn)
 }
 
 func (cn crowsnest) ScheduleJobs(un, pw string) {
@@ -120,12 +120,10 @@ func addNewJob(newJobChan chan jobs.Job, cn crowsnest, un, pw string) {
 
 	cn.jobs.WriteConfig(configPath)
 
-	cn.ScheduleJobs(un, pw)
-
-	cn.StartAsync()
+	cn.Run(un, pw)
 }
 
-func handleEvent(event chan string, cn *crowsnest) {
+func handleEvent(event chan string, cn *crowsnest, un, pw string) {
 	switch <-event {
 	case "reloadjobs":
 		log.Println("ReloadJobs event")
@@ -137,6 +135,6 @@ func handleEvent(event chan string, cn *crowsnest) {
 
 		cn.jobs = jobList
 
-		cn.Run()
+		cn.Run(un, pw)
 	}
 }

@@ -29,6 +29,7 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 		QueryLink:  r.FormValue("querylink"),
 		OutputLink: r.FormValue("outputlink"),
 		Threshold:  threshold,
+		State:      r.FormValue("state"),
 		Verbose:    verbose,
 	}
 
@@ -58,8 +59,17 @@ func (s *Server) getJobForm(w http.ResponseWriter) {
 	<input type="text" name="threshold" value="0"><br />
 
 	<label>Verbose*:</label><br />
-	<input type="text" name="verbose" value="0"><br />
+	<select name="verbose">
+    	<option value="0">0</option>
+		<option value="1">1</option>
+	</select><br />
 	<span>*If set to 1, will alert channel regardless of threshold</span><br />
+
+	<label>Condition*:</label><br />
+	<select name="state">
+    	<option value=">">></option>
+		<option value="<"><</option>
+	</select><br />
 
 	<br />
 	<input type="submit" method="POST">

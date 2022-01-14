@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
 )
 
 type SessionService interface {
@@ -72,7 +73,9 @@ func (j Job) GetCron(searchService SearchService, reportService ReportService) f
 				j.Name,
 				output,
 			)
-		} else {
+		}
+
+		if os.Getenv("CROWSNEST_DEBUG") == "log" {
 			log.Println(output)
 		}
 
@@ -81,7 +84,14 @@ func (j Job) GetCron(searchService SearchService, reportService ReportService) f
 }
 
 func (j Job) shouldAlert(count int) bool {
-	return count >= j.Condition.Threshold
+	switch j.Condition.State {
+	case ">":
+		return count >= j.Condition.Threshold
+	case "<":
+		return count <= j.Condition.Threshold
+	default:
+		return false
+	}
 }
 
 func (j Job) shouldAlertText(count int) string {
