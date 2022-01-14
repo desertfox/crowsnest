@@ -16,6 +16,8 @@ import (
 	"github.com/go-co-op/gocron"
 )
 
+const version string = "v1.0"
+
 var (
 	httpClient *http.Client      = &http.Client{}
 	un         string            = os.Getenv("CROWSNEST_USERNAME")
@@ -23,7 +25,7 @@ var (
 	configPath string            = os.Getenv("CROWSNEST_CONFIG")
 	delayJobs  string            = os.Getenv("CROWSNEST_DELAY")
 	s          *gocron.Scheduler = gocron.NewScheduler(time.UTC)
-	newJobChan chan jobs.Job     = make(chan jobs.Job)
+	jobChan    chan jobs.Job     = make(chan jobs.Job)
 	eventChan  chan string       = make(chan string)
 )
 
@@ -32,29 +34,27 @@ type crowsnest struct {
 }
 
 func main() {
-	log.Println("Crowsnest Startup")
+	log.Printf("Crowsnest Startup, version:%s", version)
 
 	jobList, err := jobs.BuildFromConfig(configPath)
 	if err != nil {
 		panic(fmt.Sprintf("error building jobs from config: %v, error: %v", configPath, err.Error()))
 	}
 
-	log.Println("Crowsnest JobRunner Startup")
-
 	cn := crowsnest{jobList}
 	cn.Run(un, pw)
 
-	go addNewJob(newJobChan, &cn, un, pw)
+	go handleAddNewJob(jobChan, &cn, un, pw)
 
 	go handleEvent(eventChan, &cn, un, pw)
 
-	log.Println("Crowsnest Server Startup")
-
-	server := api.NewServer(&http.ServeMux{}, newJobChan, eventChan, s)
+	server := api.NewServer(&http.ServeMux{}, jobChan, eventChan, s)
 	server.Run()
 }
 
 func (cn crowsnest) Run(un, pw string) {
+	log.Println("Crowsnest Run")
+
 	log.Println("Crowsnest ScheduleJobs")
 	cn.ScheduleJobs(un, pw)
 
@@ -111,7 +111,7 @@ func (cn crowsnest) StartAsync() {
 	s.StartAsync()
 }
 
-func addNewJob(newJobChan chan jobs.Job, cn *crowsnest, un, pw string) {
+func handleAddNewJob(newJobChan chan jobs.Job, cn *crowsnest, un, pw string) {
 	job := <-newJobChan
 
 	log.Println(fmt.Sprintf("New Job recv on channel to scheduler: %#v", job))
