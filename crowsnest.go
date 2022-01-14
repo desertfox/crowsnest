@@ -44,9 +44,9 @@ func main() {
 	cn := crowsnest{jobList}
 	cn.Run(un, pw)
 
-	go addNewJob(newJobChan, cn, un, pw)
+	go addNewJob(newJobChan, &cn, un, pw)
 
-	go handleEvent(eventChan, &cn)
+	go handleEvent(eventChan, &cn, un, pw)
 
 	log.Println("Crowsnest Server Startup")
 
@@ -111,7 +111,7 @@ func (cn crowsnest) StartAsync() {
 	s.StartAsync()
 }
 
-func addNewJob(newJobChan chan jobs.Job, cn crowsnest, un, pw string) {
+func addNewJob(newJobChan chan jobs.Job, cn *crowsnest, un, pw string) {
 	job := <-newJobChan
 
 	log.Println(fmt.Sprintf("New Job recv on channel to scheduler: %#v", job))
