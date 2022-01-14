@@ -127,7 +127,7 @@ func handleEvent(event chan jobs.Event, cn *crowsnest, un, pw string) {
 	e := <-event
 
 	switch e.Action {
-	case "reloadjobs":
+	case "RELOAD_JL":
 		log.Println("ReloadJobs event")
 
 		jobList, err := jobs.BuildFromConfig(configPath)
@@ -140,6 +140,8 @@ func handleEvent(event chan jobs.Event, cn *crowsnest, un, pw string) {
 		cn.Run(un, pw)
 	case "DEL_TAG":
 		tag := e.Value
+
+		log.Printf("DEL_TAG event, %v", tag)
 
 		newJobList := cn.jobs.Del(tag)
 

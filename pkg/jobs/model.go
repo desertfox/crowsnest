@@ -53,6 +53,10 @@ type Search struct {
 
 type JobList []Job
 
+type Event struct {
+	Action, Value string
+}
+
 func (j Job) GetCron(searchService SearchService, reportService ReportService) func() {
 	return func() {
 		j := j //MARK

@@ -137,7 +137,7 @@ func (s *Server) getStatus(w http.ResponseWriter) {
 
 func (s *Server) reloadJobs(w http.ResponseWriter) {
 	s.event <- jobs.Event{
-		Action: "reloadjobs",
+		Action: "RELOAD_JL",
 		Value:  "",
 	}
 
@@ -154,9 +154,9 @@ func (s *Server) deleteJob(w http.ResponseWriter, r *http.Request) {
 					Action: "DEL_TAG",
 					Value:  tag,
 				}
-
-				w.Write([]byte(fmt.Sprintf("Deleted Tag %s from jobs list", tag)))
-
+				output := template.HTML(fmt.Sprintf(`Deleted Tag %s from jobs list <br>
+				<a href="/status">Job Status</a><a href="/">Job Form</a>`, tag))
+				w.Write([]byte(output))
 				return
 			}
 		}
