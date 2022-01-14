@@ -45,6 +45,7 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) getJobForm(w http.ResponseWriter) {
 	tmpl, err := template.New("njr_form").Parse(`<h1>New Job Request Translate Form</h1>
+	<a href="/status" target="_blank">Current Job Status Page</a>
 	<form method="POST">
 	<label>Job Name:</label><br />
 	<input type="text" name="name"><br /><br />
@@ -97,7 +98,12 @@ func (s *Server) getJobForm(w http.ResponseWriter) {
 func (s *Server) getStatus(w http.ResponseWriter) {
 	var output template.HTML
 	for _, j := range s.s.Jobs() {
-		output += template.HTML(fmt.Sprintf("Tags: %v\n<br>", j.Tags()))
+		for _, tag := range j.Tags() {
+			output += template.HTML(fmt.Sprintf("Tag: %v\n<br>", tag))
+			output += template.HTML(
+				fmt.Sprintf("<form method=\"DELETE\" action=\"/status\"><input type=\"hidden\" name=\"tag\" value=\"%v\"><input type=\"submit\" value=\"DELETE\"></form><br>", tag),
+			)
+		}
 		output += template.HTML(fmt.Sprintf("LastRun: %v<br>", j.LastRun()))
 		output += template.HTML(fmt.Sprintf("NextRun: %v<br>\n", j.NextRun()))
 		output += template.HTML("<br>")
@@ -126,7 +132,29 @@ func (s *Server) getStatus(w http.ResponseWriter) {
 }
 
 func (s *Server) reloadJobs(w http.ResponseWriter) {
-	s.event <- "reloadjobs"
+	s.event <- jobs.Event{
+		Action: "reloadjobs",
+		Value:  "",
+	}
 
 	s.getStatus(w)
+}
+
+func (s *Server) deleteJob(w http.ResponseWriter, r *http.Request) {
+	tag := r.FormValue("tag")
+
+	for _, j := range s.s.Jobs() {
+		for _, t := range j.Tags() {
+			if tag == t {
+				s.event <- jobs.Event{
+					Action: "DEL_TAG",
+					Value:  tag,
+				}
+
+				w.Write([]byte(fmt.Sprintf("Deleted Tag %s from jobs list", tag)))
+
+				return
+			}
+		}
+	}
 }

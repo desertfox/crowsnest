@@ -120,3 +120,17 @@ func (jl *JobList) Add(j Job) error {
 
 	return nil
 }
+
+func (jl *JobList) Del(tag string) JobList {
+	jobs := []Job(*jl)
+
+	for i, j := range jobs {
+		if j.Name == tag {
+			jobs[i] = jobs[len(jobs)-1]
+			jobs = jobs[:len(jobs)-1]
+			return jobs
+		}
+	}
+
+	return JobList{}
+}

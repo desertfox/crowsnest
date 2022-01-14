@@ -26,7 +26,7 @@ var (
 	delayJobs  string            = os.Getenv("CROWSNEST_DELAY")
 	s          *gocron.Scheduler = gocron.NewScheduler(time.UTC)
 	jobChan    chan jobs.Job     = make(chan jobs.Job)
-	eventChan  chan string       = make(chan string)
+	eventChan  chan jobs.Event   = make(chan jobs.Event)
 )
 
 type crowsnest struct {
@@ -123,8 +123,10 @@ func handleAddNewJob(newJobChan chan jobs.Job, cn *crowsnest, un, pw string) {
 	cn.Run(un, pw)
 }
 
-func handleEvent(event chan string, cn *crowsnest, un, pw string) {
-	switch <-event {
+func handleEvent(event chan jobs.Event, cn *crowsnest, un, pw string) {
+	e := <-event
+
+	switch e.Action {
 	case "reloadjobs":
 		log.Println("ReloadJobs event")
 
@@ -134,6 +136,16 @@ func handleEvent(event chan string, cn *crowsnest, un, pw string) {
 		}
 
 		cn.jobs = jobList
+
+		cn.Run(un, pw)
+	case "DEL_TAG":
+		tag := e.Value
+
+		newJobList := cn.jobs.Del(tag)
+
+		cn.jobs = &newJobList
+
+		cn.jobs.WriteConfig(configPath)
 
 		cn.Run(un, pw)
 	}

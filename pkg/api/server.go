@@ -11,11 +11,11 @@ import (
 type Server struct {
 	mux        *http.ServeMux
 	newJobChan chan jobs.Job
-	event      chan string
+	event      chan jobs.Event
 	s          *gocron.Scheduler
 }
 
-func NewServer(mux *http.ServeMux, newJobChan chan jobs.Job, event chan string, s *gocron.Scheduler) *Server {
+func NewServer(mux *http.ServeMux, newJobChan chan jobs.Job, event chan jobs.Event, s *gocron.Scheduler) *Server {
 	return &Server{mux, newJobChan, event, s}
 }
 
@@ -34,6 +34,8 @@ func (s Server) SetupRoute() {
 			s.createJob(w, r)
 		case "GET":
 			s.getJobForm(w)
+		case "DELETE":
+			s.deleteJob(w, r)
 		}
 	})
 
