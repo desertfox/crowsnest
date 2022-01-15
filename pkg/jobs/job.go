@@ -63,12 +63,12 @@ func (j Job) GetCron(searchService SearchService, reportService ReportService) f
 		log.Printf("Job %s Results count: %d, alert: %t ", j.Name, count, j.shouldAlert(count))
 
 		output := fmt.Sprintf("📜 Status: %s\n\r", j.shouldAlertText(count))
-		output += fmt.Sprintf("🧮 Count : %d\n\rL", count)
+		output += fmt.Sprintf("🧮 Count : %d\n\r", count)
 		output += fmt.Sprintf("🔗 Link  : [GrayLog Query](%s)\n\r", searchService.BuildSearchURL())
 
 		if j.Output.Verbose > 0 || j.shouldAlert(count) {
 			reportService.Send(
-				j.Name,
+				"🔎 Name: "+j.Name,
 				output,
 			)
 		}
@@ -90,7 +90,7 @@ func (j Job) shouldAlert(count int) bool {
 
 func (j Job) shouldAlertText(count int) string {
 	if j.shouldAlert(count) {
-		return fmt.Sprintf("🔥🔥🔥 %d=%s%d", count, j.Condition.State, j.Condition.Threshold)
+		return fmt.Sprintf("🔥%d %s= %d🔥", count, j.Condition.State, j.Condition.Threshold)
 	}
-	return fmt.Sprintf("✔️✔️✔️ %d%s%d", count, j.Condition.State, j.Condition.Threshold)
+	return fmt.Sprintf("✔️%d %s= %d✔️", count, j.Condition.State, j.Condition.Threshold)
 }

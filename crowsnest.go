@@ -25,7 +25,7 @@ type crowsnest struct {
 var (
 	httpClient *http.Client    = &http.Client{}
 	jobEvent   chan jobs.Event = make(chan jobs.Event)
-	logPrefix  string          = "🦜 Crowsnest "
+	logPrefix  string          = "🏴‍☠️ Crowsnest "
 )
 
 func main() {
