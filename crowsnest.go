@@ -47,6 +47,8 @@ func main() {
 
 	go cn.handleJobEvent(jobEvent)
 
+	log.Printf("%s Server Startup", logPrefix)
+
 	api.NewServer(&http.ServeMux{}, jobEvent, cn.scheduler).Run()
 }
 

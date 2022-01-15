@@ -19,8 +19,6 @@ func NewServer(mux *http.ServeMux, event chan jobs.Event, s *gocron.Scheduler) *
 }
 
 func (s Server) Run() {
-	log.Println("Crowsnest Server Startup")
-
 	s.SetupRoute()
 
 	log.Fatal(http.ListenAndServe(":8080", s.mux))
