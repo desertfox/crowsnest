@@ -62,7 +62,8 @@ func (j Job) GetCron(searchService SearchService, reportService ReportService) f
 
 		log.Printf("Job %s Results count: %d, alert: %t ", j.Name, count, j.shouldAlert(count))
 
-		output := fmt.Sprintf("📜 Status: %s\n\r", j.shouldAlertText(count))
+		output := fmt.Sprintf("⌚ Freq  : %d\n\r", j.Search.Frequency)
+		output += fmt.Sprintf("📜 Status: %s\n\r", j.shouldAlertText(count))
 		output += fmt.Sprintf("🧮 Count : %d\n\r", count)
 		output += fmt.Sprintf("🔗 Link  : [GrayLog Query](%s)\n\r", searchService.BuildSearchURL())
 

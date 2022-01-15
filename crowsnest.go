@@ -14,7 +14,7 @@ import (
 	"github.com/go-co-op/gocron"
 )
 
-const version string = "v1.1"
+const version string = "v1.2"
 
 type crowsnest struct {
 	jobs      *jobs.JobList
