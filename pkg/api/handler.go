@@ -38,7 +38,10 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 		log.Fatal("error translating job" + err.Error())
 	}
 
-	s.newJobChan <- job
+	s.event <- jobs.Event{
+		Action: jobs.AddJob,
+		Job:    job,
+	}
 
 	w.Write([]byte("Job Created"))
 }
@@ -137,8 +140,7 @@ func (s *Server) getStatus(w http.ResponseWriter) {
 
 func (s *Server) reloadJobs(w http.ResponseWriter) {
 	s.event <- jobs.Event{
-		Action: "RELOAD_JL",
-		Value:  "",
+		Action: jobs.ReloadJobList,
 	}
 
 	s.getStatus(w)
@@ -160,8 +162,8 @@ func (s *Server) deleteJob(w http.ResponseWriter, r *http.Request) {
 		for _, t := range j.Tags() {
 			if tag == t {
 				s.event <- jobs.Event{
-					Action: "DEL_TAG",
-					Value:  tag,
+					Action: jobs.DelJob,
+					Job:    jobs.Job{Name: tag},
 				}
 				output := template.HTML(
 					fmt.Sprintf(`Deleted Tag %s from jobs list<br>

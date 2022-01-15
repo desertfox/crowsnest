@@ -9,14 +9,13 @@ import (
 )
 
 type Server struct {
-	mux        *http.ServeMux
-	newJobChan chan jobs.Job
-	event      chan jobs.Event
-	s          *gocron.Scheduler
+	mux   *http.ServeMux
+	event chan jobs.Event
+	s     *gocron.Scheduler
 }
 
-func NewServer(mux *http.ServeMux, newJobChan chan jobs.Job, event chan jobs.Event, s *gocron.Scheduler) *Server {
-	return &Server{mux, newJobChan, event, s}
+func NewServer(mux *http.ServeMux, event chan jobs.Event, s *gocron.Scheduler) *Server {
+	return &Server{mux, event, s}
 }
 
 func (s Server) Run() {

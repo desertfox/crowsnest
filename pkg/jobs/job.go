@@ -1,7 +1,6 @@
 package jobs
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -51,12 +50,6 @@ type Search struct {
 	Frequency int      `yaml:"frequency"`
 }
 
-type JobList []Job
-
-type Event struct {
-	Action, Value string
-}
-
 func (j Job) GetCron(searchService SearchService, reportService ReportService) func() {
 	return func() {
 		j := j //MARK
@@ -103,38 +96,4 @@ func (j Job) shouldAlertText(count int) string {
 		return fmt.Sprintf("ALERT %d/%d", count, j.Condition.Threshold)
 	}
 	return fmt.Sprintf("OK %d/%d", count, j.Condition.Threshold)
-}
-
-func (jl JobList) checkIfExists(j Job) bool {
-	for _, job := range jl {
-		if job.Name == j.Name {
-			return true
-		}
-	}
-	return false
-}
-
-//Add Job to JobList if j.Name does not already exist.
-func (jl *JobList) Add(j Job) error {
-	if jl.checkIfExists(j) {
-		return errors.New("job exists")
-	}
-
-	*jl = append(*jl, j)
-
-	return nil
-}
-
-func (jl *JobList) Del(tag string) JobList {
-	jobs := []Job(*jl)
-
-	for i, j := range jobs {
-		if j.Name == tag {
-			jobs[i] = jobs[len(jobs)-1]
-			jobs = jobs[:len(jobs)-1]
-			return jobs
-		}
-	}
-
-	return JobList{}
 }

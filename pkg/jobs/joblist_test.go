@@ -20,16 +20,15 @@ func Test_BuildFromConfig(t *testing.T) {
 		file.Write(fakeyaml)
 		defer file.Close()
 
-		got, gotErr := BuildFromConfig(file.Name())
-		if gotErr != nil {
-			t.Error(gotErr.Error())
-		}
+		got := &JobList{}
+
+		got.GetConfig(file.Name())
 
 		jobCopy := (*got)[0]
 
 		jobCopy.Name = "test"
 
-		gotErr = got.Add(jobCopy)
+		gotErr := got.Add(jobCopy)
 		if gotErr != nil {
 			t.Error(gotErr.Error())
 		}
@@ -43,10 +42,8 @@ func Test_BuildFromConfig(t *testing.T) {
 			t.Error(gotErr.Error())
 		}
 
-		got, gotErr = BuildFromConfig(file.Name())
-		if gotErr != nil {
-			t.Error(gotErr.Error())
-		}
+		got = &JobList{}
+		got.GetConfig(file.Name())
 
 		if len(*got) != 2 {
 			t.Errorf("wrong number of jobs: %#v", got)
