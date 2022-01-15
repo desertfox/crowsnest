@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-var prefix string = "CROWSNET_"
+var prefix string = "CROWSNEST_"
 
 type Env struct {
 	Username   string
