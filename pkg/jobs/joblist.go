@@ -29,26 +29,23 @@ func (jl *JobList) GetConfig(configPath string) {
 
 	if len(*data["jobs"]) > 0 {
 		for i, job := range *data["jobs"] {
-			log.Printf("loaded Job %d: %s", i, job.Name)
+			log.Printf("loaded Job from config %d: %s", i, job.Name)
 
 			jl.Add(job)
 		}
 	}
 }
 
-func (jl JobList) WriteConfig(configPath string) error {
+func (jl JobList) WriteConfig(configPath string) {
 	var list = map[string]JobList{"jobs": jl}
 	data, err := yaml.Marshal(&list)
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 
-	err = ioutil.WriteFile(configPath, data, os.FileMode(int(0777)))
-	if err != nil {
-		return err
+	if err := ioutil.WriteFile(configPath, data, os.FileMode(int(0777))); err != nil {
+		log.Fatal(err)
 	}
-
-	return nil
 }
 
 func (jl JobList) checkIfExists(j Job) bool {

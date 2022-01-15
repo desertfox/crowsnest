@@ -25,10 +25,11 @@ type crowsnest struct {
 var (
 	httpClient *http.Client    = &http.Client{}
 	jobEvent   chan jobs.Event = make(chan jobs.Event)
+	logPrefix  string          = "🦜 Crowsnest "
 )
 
 func main() {
-	log.Printf("Crowsnest Startup, version: %s", version)
+	log.Printf("%s Startup Version: %s", logPrefix, version)
 
 	env := &config.Env{}
 	env.GetEnv()
@@ -49,25 +50,23 @@ func main() {
 	api.NewServer(&http.ServeMux{}, jobEvent, cn.scheduler).Run()
 }
 
-func (cn *crowsnest) handleJobEvent(jobEvent chan jobs.Event) {
-	cn.jobs.HandleEvent(<-jobEvent, cn.config.ConfigPath)
-}
-
 func (cn crowsnest) ScheduleJobs() {
-	log.Println("Crowsnest ScheduleJobs")
+	log.Printf("%s ScheduleJobs", logPrefix)
 
-	log.Printf("Crowsnest clearing jobs from scheduler: %v", len(cn.scheduler.Jobs()))
-	cn.scheduler.Clear()
+	if len(cn.scheduler.Jobs()) > 0 {
+		log.Printf("🧹 %s Clear Jobs from scheduler: %v", logPrefix, len(cn.scheduler.Jobs()))
+		cn.scheduler.Clear()
+	}
 
 	for i, j := range *cn.jobs {
 		cn.scheduler.Every(j.Search.Frequency).Minutes().Tag(j.Name).Do(j.GetCron(cn.createSearchService(j), cn.createReportService(j)))
 
-		log.Printf("Scheduled Job %d: %s for every %d min(s)", i, j.Name, j.Search.Frequency)
+		log.Printf("⏲️ Job %d: %s for every %d min(s)", i, j.Name, j.Search.Frequency)
 
 		time.Sleep(time.Duration(cn.config.DelayJobs) * time.Second)
 	}
 
-	log.Println("Crowsnest StartJobs")
+	log.Printf("%s StartJobs", logPrefix)
 	cn.scheduler.StartAsync()
 }
 
@@ -99,4 +98,8 @@ func (cn crowsnest) createReportService(j jobs.Job) report.Report {
 	return report.Report{
 		Url: j.Output.TeamsURL,
 	}
+}
+
+func (cn *crowsnest) handleJobEvent(jobEvent chan jobs.Event) {
+	cn.jobs.HandleEvent(<-jobEvent, cn.config.ConfigPath)
 }

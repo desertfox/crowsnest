@@ -3,7 +3,6 @@ package jobs
 import (
 	"fmt"
 	"log"
-	"os"
 )
 
 type SessionService interface {
@@ -54,16 +53,18 @@ func (j Job) GetCron(searchService SearchService, reportService ReportService) f
 	return func() {
 		j := j //MARK
 
-		log.Println("Starting Job: " + j.Name)
+		log.Println("Job Start: " + j.Name)
 
 		count, err := searchService.ExecuteSearch(searchService.GetHeader())
 		if err != nil {
 			log.Fatal(err.Error())
 		}
 
-		log.Println("Search Complete: " + j.Name)
+		log.Printf("Job %s Results count: %d, alert: %t ", j.Name, count, j.shouldAlert(count))
 
-		output := fmt.Sprintf("Alert: %s\n\rCount: %d\n\rLink: [GrayLog Query](%s)\n\r", j.shouldAlertText(count), count, searchService.BuildSearchURL())
+		output := fmt.Sprintf("📜 Status: %s\n\r", j.shouldAlertText(count))
+		output += fmt.Sprintf("🧮 Count : %d\n\rL", count)
+		output += fmt.Sprintf("🔗 Link  : [GrayLog Query](%s)\n\r", searchService.BuildSearchURL())
 
 		if j.Output.Verbose > 0 || j.shouldAlert(count) {
 			reportService.Send(
@@ -72,11 +73,7 @@ func (j Job) GetCron(searchService SearchService, reportService ReportService) f
 			)
 		}
 
-		if os.Getenv("CROWSNEST_DEBUG") == "log" {
-			log.Println(output)
-		}
-
-		log.Println("Finished Job: " + j.Name)
+		log.Println("Job Finish: " + j.Name)
 	}
 }
 
@@ -93,7 +90,7 @@ func (j Job) shouldAlert(count int) bool {
 
 func (j Job) shouldAlertText(count int) string {
 	if j.shouldAlert(count) {
-		return fmt.Sprintf("ALERT %d/%d", count, j.Condition.Threshold)
+		return fmt.Sprintf("🔥🔥🔥 %d=%s%d", count, j.Condition.State, j.Condition.Threshold)
 	}
-	return fmt.Sprintf("OK %d/%d", count, j.Condition.Threshold)
+	return fmt.Sprintf("✔️✔️✔️ %d%s%d", count, j.Condition.State, j.Condition.Threshold)
 }

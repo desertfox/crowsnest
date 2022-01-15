@@ -37,10 +37,7 @@ func Test_BuildFromConfig(t *testing.T) {
 			t.Errorf("wrong number of jobs: %#v", got)
 		}
 
-		gotErr = got.WriteConfig(file.Name())
-		if gotErr != nil {
-			t.Error(gotErr.Error())
-		}
+		got.WriteConfig(file.Name())
 
 		got = &JobList{}
 		got.GetConfig(file.Name())
