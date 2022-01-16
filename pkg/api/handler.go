@@ -98,27 +98,25 @@ func (a Api) getJobForm(w http.ResponseWriter) {
 func (a Api) getStatus(w http.ResponseWriter) {
 	var output template.HTML
 	for i, j := range *a.Jobs.Jobs() {
-		output += template.HTML(
-			fmt.Sprintf(`
-				Tag: %v 
+		if v := a.Jobs.SJobs()[i]; v != nil {
+			output += template.HTML(fmt.Sprintf(`
+				<div style="border-style: solid">
+				<label>Name: %v</label><br>
+				<label>Frequency: %v min(s)</label><br>
+				<label>LastRun: %v</label><br>
+				<label>NextRun: %v</label><br>
 				<form method="POST" action="/delete">
 					<input type="hidden" name="tag" value="%v">
 					<input type="submit" value="DELETE">
-				</form><br>`,
+				</form>
+				</div>
+				<br>`,
 				j.Name,
+				j.Search.Frequency,
+				v.NextRun(),
+				v.LastRun(),
 				j.Name,
-			),
-		)
-
-		if v := a.Jobs.SJobs()[i]; v != nil {
-			output += template.HTML(
-				fmt.Sprintf(`
-				LastRun: %v<br>
-				NextRun: %v<br>`,
-					v.NextRun(),
-					v.LastRun(),
-				),
-			)
+			))
 		} else {
 			w.Write(
 				[]byte(
