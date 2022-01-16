@@ -49,18 +49,19 @@ func (j Job) Func(searchService SearchService, reportService ReportService) func
 		log.Printf("Job Results, name: %s, count: %d, alert: %t ", j.Name, count, j.Condition.isAlert(count))
 
 		if j.Output.isVerbose() || j.Condition.isAlert(count) {
-			reportService.Send(fmt.Sprintf(`
-				🔎 Name  : %s\n\r
-				⌚ Freq  : %d\n\r
-				📜 Status: %s\n\r
-				🧮 Count : %d\n\r
-				🔗 Link  : [GrayLog](%s)`,
-				j.Name,
-				j.Search.Frequency,
-				j.Condition.isAlertText(count),
-				count,
-				searchService.BuildSearchURL(),
-			))
+			reportService.Send(
+				fmt.Sprintf("🔎 Name  : %s\n\r"+
+					"⌚ Freq  : %d\n\r"+
+					"📜 Status: %s\n\r"+
+					"🧮 Count : %d\n\r"+
+					"🔗 Link  : [GrayLog](%s)",
+					j.Name,
+					j.Search.Frequency,
+					j.Condition.isAlertText(count),
+					count,
+					searchService.BuildSearchURL(),
+				),
+			)
 		}
 
 		log.Println("Job Finish, name: " + j.Name)
