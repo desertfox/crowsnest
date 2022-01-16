@@ -1,13 +1,15 @@
 package jobs
 
+type action int
+
 const (
-	AddJob = iota
+	AddJob action = iota
 	DelJob
 	ReloadJobList
 )
 
 type Event struct {
-	Action int
+	Action action
 	Value  string
 	Job    Job
 }

@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/desertfox/crowsnest/pkg/api"
 	"github.com/desertfox/crowsnest/pkg/config"
 	"github.com/desertfox/crowsnest/pkg/graylog/search"
 	"github.com/desertfox/crowsnest/pkg/graylog/session"
@@ -14,7 +13,10 @@ import (
 	"github.com/go-co-op/gocron"
 )
 
-const version string = "v1.2"
+const (
+	version   string = "v1.2"
+	logPrefix string = "(┛ಠ_ಠ)┛彡┻━┻ Crowsnest "
+)
 
 type crowsnest struct {
 	jobs      *jobs.JobList
@@ -25,7 +27,6 @@ type crowsnest struct {
 var (
 	httpClient *http.Client    = &http.Client{}
 	jobEvent   chan jobs.Event = make(chan jobs.Event)
-	logPrefix  string          = "(┛ಠ_ಠ)┛彡┻━┻ Crowsnest "
 )
 
 func main() {
@@ -49,7 +50,8 @@ func main() {
 
 	log.Printf("%s Server Startup", logPrefix)
 
-	api.NewServer(&http.ServeMux{}, jobEvent, cn.scheduler).Run()
+	server := api.Server{&http.ServeMux{}, jobEvent, cn.scheduler}
+	server.Run()
 }
 
 func (cn crowsnest) ScheduleJobs() {

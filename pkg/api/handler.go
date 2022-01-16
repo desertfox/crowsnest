@@ -102,18 +102,18 @@ func (s *Server) getStatus(w http.ResponseWriter) {
 	var output template.HTML
 	for _, j := range s.s.Jobs() {
 		for _, tag := range j.Tags() {
-			output += template.HTML(fmt.Sprintf("Tag: %v\n<br>", tag))
-			output += template.HTML(
-				fmt.Sprintf(`
+			output += template.HTML(fmt.Sprintf(`
+				Tag: %v 
 				<form method="POST" action="/delete">
 					<input type="hidden" name="tag" value="%v">
 					<input type="submit" value="DELETE">
-				</form><br>`, tag),
+				</form><br>`, tag, tag),
 			)
 		}
-		output += template.HTML(fmt.Sprintf("LastRun: %v<br>", j.LastRun()))
-		output += template.HTML(fmt.Sprintf("NextRun: %v<br>\n", j.NextRun()))
-		output += template.HTML("<br>")
+		output += template.HTML(fmt.Sprintf(`			
+			LastRun: %v<br>
+			NextRun: %v<br>`, j.NextRun(), j.LastRun()),
+		)
 	}
 
 	tmpl, err := template.New("status_form").Parse(`
