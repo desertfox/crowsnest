@@ -51,7 +51,7 @@ func (a Api) getJobForm(w http.ResponseWriter) {
 	<html>
 	<h1>New Job Request Translate Form</h1>
 	<a href="/status" target="_blank">Current Job Status Page</a>
-	<div class="cn-form"
+	<div class="cn-form">
 	<form method="POST">
 	<label>Job Name:</label>
 	<input type="text" name="name"><br /><br />
@@ -85,6 +85,7 @@ func (a Api) getJobForm(w http.ResponseWriter) {
 	<br />
 	<input type="submit" method="POST" value="Create Job">
 </form>
+</div>
 </html>`)
 
 	if err != nil {

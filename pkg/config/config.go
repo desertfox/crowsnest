@@ -18,10 +18,10 @@ type Config struct {
 
 func LoadConfigFromEnv() *Config {
 	return &Config{
-		Username:  checkEnvStr(loadEnv("username"), true),
-		Password:  checkEnvStr(loadEnv("password"), true),
-		Path:      checkEnvStr(loadEnv("config"), true),
-		DelayJobs: checkEnvInt(loadEnv("delay"), false),
+		Username:  checkEnvStr("username", true),
+		Password:  checkEnvStr("password", true),
+		Path:      checkEnvStr("config", true),
+		DelayJobs: checkEnvInt("delay", false),
 	}
 }
 
@@ -34,29 +34,33 @@ func buildEnvStr(s string) string {
 }
 
 func checkEnvStr(s string, required bool) string {
-	if s == "" && !required {
+	str := loadEnv(s)
+
+	if str == "" && !required {
 		return ""
 	}
 
-	if s == "" && required {
+	if str == "" && required {
 		log.Fatalf("missing enviromental variable: %s", buildEnvStr(s))
 	}
 
-	return s
+	return str
 }
 
 func checkEnvInt(s string, required bool) int {
-	if s == "" && !required {
+	str := loadEnv(s)
+
+	if str == "" && !required {
 		return 0
 	}
 
-	if s == "" && required {
+	if str == "" && required {
 		log.Fatalf("missing enviromental variable: %s", buildEnvStr(s))
 	}
 
-	i, err := strconv.Atoi(s)
+	i, err := strconv.Atoi(str)
 	if err != nil {
-		log.Fatalf("cannot convert string to int: %s=%s", buildEnvStr(s), s)
+		log.Fatalf("cannot convert string to int: %s=%s", buildEnvStr(s), str)
 	}
 
 	return i
