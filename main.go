@@ -13,11 +13,11 @@ import (
 
 const (
 	version   string = "v1.2"
-	logPrefix string = "🟢 Crowsnest "
+	logPrefix string = "Crowsnest "
 )
 
 func main() {
-	crowLog("Startup Version:" + version)
+	crowLog("Startup Version " + version)
 
 	env := &config.Env{}
 	env.GetEnv()
