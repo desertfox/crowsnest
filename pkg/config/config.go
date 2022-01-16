@@ -20,13 +20,17 @@ func LoadConfigFromEnv() *Config {
 	return &Config{
 		Username:  checkEnvStr(loadEnv("username"), true),
 		Password:  checkEnvStr(loadEnv("password"), true),
-		Path:      checkEnvStr(loadEnv("path"), true),
+		Path:      checkEnvStr(loadEnv("config"), true),
 		DelayJobs: checkEnvInt(loadEnv("delay"), false),
 	}
 }
 
 func loadEnv(s string) string {
 	return os.Getenv(buildEnvStr(s))
+}
+
+func buildEnvStr(s string) string {
+	return prefix + strings.ToUpper(s)
 }
 
 func checkEnvStr(s string, required bool) string {
@@ -56,8 +60,4 @@ func checkEnvInt(s string, required bool) int {
 	}
 
 	return i
-}
-
-func buildEnvStr(s string) string {
-	return prefix + strings.ToUpper(s)
 }
