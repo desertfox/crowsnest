@@ -19,15 +19,13 @@ const (
 func main() {
 	crowLog("Startup Version " + version)
 
-	env := &config.Env{}
-	env.GetEnv()
+	conf := config.New()
 
-	jl := &jobs.JobList{}
-	jl.GetConfig(env.ConfigPath)
+	jobList := jobs.Load(conf.Path)
 
 	cn := crowsnest{
-		jobs:       jl,
-		config:     env,
+		config:     conf,
+		jobs:       jobList,
 		scheduler:  gocron.NewScheduler(time.UTC),
 		event:      make(chan jobs.Event),
 		httpClient: &http.Client{},

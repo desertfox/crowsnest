@@ -9,18 +9,26 @@ import (
 
 var prefix string = "CROWSNEST_"
 
-type Env struct {
-	Username   string
-	Password   string
-	ConfigPath string
-	DelayJobs  int
+type Config struct {
+	Username  string
+	Password  string
+	Path      string
+	DelayJobs int
 }
 
-func (e *Env) GetEnv() {
-	e.Username = loadStrFromEnv("username", true)
-	e.Password = loadStrFromEnv("password", true)
-	e.ConfigPath = loadStrFromEnv("config", true)
-	e.DelayJobs = loadIntFromEnv("delay", false)
+func New() *Config {
+	c := &Config{}
+
+	c.GetEnv()
+
+	return c
+}
+
+func (c *Config) GetEnv() {
+	c.Username = loadStrFromEnv("username", true)
+	c.Password = loadStrFromEnv("password", true)
+	c.Path = loadStrFromEnv("config", true)
+	c.DelayJobs = loadIntFromEnv("delay", false)
 }
 
 func loadStrFromEnv(key string, required bool) string {

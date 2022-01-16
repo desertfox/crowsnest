@@ -11,7 +11,7 @@ import (
 
 type JobList []Job
 
-func (jl *JobList) GetConfig(configPath string) {
+func Load(configPath string) *JobList {
 	file, err := ioutil.ReadFile(configPath)
 	if err != nil {
 		log.Fatalf("unable to read file %s", configPath)
@@ -27,6 +27,7 @@ func (jl *JobList) GetConfig(configPath string) {
 		log.Fatalf("missing jobs yaml key %s", file)
 	}
 
+	var jl JobList
 	if len(*data["jobs"]) > 0 {
 		for i, job := range *data["jobs"] {
 			log.Printf("loaded Job from config %d: %s", i, job.Name)
@@ -34,6 +35,8 @@ func (jl *JobList) GetConfig(configPath string) {
 			jl.Add(job)
 		}
 	}
+
+	return &jl
 }
 
 func (jl JobList) WriteConfig(configPath string) {
@@ -82,11 +85,9 @@ func (jl *JobList) Del(name string) JobList {
 }
 
 func (jl *JobList) HandleEvent(event Event, configPath string) {
-	log.Printf("handleEvent, event: %v", event)
-
 	switch event.Action {
 	case ReloadJobList:
-		jl.GetConfig(configPath)
+		jl = Load(configPath)
 	case DelJob:
 		jl.Del(event.Value)
 		jl.WriteConfig(configPath)

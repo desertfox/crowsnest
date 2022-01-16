@@ -17,7 +17,7 @@ import (
 
 type crowsnest struct {
 	jobs        *jobs.JobList
-	config      *config.Env
+	config      *config.Config
 	scheduler   *gocron.Scheduler
 	event       chan jobs.Event
 	httpClient  *http.Client
@@ -71,5 +71,9 @@ func (cn crowsnest) ScheduleJobs() {
 }
 
 func (cn *crowsnest) handleJobEvent(jobEvent chan jobs.Event) {
-	cn.jobs.HandleEvent(<-jobEvent, cn.config.ConfigPath)
+	event := <-jobEvent
+
+	crowLog(fmt.Sprintf("handleJobEvent event %v", event))
+
+	cn.jobs.HandleEvent(event, cn.config.Path)
 }
