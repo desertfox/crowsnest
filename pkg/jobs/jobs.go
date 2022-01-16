@@ -51,7 +51,7 @@ func (j *Jobs) WriteConfig() {
 	j.jobList.WriteConfig(j.config.Path)
 }
 
-func (j Jobs) Schedule() {
+func (j *Jobs) Schedule() *Jobs {
 	j.loadJobChannel.Do(func() {
 		go j.HandleEvent()
 	})
@@ -91,6 +91,8 @@ func (j Jobs) Schedule() {
 	}
 
 	j.scheduler.StartAsync()
+
+	return j
 }
 
 func (j *Jobs) HandleEvent() {

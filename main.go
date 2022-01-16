@@ -14,8 +14,7 @@ const (
 func main() {
 	log.Printf("Crowsnest Startup Version %s ", version)
 
-	jobs := jobs.Load()
-	jobs.Schedule()
+	jobs := jobs.Load().Schedule()
 
 	log.Print("Crowsnest API Startup")
 
