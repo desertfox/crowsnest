@@ -49,7 +49,7 @@ type Search struct {
 	Frequency int      `yaml:"frequency"`
 }
 
-func (j Job) GetCron(searchService SearchService, reportService ReportService) func() {
+func (j Job) Func(searchService SearchService, reportService ReportService) func() {
 	return func() {
 		j := j //MARK
 

@@ -11,7 +11,7 @@ import (
 
 type JobList []Job
 
-func Load(configPath string) *JobList {
+func LoadJobList(configPath string) *JobList {
 	file, err := ioutil.ReadFile(configPath)
 	if err != nil {
 		log.Fatalf("unable to read file %s", configPath)
@@ -82,17 +82,4 @@ func (jl *JobList) Del(name string) JobList {
 	}
 
 	return JobList{}
-}
-
-func (jl *JobList) HandleEvent(event Event, configPath string) {
-	switch event.Action {
-	case ReloadJobList:
-		jl = Load(configPath)
-	case DelJob:
-		jl.Del(event.Value)
-		jl.WriteConfig(configPath)
-	case AddJob:
-		jl.Add(event.Job)
-		jl.WriteConfig(configPath)
-	}
 }

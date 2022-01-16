@@ -11,7 +11,7 @@ import (
 	"github.com/desertfox/crowsnest/pkg/jobs"
 )
 
-func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
+func (a Api) createJob(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
 	threshold, err := strconv.Atoi(r.FormValue("threshold"))
@@ -38,7 +38,7 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 		log.Fatal("error translating job" + err.Error())
 	}
 
-	s.Event <- jobs.Event{
+	a.Jobs.EventChannel() <- jobs.Event{
 		Action: jobs.AddJob,
 		Job:    job,
 	}
@@ -46,7 +46,7 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Job Created"))
 }
 
-func (s *Server) getJobForm(w http.ResponseWriter) {
+func (a Api) getJobForm(w http.ResponseWriter) {
 	tmpl, err := template.New("njr_form").Parse(`<h1>New Job Request Translate Form</h1>
 	<a href="/status" target="_blank">Current Job Status Page</a>
 	<form method="POST">
@@ -98,9 +98,9 @@ func (s *Server) getJobForm(w http.ResponseWriter) {
 	tmpl.Execute(w, nil)
 }
 
-func (s *Server) getStatus(w http.ResponseWriter) {
+func (a Api) getStatus(w http.ResponseWriter) {
 	var output template.HTML
-	for _, j := range s.Scheduler.Jobs() {
+	for _, j := range a.Jobs.Scheduler().Jobs() {
 		for _, tag := range j.Tags() {
 			output += template.HTML(fmt.Sprintf(`
 				Tag: %v 
@@ -138,15 +138,15 @@ func (s *Server) getStatus(w http.ResponseWriter) {
 	})
 }
 
-func (s *Server) reloadJobs(w http.ResponseWriter) {
-	s.Event <- jobs.Event{
+func (a Api) reloadJobs(w http.ResponseWriter) {
+	a.Jobs.EventChannel() <- jobs.Event{
 		Action: jobs.ReloadJobList,
 	}
 
-	s.getStatus(w)
+	a.getStatus(w)
 }
 
-func (s *Server) deleteJob(w http.ResponseWriter, r *http.Request) {
+func (a Api) deleteJob(w http.ResponseWriter, r *http.Request) {
 	tag := r.FormValue("tag")
 
 	tmpl, err := template.New("del_job").Parse(`
@@ -158,10 +158,10 @@ func (s *Server) deleteJob(w http.ResponseWriter, r *http.Request) {
 		log.Fatalln(err.Error())
 	}
 
-	for _, j := range s.Scheduler.Jobs() {
+	for _, j := range a.Jobs.Scheduler().Jobs() {
 		for _, t := range j.Tags() {
 			if tag == t {
-				s.Event <- jobs.Event{
+				a.Jobs.EventChannel() <- jobs.Event{
 					Action: jobs.DelJob,
 					Job:    jobs.Job{Name: tag},
 				}

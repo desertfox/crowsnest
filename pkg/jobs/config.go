@@ -1,4 +1,4 @@
-package config
+package jobs
 
 import (
 	"log"
@@ -16,19 +16,13 @@ type Config struct {
 	DelayJobs int
 }
 
-func New() *Config {
-	c := &Config{}
-
-	c.GetEnv()
-
-	return c
-}
-
-func (c *Config) GetEnv() {
-	c.Username = loadStrFromEnv("username", true)
-	c.Password = loadStrFromEnv("password", true)
-	c.Path = loadStrFromEnv("config", true)
-	c.DelayJobs = loadIntFromEnv("delay", false)
+func LoadConfigFromEnv() *Config {
+	return &Config{
+		Username:  loadStrFromEnv("username", true),
+		Password:  loadStrFromEnv("password", true),
+		Path:      loadStrFromEnv("config", true),
+		DelayJobs: loadIntFromEnv("delay", false),
+	}
 }
 
 func loadStrFromEnv(key string, required bool) string {

@@ -22,7 +22,7 @@ func Test_BuildFromConfig(t *testing.T) {
 
 		got := &JobList{}
 
-		got.GetConfig(file.Name())
+		got = LoadJobList(file.Name())
 
 		jobCopy := (*got)[0]
 
@@ -39,8 +39,7 @@ func Test_BuildFromConfig(t *testing.T) {
 
 		got.WriteConfig(file.Name())
 
-		got = &JobList{}
-		got.GetConfig(file.Name())
+		got = LoadJobList(file.Name())
 
 		if len(*got) != 2 {
 			t.Errorf("wrong number of jobs: %#v", got)
