@@ -100,19 +100,26 @@ func (a Api) getJobForm(w http.ResponseWriter) {
 
 func (a Api) getStatus(w http.ResponseWriter) {
 	var output template.HTML
-	for _, j := range a.Jobs.Scheduler().Jobs() {
-		for _, tag := range j.Tags() {
-			output += template.HTML(fmt.Sprintf(`
+	for i, j := range *a.Jobs.Jobs() {
+		output += template.HTML(
+			fmt.Sprintf(`
 				Tag: %v 
 				<form method="POST" action="/delete">
 					<input type="hidden" name="tag" value="%v">
 					<input type="submit" value="DELETE">
-				</form><br>`, tag, tag),
-			)
-		}
-		output += template.HTML(fmt.Sprintf(`			
-			LastRun: %v<br>
-			NextRun: %v<br>`, j.NextRun(), j.LastRun()),
+				</form><br>`,
+				j.Name,
+				j.Name,
+			),
+		)
+
+		output += template.HTML(
+			fmt.Sprintf(`
+				LastRun: %v<br>
+				NextRun: %v<br>`,
+				a.Jobs.Scheduler().Jobs()[i].NextRun(),
+				a.Jobs.Scheduler().Jobs()[i].LastRun(),
+			),
 		)
 	}
 
@@ -147,7 +154,7 @@ func (a Api) reloadJobs(w http.ResponseWriter) {
 }
 
 func (a Api) deleteJob(w http.ResponseWriter, r *http.Request) {
-	tag := r.FormValue("tag")
+	name := r.FormValue("name")
 
 	tmpl, err := template.New("del_job").Parse(`
 	<html>
@@ -158,26 +165,23 @@ func (a Api) deleteJob(w http.ResponseWriter, r *http.Request) {
 		log.Fatalln(err.Error())
 	}
 
-	for _, j := range a.Jobs.Scheduler().Jobs() {
-		for _, t := range j.Tags() {
-			if tag == t {
-				a.Jobs.EventChannel() <- jobs.Event{
-					Action: jobs.DelJob,
-					Job:    jobs.Job{Name: tag},
-				}
-				output := template.HTML(
-					fmt.Sprintf(`Deleted Tag %s from jobs list<br>
-					<a href="/status">Job Status</a><a href="/">Job Form</a>`, tag),
-				)
-
-				tmpl.Execute(w, struct {
-					Output template.HTML
-				}{
-					output,
-				})
-
-				return
+	for _, j := range *a.Jobs.Jobs() {
+		if name == j.Name {
+			a.Jobs.EventChannel() <- jobs.Event{
+				Action: jobs.DelJob,
+				Job:    jobs.Job{Name: name},
 			}
+
+			output := template.HTML(
+				fmt.Sprintf(`Deleted Tag %s from jobs list<br>
+				<a href="/status">Job Status</a><a href="/">Job Form</a>`, name),
+			)
+
+			tmpl.Execute(w, struct {
+				Output template.HTML
+			}{
+				output,
+			})
 		}
 	}
 }

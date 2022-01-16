@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/desertfox/crowsnest/pkg/config"
 	"github.com/desertfox/crowsnest/pkg/graylog/search"
 	"github.com/desertfox/crowsnest/pkg/graylog/session"
 	"github.com/desertfox/crowsnest/pkg/teams/report"
@@ -13,7 +14,7 @@ import (
 )
 
 type Jobs struct {
-	config         *Config
+	config         *config.Config
 	jobList        *JobList
 	event          chan Event
 	scheduler      *gocron.Scheduler
@@ -22,7 +23,7 @@ type Jobs struct {
 }
 
 func Load() *Jobs {
-	config := LoadConfigFromEnv()
+	config := config.LoadConfigFromEnv()
 
 	jobList := LoadJobList(config.Path)
 
@@ -41,6 +42,10 @@ func (j Jobs) EventChannel() chan Event {
 
 func (j Jobs) Scheduler() *gocron.Scheduler {
 	return j.scheduler
+}
+
+func (j Jobs) Jobs() *JobList {
+	return j.jobList
 }
 
 func (j *Jobs) WriteConfig() {
