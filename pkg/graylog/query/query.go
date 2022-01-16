@@ -1,4 +1,4 @@
-package search
+package query
 
 import (
 	"fmt"
@@ -17,7 +17,7 @@ var (
 	//absoluteStrTempalte string = "%v/api/search/universal/absolute?%v"
 )
 
-type query struct {
+type Query struct {
 	host, query, streamid string
 	frequnecy             int
 	fields                []string
@@ -25,11 +25,11 @@ type query struct {
 	httpClient            *http.Client
 }
 
-func New(host, q, streamid string, frequency int, fields []string, t string, httpClient *http.Client) query {
-	return query{host, q, streamid, frequency, fields, t, httpClient}
+func New(host, q, streamid string, frequency int, fields []string, t string, httpClient *http.Client) Query {
+	return Query{host, q, streamid, frequency, fields, t, httpClient}
 }
 
-func (q query) String() string {
+func (q Query) String() string {
 	switch q.Type {
 	case "relative":
 		if os.Getenv("CROWSNEST_DEBUG") == "1" {
@@ -49,7 +49,7 @@ func (q query) String() string {
 	return ""
 }
 
-func (q query) urlEncodeRelative() string {
+func (q Query) urlEncodeRelative() string {
 	params := url.Values{}
 
 	params.Add("query", q.query)
@@ -82,7 +82,7 @@ func (q query) urlEncodeAbsolute() string {
 }
 */
 
-func (q query) ExecuteSearch(authToken string) (int, error) {
+func (q Query) ExecuteSearch(authToken string) (int, error) {
 	request, _ := http.NewRequest("GET", q.String(), nil)
 	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
 	request.Header.Set("Authorization", authToken)
@@ -112,7 +112,7 @@ func (q query) ExecuteSearch(authToken string) (int, error) {
 	return count, nil
 }
 
-func (q query) BuildSearchURL() string {
+func (q Query) BuildSearchURL() string {
 	params := url.Values{}
 
 	params.Add("q", q.query)

@@ -7,9 +7,8 @@ import (
 	"time"
 
 	"github.com/desertfox/crowsnest/pkg/config"
-	"github.com/desertfox/crowsnest/pkg/graylog/search"
+	"github.com/desertfox/crowsnest/pkg/graylog/query"
 	"github.com/desertfox/crowsnest/pkg/graylog/session"
-	"github.com/desertfox/crowsnest/pkg/teams/report"
 	"github.com/go-co-op/gocron"
 )
 
@@ -71,7 +70,7 @@ func (j Jobs) Schedule() {
 					j.config.Password,
 					j.httpClient,
 				),
-				QueryService: search.New(
+				QueryService: query.New(
 					job.Search.Host,
 					job.Search.Query,
 					job.Search.Streamid,
@@ -81,9 +80,7 @@ func (j Jobs) Schedule() {
 					j.httpClient,
 				),
 			},
-			report.Report{
-				Url: job.Output.TeamsURL,
-			},
+			job.Output.reportService(),
 		)
 
 		j.scheduler.Every(job.Search.Frequency).Minutes().Tag(job.Name).Do(jobFunc)

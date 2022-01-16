@@ -14,7 +14,7 @@ var (
 	host                        = "https://desertfox.dev"
 	searchTypeRelative string   = "relative"
 	streamid           string   = "5555555"
-	query              string   = "\"Error Checking Out\""
+	q                  string   = "\"Error Checking Out\""
 	fields             []string = []string{"source", "message"}
 	verbose            int      = 1
 )
@@ -43,7 +43,7 @@ func Test_translate(t *testing.T) {
 				Host:      host,
 				Type:      searchTypeRelative,
 				Streamid:  streamid,
-				Query:     query,
+				Query:     q,
 				Fields:    fields,
 			},
 		}
