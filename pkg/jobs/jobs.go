@@ -108,4 +108,6 @@ func (j *Jobs) HandleEvent() {
 		j.jobList.Add(event.Job)
 		j.WriteConfig()
 	}
+
+	j.Schedule()
 }
