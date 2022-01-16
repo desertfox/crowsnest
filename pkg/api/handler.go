@@ -99,7 +99,11 @@ func (a Api) getJobForm(w http.ResponseWriter) {
 }
 
 func (a Api) getStatus(w http.ResponseWriter) {
-	var output template.HTML
+	var (
+		output template.HTML
+		sJobs  = a.Jobs.Scheduler().Jobs()
+	)
+
 	for i, j := range *a.Jobs.Jobs() {
 		output += template.HTML(
 			fmt.Sprintf(`
@@ -113,14 +117,26 @@ func (a Api) getStatus(w http.ResponseWriter) {
 			),
 		)
 
-		output += template.HTML(
-			fmt.Sprintf(`
+		if v := sJobs[i]; v != nil {
+			output += template.HTML(
+				fmt.Sprintf(`
 				LastRun: %v<br>
 				NextRun: %v<br>`,
-				a.Jobs.Scheduler().Jobs()[i].NextRun(),
-				a.Jobs.Scheduler().Jobs()[i].LastRun(),
-			),
-		)
+					v.NextRun(),
+					v.LastRun(),
+				),
+			)
+		} else {
+			w.Write(
+				[]byte(
+					fmt.Sprintf(
+						"Miss-match between jobs and schedule, try again in a moment jobs may be scheduling. jobs: %d, sheduled jobs: %d",
+						len(*a.Jobs.Jobs()),
+						len(sJobs),
+					),
+				),
+			)
+		}
 	}
 
 	tmpl, err := template.New("status_form").Parse(`
