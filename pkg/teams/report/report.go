@@ -14,7 +14,6 @@ type Report struct {
 
 func (r Report) Send(text string) error {
 	card := cards.NewCard(text)
-	//card := cards.NewThumbnailCard(title, subtitle, text)
 
 	json_data, err := json.Marshal(card)
 	if err != nil {
