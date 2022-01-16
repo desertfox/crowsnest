@@ -12,8 +12,8 @@ type Report struct {
 	Url string
 }
 
-func (r Report) Send(title, text string) error {
-	card := cards.NewCard(title, text)
+func (r Report) Send(text string) error {
+	card := cards.NewCard(text)
 	//card := cards.NewThumbnailCard(title, subtitle, text)
 
 	json_data, err := json.Marshal(card)

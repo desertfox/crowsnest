@@ -5,24 +5,6 @@ import (
 	"log"
 )
 
-type SessionService interface {
-	GetHeader() string
-}
-
-type QueryService interface {
-	ExecuteSearch(string) (int, error)
-	BuildSearchURL() string
-}
-
-type SearchService struct {
-	SessionService
-	QueryService
-}
-
-type ReportService interface {
-	Send(string, string) error
-}
-
 type Job struct {
 	Name      string    `yaml:"name"`
 	Condition Condition `yaml:"condition"`
@@ -49,6 +31,28 @@ type Search struct {
 	Frequency int      `yaml:"frequency"`
 }
 
+type SessionService interface {
+	GetHeader() string
+}
+
+type QueryService interface {
+	ExecuteSearch(string) (int, error)
+	BuildSearchURL() string
+}
+
+type SearchService struct {
+	SessionService
+	QueryService
+}
+
+type ReportService interface {
+	Send(string) error
+}
+
+func (o Output) isVerbose() bool {
+	return o.Verbose > 0
+}
+
 func (j Job) Func(searchService SearchService, reportService ReportService) func() {
 	return func() {
 		j := j //MARK
@@ -62,16 +66,21 @@ func (j Job) Func(searchService SearchService, reportService ReportService) func
 
 		log.Printf("Job %s Results count: %d, alert: %t ", j.Name, count, j.shouldAlert(count))
 
-		output := fmt.Sprintf("⌚ Freq  : %d\n\r", j.Search.Frequency)
-		output += fmt.Sprintf("📜 Status: %s\n\r", j.shouldAlertText(count))
-		output += fmt.Sprintf("🧮 Count : %d\n\r", count)
-		output += fmt.Sprintf("🔗 Link  : [GrayLog Query](%s)\n\r", searchService.BuildSearchURL())
+		output := fmt.Sprintf(`
+		🔎 Name  : %s\n\r
+		⌚ Freq  : %d\n\r
+		📜 Status: %s\n\r
+		🧮 Count : %d\n\r
+		🔗 Link  : [GrayLog](%s)`,
+			j.Name,
+			j.Search.Frequency,
+			j.shouldAlertText(count),
+			count,
+			searchService.BuildSearchURL(),
+		)
 
-		if j.Output.Verbose > 0 || j.shouldAlert(count) {
-			reportService.Send(
-				"🔎 Name: "+j.Name,
-				output,
-			)
+		if j.Output.isVerbose() || j.shouldAlert(count) {
+			reportService.Send(output)
 		}
 
 		log.Println("Job Finish: " + j.Name)

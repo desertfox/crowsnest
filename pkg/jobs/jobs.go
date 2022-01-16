@@ -40,12 +40,12 @@ func (j Jobs) EventChannel() chan Event {
 	return j.event
 }
 
-func (j Jobs) Scheduler() *gocron.Scheduler {
-	return j.scheduler
-}
-
 func (j Jobs) Jobs() *JobList {
 	return j.jobList
+}
+
+func (j Jobs) SJobs() []*gocron.Job {
+	return j.scheduler.Jobs()
 }
 
 func (j *Jobs) WriteConfig() {

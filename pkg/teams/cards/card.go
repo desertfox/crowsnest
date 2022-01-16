@@ -1,7 +1,5 @@
 package cards
 
-import "fmt"
-
 type msCard struct {
 	Type        string       `json:"type"`
 	Attachments []attachment `json:"attachments"`
@@ -28,10 +26,10 @@ type body struct {
 	Markdown bool   `json:"markdown"`
 }
 
-func NewCard(reportTitle, reportText string) msCard {
+func NewCard(text string) msCard {
 	b := body{
 		"TextBlock",
-		fmt.Sprintf("%v\n\r%v", reportTitle, reportText),
+		text,
 		"Medium",
 		true,
 		true,
