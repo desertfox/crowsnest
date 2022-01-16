@@ -38,7 +38,7 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 		log.Fatal("error translating job" + err.Error())
 	}
 
-	s.event <- jobs.Event{
+	s.Event <- jobs.Event{
 		Action: jobs.AddJob,
 		Job:    job,
 	}
@@ -100,7 +100,7 @@ func (s *Server) getJobForm(w http.ResponseWriter) {
 
 func (s *Server) getStatus(w http.ResponseWriter) {
 	var output template.HTML
-	for _, j := range s.s.Jobs() {
+	for _, j := range s.Scheduler.Jobs() {
 		for _, tag := range j.Tags() {
 			output += template.HTML(fmt.Sprintf(`
 				Tag: %v 
@@ -139,7 +139,7 @@ func (s *Server) getStatus(w http.ResponseWriter) {
 }
 
 func (s *Server) reloadJobs(w http.ResponseWriter) {
-	s.event <- jobs.Event{
+	s.Event <- jobs.Event{
 		Action: jobs.ReloadJobList,
 	}
 
@@ -158,10 +158,10 @@ func (s *Server) deleteJob(w http.ResponseWriter, r *http.Request) {
 		log.Fatalln(err.Error())
 	}
 
-	for _, j := range s.s.Jobs() {
+	for _, j := range s.Scheduler.Jobs() {
 		for _, t := range j.Tags() {
 			if tag == t {
-				s.event <- jobs.Event{
+				s.Event <- jobs.Event{
 					Action: jobs.DelJob,
 					Job:    jobs.Job{Name: tag},
 				}

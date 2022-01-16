@@ -9,23 +9,19 @@ import (
 )
 
 type Server struct {
-	mux   *http.ServeMux
-	event chan jobs.Event
-	s     *gocron.Scheduler
-}
-
-func NewServer(mux *http.ServeMux, event chan jobs.Event, s *gocron.Scheduler) *Server {
-	return &Server{mux, event, s}
+	Mux       *http.ServeMux
+	Event     chan jobs.Event
+	Scheduler *gocron.Scheduler
 }
 
 func (s Server) Run() {
 	s.SetupRoute()
 
-	log.Fatal(http.ListenAndServe(":8080", s.mux))
+	log.Fatal(http.ListenAndServe(":8080", s.Mux))
 }
 
 func (s Server) SetupRoute() {
-	s.mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	s.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "POST":
 			s.createJob(w, r)
@@ -36,7 +32,7 @@ func (s Server) SetupRoute() {
 		}
 	})
 
-	s.mux.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
+	s.Mux.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "GET":
 			s.getStatus(w)
@@ -45,7 +41,7 @@ func (s Server) SetupRoute() {
 		}
 	})
 
-	s.mux.HandleFunc("/delete", func(w http.ResponseWriter, r *http.Request) {
+	s.Mux.HandleFunc("/delete", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "POST":
 			s.deleteJob(w, r)
