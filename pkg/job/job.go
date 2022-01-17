@@ -16,20 +16,6 @@ type Job struct {
 	Search    search.Search       `yaml:"search"`
 }
 
-type SessionService interface {
-	GetHeader() string
-}
-
-type QueryService interface {
-	ExecuteSearch(string) (int, error)
-	BuildSearchURL() string
-}
-
-type SearchService struct {
-	SessionService
-	QueryService
-}
-
 func (j Job) Func(searchService search.SearchService, reportService output.ReportService) func() {
 	return func() {
 		j := j

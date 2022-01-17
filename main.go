@@ -8,15 +8,10 @@ import (
 )
 
 const (
-	version string = "v1.3"
+	version string = "v1.4"
 )
 
 func main() {
 	log.Printf("Crowsnest Startup Version %s ", version)
-
-	s := scheduler.Load().Schedule()
-
-	log.Print("Crowsnest API Startup")
-
-	api.New(s).Run()
+	api.New(scheduler.Load().Schedule()).Run()
 }
