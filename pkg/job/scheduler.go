@@ -1,4 +1,4 @@
-package scheduler
+package job
 
 import (
 	"log"
@@ -6,16 +6,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/desertfox/crowsnest/pkg/config"
-	"github.com/desertfox/crowsnest/pkg/job"
-	"github.com/desertfox/crowsnest/pkg/joblist"
+	"github.com/desertfox/crowsnest/pkg/job/config"
 	"github.com/go-co-op/gocron"
 )
 
 type Scheduler struct {
 	config         *config.Config
-	jobList        joblist.JobList
-	event          chan job.Event
+	list           List
+	event          chan Event
 	scheduler      *gocron.Scheduler
 	httpClient     *http.Client
 	loadJobChannel sync.Once
@@ -24,31 +22,31 @@ type Scheduler struct {
 func Load() *Scheduler {
 	config := config.LoadConfigFromEnv()
 
-	jobList := joblist.JobList{}
+	list := List{}
 
 	return &Scheduler{
 		config:     config,
-		jobList:    jobList.Load(config.Path),
-		event:      make(chan job.Event),
+		list:       list.Load(config.Path),
+		event:      make(chan Event),
 		scheduler:  gocron.NewScheduler(time.UTC),
 		httpClient: &http.Client{},
 	}
 }
 
-func (js Scheduler) EventChannel() chan job.Event {
+func (js Scheduler) EventChannel() chan Event {
 	return js.event
 }
 
-func (js Scheduler) Jobs() joblist.JobList {
-	return js.jobList
+func (js Scheduler) Jobs() List {
+	return js.list
 }
 
 func (js Scheduler) SJobs() []*gocron.Job {
 	return js.scheduler.Jobs()
 }
 
-func (js *Scheduler) SaveJobList() {
-	js.jobList.Save(js.config.Path)
+func (js *Scheduler) Savelist() {
+	js.list.Save(js.config.Path)
 }
 
 func (js *Scheduler) Schedule() *Scheduler {
@@ -61,7 +59,7 @@ func (js *Scheduler) Schedule() *Scheduler {
 		js.scheduler.Clear()
 	}
 
-	for i, j := range js.jobList {
+	for i, j := range js.list {
 		jobFunc := j.Func(
 			j.Search.Service(
 				js.config.Username,
@@ -87,15 +85,15 @@ func (js *Scheduler) HandleEvent() {
 	event := <-js.event
 
 	switch event.Action {
-	case job.Reload:
-		js.jobList = joblist.JobList{}
-	case job.Del:
-		js.jobList.Del(event.Value)
-	case job.Add:
-		js.jobList.Add(event.Job)
+	case Reload:
+		js.list = List{}
+	case Del:
+		js.list.Del(event.Value)
+	case Add:
+		js.list.Add(event.Job)
 	}
 
-	js.SaveJobList()
+	js.Savelist()
 
 	js.Schedule()
 }

@@ -1,14 +1,13 @@
-package translate
+package job
 
 import (
 	"net/url"
 	"strconv"
 	"strings"
 
-	"github.com/desertfox/crowsnest/pkg/condition"
-	"github.com/desertfox/crowsnest/pkg/job"
-	"github.com/desertfox/crowsnest/pkg/output"
-	"github.com/desertfox/crowsnest/pkg/search"
+	"github.com/desertfox/crowsnest/pkg/job/condition"
+	"github.com/desertfox/crowsnest/pkg/job/output"
+	"github.com/desertfox/crowsnest/pkg/job/search"
 )
 
 type NewJobReq struct {
@@ -20,7 +19,7 @@ type NewJobReq struct {
 	Verbose    int
 }
 
-func (njr NewJobReq) TranslateToJob() (job.Job, error) {
+func (njr NewJobReq) ToJob() (Job, error) {
 	var (
 		frequency  int
 		typeSearch string
@@ -29,7 +28,7 @@ func (njr NewJobReq) TranslateToJob() (job.Job, error) {
 
 	urlObj, err := url.Parse(njr.QueryLink)
 	if err != nil {
-		return job.Job{}, err
+		return Job{}, err
 	}
 
 	parsedQuery := urlObj.Query()
@@ -50,7 +49,7 @@ func (njr NewJobReq) TranslateToJob() (job.Job, error) {
 		fields = strings.Split(parsedQuery["fields"][0], ",")
 	}
 
-	return job.Job{
+	return Job{
 		Name: njr.Name,
 		Condition: condition.Condition{
 			Threshold: njr.Threshold,

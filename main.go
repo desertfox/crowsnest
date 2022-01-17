@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/desertfox/crowsnest/pkg/api"
-	"github.com/desertfox/crowsnest/pkg/scheduler"
+	"github.com/desertfox/crowsnest/pkg/job"
 )
 
 const (
@@ -13,5 +13,5 @@ const (
 
 func main() {
 	log.Printf("Crowsnest Startup Version %s ", version)
-	api.New(scheduler.Load().Schedule()).Run()
+	api.New(job.Load().Schedule()).Run()
 }

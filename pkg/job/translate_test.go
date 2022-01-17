@@ -1,12 +1,11 @@
-package translate
+package job
 
 import (
 	"testing"
 
-	"github.com/desertfox/crowsnest/pkg/condition"
-	"github.com/desertfox/crowsnest/pkg/job"
-	"github.com/desertfox/crowsnest/pkg/output"
-	"github.com/desertfox/crowsnest/pkg/search"
+	"github.com/desertfox/crowsnest/pkg/job/condition"
+	"github.com/desertfox/crowsnest/pkg/job/output"
+	"github.com/desertfox/crowsnest/pkg/job/search"
 )
 
 var (
@@ -29,12 +28,12 @@ func Test_translate(t *testing.T) {
 	t.Run("translate", func(t *testing.T) {
 
 		njr := NewJobReq{name, relativeQueryLink, outputLink, threshold, "<", verbose}
-		got, gotErr := njr.TranslateToJob()
+		got, gotErr := njr.ToJob()
 		if gotErr != nil {
 			t.Errorf("error got: %#v", gotErr)
 		}
 
-		want := job.Job{
+		want := Job{
 			Name: name,
 			Condition: condition.Condition{
 				Threshold: threshold,

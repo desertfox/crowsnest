@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/desertfox/crowsnest/pkg/condition"
-	"github.com/desertfox/crowsnest/pkg/output"
-	"github.com/desertfox/crowsnest/pkg/search"
+	"github.com/desertfox/crowsnest/pkg/job/condition"
+	"github.com/desertfox/crowsnest/pkg/job/output"
+	"github.com/desertfox/crowsnest/pkg/job/search"
 )
 
 type Job struct {

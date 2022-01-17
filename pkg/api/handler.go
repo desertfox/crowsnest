@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/desertfox/crowsnest/pkg/job"
-	"github.com/desertfox/crowsnest/pkg/translate"
 )
 
 func (a Api) createJob(w http.ResponseWriter, r *http.Request) {
@@ -25,7 +24,7 @@ func (a Api) createJob(w http.ResponseWriter, r *http.Request) {
 		log.Fatal("error translating threshold to int " + err.Error())
 	}
 
-	njr := translate.NewJobReq{
+	njr := job.NewJobReq{
 		Name:       r.FormValue("name"),
 		QueryLink:  r.FormValue("querylink"),
 		OutputLink: r.FormValue("outputlink"),
@@ -34,7 +33,7 @@ func (a Api) createJob(w http.ResponseWriter, r *http.Request) {
 		Verbose:    verbose,
 	}
 
-	j, err := njr.TranslateToJob()
+	j, err := njr.ToJob()
 	if err != nil {
 		log.Fatal("error translating job" + err.Error())
 	}

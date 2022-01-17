@@ -1,4 +1,4 @@
-package joblist
+package job
 
 import (
 	"errors"
@@ -6,19 +6,18 @@ import (
 	"log"
 	"os"
 
-	"github.com/desertfox/crowsnest/pkg/job"
 	"gopkg.in/yaml.v2"
 )
 
-type JobList []job.Job
+type List []Job
 
-func (jl *JobList) Load(configPath string) JobList {
+func (jl *List) Load(configPath string) List {
 	file, err := ioutil.ReadFile(configPath)
 	if err != nil {
 		log.Fatalf("unable to read file %s", configPath)
 	}
 
-	data := make(map[string]*JobList)
+	data := make(map[string]*List)
 	err = yaml.Unmarshal(file, &data)
 	if err != nil {
 		log.Fatalf("unable to load jobs %s", file)
@@ -28,20 +27,20 @@ func (jl *JobList) Load(configPath string) JobList {
 		log.Fatalf("missing jobs yaml key %s", file)
 	}
 
-	var jobList JobList
+	var list List
 	if len(*data["jobs"]) > 0 {
 		for i, job := range *data["jobs"] {
 			log.Printf("loaded Job from config %d: %s", i, job.Name)
 
-			jobList.Add(job)
+			list.Add(job)
 		}
 	}
 
-	return jobList
+	return list
 }
 
-func (jl JobList) Save(configPath string) {
-	var list = map[string]JobList{"jobs": jl}
+func (jl List) Save(configPath string) {
+	var list = map[string]List{"jobs": jl}
 	data, err := yaml.Marshal(&list)
 	if err != nil {
 		log.Fatal(err)
@@ -52,7 +51,7 @@ func (jl JobList) Save(configPath string) {
 	}
 }
 
-func (jl *JobList) Add(j job.Job) error {
+func (jl *List) Add(j Job) error {
 	if jl.Exists(j) {
 		return errors.New("job exists")
 	}
@@ -62,7 +61,7 @@ func (jl *JobList) Add(j job.Job) error {
 	return nil
 }
 
-func (jl JobList) Exists(j job.Job) bool {
+func (jl List) Exists(j Job) bool {
 	for _, job := range jl {
 		if job.Name == j.Name {
 			return true
@@ -71,15 +70,15 @@ func (jl JobList) Exists(j job.Job) bool {
 	return false
 }
 
-func (jl *JobList) Del(name string) {
-	jobs := []job.Job(*jl)
+func (jl *List) Del(name string) {
+	jobs := []Job(*jl)
 
 	for i, j := range jobs {
 		if j.Name == name {
 			jobs[i] = jobs[len(jobs)-1]
 			jobs = jobs[:len(jobs)-1]
 
-			*jl = JobList(jobs)
+			*jl = List(jobs)
 		}
 	}
 }

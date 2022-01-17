@@ -1,4 +1,4 @@
-package joblist
+package job
 
 import (
 	"io/ioutil"
@@ -20,7 +20,7 @@ func Test_BuildFromConfig(t *testing.T) {
 		file.Write(fakeyaml)
 		defer file.Close()
 
-		got := JobList{}
+		got := List{}
 
 		got = got.Load(file.Name())
 
