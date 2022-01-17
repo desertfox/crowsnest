@@ -1,9 +1,14 @@
-package jobs
+package translate
 
 import (
 	"net/url"
 	"strconv"
 	"strings"
+
+	"github.com/desertfox/crowsnest/pkg/condition"
+	"github.com/desertfox/crowsnest/pkg/job"
+	"github.com/desertfox/crowsnest/pkg/output"
+	"github.com/desertfox/crowsnest/pkg/search"
 )
 
 type NewJobReq struct {
@@ -15,7 +20,7 @@ type NewJobReq struct {
 	Verbose    int
 }
 
-func (njr NewJobReq) TranslateToJob() (Job, error) {
+func (njr NewJobReq) TranslateToJob() (job.Job, error) {
 	var (
 		frequency  int
 		typeSearch string
@@ -24,7 +29,7 @@ func (njr NewJobReq) TranslateToJob() (Job, error) {
 
 	urlObj, err := url.Parse(njr.QueryLink)
 	if err != nil {
-		return Job{}, err
+		return job.Job{}, err
 	}
 
 	parsedQuery := urlObj.Query()
@@ -45,23 +50,23 @@ func (njr NewJobReq) TranslateToJob() (Job, error) {
 		fields = strings.Split(parsedQuery["fields"][0], ",")
 	}
 
-	return Job{
-		njr.Name,
-		Condition{
-			njr.Threshold,
-			njr.State,
+	return job.Job{
+		Name: njr.Name,
+		Condition: condition.Condition{
+			Threshold: njr.Threshold,
+			State:     njr.State,
 		},
-		Output{
-			njr.Verbose,
-			njr.OutputLink,
+		Output: output.Output{
+			Verbose:  njr.Verbose,
+			TeamsURL: njr.OutputLink,
 		},
-		Search{
-			"https://" + urlObj.Hostname(),
-			typeSearch,
-			getSteamId(urlObj.EscapedPath()),
-			parsedQuery["q"][0],
-			fields,
-			frequency / 60,
+		Search: search.Search{
+			Host:      "https://" + urlObj.Hostname(),
+			Type:      typeSearch,
+			Streamid:  getSteamId(urlObj.EscapedPath()),
+			Query:     parsedQuery["q"][0],
+			Fields:    fields,
+			Frequency: frequency / 60,
 		},
 	}, nil
 }

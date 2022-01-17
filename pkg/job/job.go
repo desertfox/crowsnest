@@ -1,24 +1,19 @@
-package jobs
+package job
 
 import (
 	"fmt"
 	"log"
+
+	"github.com/desertfox/crowsnest/pkg/condition"
+	"github.com/desertfox/crowsnest/pkg/output"
+	"github.com/desertfox/crowsnest/pkg/search"
 )
 
 type Job struct {
-	Name      string    `yaml:"name"`
-	Condition Condition `yaml:"condition"`
-	Output    Output    `yaml:"output"`
-	Search    Search    `yaml:"search"`
-}
-
-type Search struct {
-	Host      string   `yaml:"host"`
-	Type      string   `yaml:"type"`
-	Streamid  string   `yaml:"streamid"`
-	Query     string   `yaml:"query"`
-	Fields    []string `yaml:"fields"`
-	Frequency int      `yaml:"frequency"`
+	Name      string              `yaml:"name"`
+	Condition condition.Condition `yaml:"condition"`
+	Output    output.Output       `yaml:"output"`
+	Search    search.Search       `yaml:"search"`
 }
 
 type SessionService interface {
@@ -35,7 +30,7 @@ type SearchService struct {
 	QueryService
 }
 
-func (j Job) Func(searchService SearchService, reportService ReportService) func() {
+func (j Job) Func(searchService search.SearchService, reportService output.ReportService) func() {
 	return func() {
 		j := j
 
@@ -46,9 +41,9 @@ func (j Job) Func(searchService SearchService, reportService ReportService) func
 			log.Fatal(err.Error())
 		}
 
-		log.Printf("Job Results, name: %s, count: %d, alert: %t ", j.Name, count, j.Condition.isAlert(count))
+		log.Printf("Job Results, name: %s, count: %d, alert: %t ", j.Name, count, j.Condition.IsAlert(count))
 
-		if j.Output.isVerbose() || j.Condition.isAlert(count) {
+		if j.Output.IsVerbose() || j.Condition.IsAlert(count) {
 			reportService.Send(
 				fmt.Sprintf("🔎 Name  : %s\n\r"+
 					"⌚ Freq  : %d\n\r"+
@@ -57,7 +52,7 @@ func (j Job) Func(searchService SearchService, reportService ReportService) func
 					"🔗 Link  : [GrayLog](%s)",
 					j.Name,
 					j.Search.Frequency,
-					j.Condition.isAlertText(count),
+					j.Condition.IsAlertText(count),
 					count,
 					searchService.BuildSearchURL(),
 				),

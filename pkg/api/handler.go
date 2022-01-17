@@ -8,7 +8,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/desertfox/crowsnest/pkg/jobs"
+	"github.com/desertfox/crowsnest/pkg/job"
+	"github.com/desertfox/crowsnest/pkg/translate"
 )
 
 func (a Api) createJob(w http.ResponseWriter, r *http.Request) {
@@ -24,7 +25,7 @@ func (a Api) createJob(w http.ResponseWriter, r *http.Request) {
 		log.Fatal("error translating threshold to int " + err.Error())
 	}
 
-	njr := jobs.NewJobReq{
+	njr := translate.NewJobReq{
 		Name:       r.FormValue("name"),
 		QueryLink:  r.FormValue("querylink"),
 		OutputLink: r.FormValue("outputlink"),
@@ -33,14 +34,14 @@ func (a Api) createJob(w http.ResponseWriter, r *http.Request) {
 		Verbose:    verbose,
 	}
 
-	job, err := njr.TranslateToJob()
+	j, err := njr.TranslateToJob()
 	if err != nil {
 		log.Fatal("error translating job" + err.Error())
 	}
 
-	a.Jobs.EventChannel() <- jobs.Event{
-		Action: jobs.AddJob,
-		Job:    job,
+	a.Scheduler.EventChannel() <- job.Event{
+		Action: job.Add,
+		Job:    j,
 	}
 
 	w.Write([]byte("Job Created"))
@@ -97,8 +98,8 @@ func (a Api) getJobForm(w http.ResponseWriter) {
 
 func (a Api) getStatus(w http.ResponseWriter) {
 	var output template.HTML
-	for i, j := range *a.Jobs.Jobs() {
-		if v := a.Jobs.SJobs()[i]; v != nil {
+	for i, j := range a.Scheduler.Jobs() {
+		if v := a.Scheduler.SJobs()[i]; v != nil {
 			output += template.HTML(fmt.Sprintf(`
 				<div style="border-style: solid">
 				<label>Name: %v</label><br>
@@ -122,8 +123,8 @@ func (a Api) getStatus(w http.ResponseWriter) {
 				[]byte(
 					fmt.Sprintf(
 						"Miss-match between jobs and schedule, try again in a moment jobs may be scheduling. jobs: %d, sheduled jobs: %d",
-						len(*a.Jobs.Jobs()),
-						len(a.Jobs.SJobs()),
+						len(a.Scheduler.Jobs()),
+						len(a.Scheduler.SJobs()),
 					),
 				),
 			)
@@ -153,8 +154,8 @@ func (a Api) getStatus(w http.ResponseWriter) {
 }
 
 func (a Api) reloadJobs(w http.ResponseWriter) {
-	a.Jobs.EventChannel() <- jobs.Event{
-		Action: jobs.ReloadJobList,
+	a.Scheduler.EventChannel() <- job.Event{
+		Action: job.Reload,
 	}
 
 	a.getStatus(w)
@@ -172,11 +173,11 @@ func (a Api) deleteJob(w http.ResponseWriter, r *http.Request) {
 		log.Fatalln(err.Error())
 	}
 
-	for _, j := range *a.Jobs.Jobs() {
+	for _, j := range a.Scheduler.Jobs() {
 		if name == j.Name {
-			a.Jobs.EventChannel() <- jobs.Event{
-				Action: jobs.DelJob,
-				Job:    jobs.Job{Name: name},
+			a.Scheduler.EventChannel() <- job.Event{
+				Action: job.Del,
+				Job:    job.Job{Name: name},
 			}
 
 			output := template.HTML(

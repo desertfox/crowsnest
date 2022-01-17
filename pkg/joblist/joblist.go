@@ -1,4 +1,4 @@
-package jobs
+package joblist
 
 import (
 	"errors"
@@ -6,12 +6,13 @@ import (
 	"log"
 	"os"
 
+	"github.com/desertfox/crowsnest/pkg/job"
 	"gopkg.in/yaml.v2"
 )
 
-type JobList []Job
+type JobList []job.Job
 
-func LoadJobList(configPath string) *JobList {
+func (jl *JobList) Load(configPath string) JobList {
 	file, err := ioutil.ReadFile(configPath)
 	if err != nil {
 		log.Fatalf("unable to read file %s", configPath)
@@ -27,19 +28,19 @@ func LoadJobList(configPath string) *JobList {
 		log.Fatalf("missing jobs yaml key %s", file)
 	}
 
-	var jl JobList
+	var jobList JobList
 	if len(*data["jobs"]) > 0 {
 		for i, job := range *data["jobs"] {
 			log.Printf("loaded Job from config %d: %s", i, job.Name)
 
-			jl.Add(job)
+			jobList.Add(job)
 		}
 	}
 
-	return &jl
+	return jobList
 }
 
-func (jl JobList) WriteConfig(configPath string) {
+func (jl JobList) Save(configPath string) {
 	var list = map[string]JobList{"jobs": jl}
 	data, err := yaml.Marshal(&list)
 	if err != nil {
@@ -51,17 +52,8 @@ func (jl JobList) WriteConfig(configPath string) {
 	}
 }
 
-func (jl JobList) checkIfExists(j Job) bool {
-	for _, job := range jl {
-		if job.Name == j.Name {
-			return true
-		}
-	}
-	return false
-}
-
-func (jl *JobList) Add(j Job) error {
-	if jl.checkIfExists(j) {
+func (jl *JobList) Add(j job.Job) error {
+	if jl.Exists(j) {
 		return errors.New("job exists")
 	}
 
@@ -70,16 +62,24 @@ func (jl *JobList) Add(j Job) error {
 	return nil
 }
 
-func (jl *JobList) Del(name string) JobList {
-	jobs := []Job(*jl)
+func (jl JobList) Exists(j job.Job) bool {
+	for _, job := range jl {
+		if job.Name == j.Name {
+			return true
+		}
+	}
+	return false
+}
+
+func (jl *JobList) Del(name string) {
+	jobs := []job.Job(*jl)
 
 	for i, j := range jobs {
 		if j.Name == name {
 			jobs[i] = jobs[len(jobs)-1]
 			jobs = jobs[:len(jobs)-1]
-			return jobs
+
+			*jl = JobList(jobs)
 		}
 	}
-
-	return JobList{}
 }

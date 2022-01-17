@@ -4,18 +4,18 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/desertfox/crowsnest/pkg/jobs"
+	"github.com/desertfox/crowsnest/pkg/scheduler"
 )
 
 type Api struct {
-	Mux  *http.ServeMux
-	Jobs *jobs.Jobs
+	Mux       *http.ServeMux
+	Scheduler *scheduler.Scheduler
 }
 
-func New(j *jobs.Jobs) Api {
+func New(j *scheduler.Scheduler) Api {
 	return Api{
-		Mux:  &http.ServeMux{},
-		Jobs: j,
+		Mux:       &http.ServeMux{},
+		Scheduler: j,
 	}
 }
 

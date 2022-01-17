@@ -1,4 +1,4 @@
-package jobs
+package output
 
 import "github.com/desertfox/crowsnest/pkg/teams/report"
 
@@ -10,11 +10,11 @@ type ReportService interface {
 	Send(string) error
 }
 
-func (o Output) isVerbose() bool {
+func (o Output) IsVerbose() bool {
 	return o.Verbose > 0
 }
 
-func (o Output) reportService() ReportService {
+func (o Output) ReportService() ReportService {
 	return report.Report{
 		Url: o.TeamsURL,
 	}

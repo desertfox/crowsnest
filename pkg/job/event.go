@@ -1,11 +1,11 @@
-package jobs
+package job
 
 type action int
 
 const (
-	AddJob action = iota
-	DelJob
-	ReloadJobList
+	Add action = iota
+	Del
+	Reload
 )
 
 type Event struct {

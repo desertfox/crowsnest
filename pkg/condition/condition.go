@@ -1,4 +1,4 @@
-package jobs
+package condition
 
 import "fmt"
 
@@ -7,7 +7,7 @@ type Condition struct {
 	State     string `yaml:"state"`
 }
 
-func (c Condition) isAlert(count int) bool {
+func (c Condition) IsAlert(count int) bool {
 	switch c.State {
 	case ">":
 		return count >= c.Threshold
@@ -18,8 +18,8 @@ func (c Condition) isAlert(count int) bool {
 	}
 }
 
-func (c Condition) isAlertText(count int) string {
-	if c.isAlert(count) {
+func (c Condition) IsAlertText(count int) string {
+	if c.IsAlert(count) {
 		return fmt.Sprintf("🔥%d %s= %d🔥", count, c.State, c.Threshold)
 	}
 	return fmt.Sprintf("✔️%d %s= %d✔️", count, c.State, c.Threshold)

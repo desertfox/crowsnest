@@ -1,4 +1,4 @@
-package jobs
+package joblist
 
 import (
 	"io/ioutil"
@@ -20,11 +20,13 @@ func Test_BuildFromConfig(t *testing.T) {
 		file.Write(fakeyaml)
 		defer file.Close()
 
-		got := &JobList{}
+		got := JobList{}
 
-		got = LoadJobList(file.Name())
+		got = got.Load(file.Name())
 
-		jobCopy := (*got)[0]
+		log.Printf("%v", got)
+
+		jobCopy := (got)[0]
 
 		jobCopy.Name = "test"
 
@@ -33,15 +35,15 @@ func Test_BuildFromConfig(t *testing.T) {
 			t.Error(gotErr.Error())
 		}
 
-		if len(*got) != 2 {
+		if len(got) != 2 {
 			t.Errorf("wrong number of jobs: %#v", got)
 		}
 
-		got.WriteConfig(file.Name())
+		got.Save(file.Name())
 
-		got = LoadJobList(file.Name())
+		got.Load(file.Name())
 
-		if len(*got) != 2 {
+		if len(got) != 2 {
 			t.Errorf("wrong number of jobs: %#v", got)
 		}
 
