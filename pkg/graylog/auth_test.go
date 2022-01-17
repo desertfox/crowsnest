@@ -1,4 +1,4 @@
-package session
+package graylog
 
 import (
 	"net/http"

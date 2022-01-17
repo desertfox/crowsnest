@@ -6,7 +6,7 @@ type Output struct {
 	Verbose  int    `yaml:"verbose"`
 	TeamsURL string `yaml:"teamsurl"`
 }
-type ReportService interface {
+type Service interface {
 	Send(string) error
 }
 
@@ -14,7 +14,7 @@ func (o Output) IsVerbose() bool {
 	return o.Verbose > 0
 }
 
-func (o Output) ReportService() ReportService {
+func (o Output) Service() Service {
 	return report.Report{
 		Url: o.TeamsURL,
 	}

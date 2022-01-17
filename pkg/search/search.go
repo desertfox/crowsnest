@@ -3,22 +3,12 @@ package search
 import (
 	"net/http"
 
-	"github.com/desertfox/crowsnest/pkg/graylog/query"
-	"github.com/desertfox/crowsnest/pkg/graylog/session"
+	"github.com/desertfox/crowsnest/pkg/graylog"
 )
 
-type SessionService interface {
-	GetHeader() string
-}
-
-type QueryService interface {
-	ExecuteSearch(string) (int, error)
-	BuildSearchURL() string
-}
-
-type SearchService struct {
-	SessionService
-	QueryService
+type Service interface {
+	Execute() (int, error)
+	BuildURL() string
 }
 
 type Search struct {
@@ -30,22 +20,16 @@ type Search struct {
 	Frequency int      `yaml:"frequency"`
 }
 
-func (s Search) SearchService(un, pw string, httpClient *http.Client) SearchService {
-	return SearchService{
-		SessionService: session.New(
-			s.Host,
-			un,
-			pw,
-			httpClient,
-		),
-		QueryService: query.New(
-			s.Host,
-			s.Query,
-			s.Streamid,
-			s.Frequency,
-			s.Fields,
-			s.Type,
-			httpClient,
-		),
-	}
+func (s Search) Service(un, pw string, httpClient *http.Client) Service {
+	return graylog.New(
+		un,
+		pw,
+		s.Host,
+		s.Query,
+		s.Streamid,
+		s.Frequency,
+		s.Fields,
+		s.Type,
+		httpClient,
+	)
 }

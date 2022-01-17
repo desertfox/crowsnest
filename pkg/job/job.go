@@ -16,13 +16,13 @@ type Job struct {
 	Search    search.Search       `yaml:"search"`
 }
 
-func (j Job) Func(searchService search.SearchService, reportService output.ReportService) func() {
+func (j Job) Func(searchService search.Service, reportService output.Service) func() {
 	return func() {
 		j := j
 
 		log.Println("Job Start, name: " + j.Name)
 
-		count, err := searchService.ExecuteSearch(searchService.GetHeader())
+		count, err := searchService.Execute()
 		if err != nil {
 			log.Fatal(err.Error())
 		}
@@ -40,7 +40,7 @@ func (j Job) Func(searchService search.SearchService, reportService output.Repor
 					j.Search.Frequency,
 					j.Condition.IsAlertText(count),
 					count,
-					searchService.BuildSearchURL(),
+					searchService.BuildURL(),
 				),
 			)
 		}

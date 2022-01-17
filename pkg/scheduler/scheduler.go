@@ -47,7 +47,7 @@ func (js Scheduler) SJobs() []*gocron.Job {
 	return js.scheduler.Jobs()
 }
 
-func (js *Scheduler) Save() {
+func (js *Scheduler) SaveJobList() {
 	js.jobList.Save(js.config.Path)
 }
 
@@ -63,12 +63,12 @@ func (js *Scheduler) Schedule() *Scheduler {
 
 	for i, j := range js.jobList {
 		jobFunc := j.Func(
-			j.Search.SearchService(
+			j.Search.Service(
 				js.config.Username,
 				js.config.Password,
 				js.httpClient,
 			),
-			j.Output.ReportService(),
+			j.Output.Service(),
 		)
 
 		js.scheduler.Every(j.Search.Frequency).Minutes().Tag(j.Name).Do(jobFunc)
@@ -85,16 +85,17 @@ func (js *Scheduler) Schedule() *Scheduler {
 
 func (js *Scheduler) HandleEvent() {
 	event := <-js.event
+
 	switch event.Action {
 	case job.Reload:
 		js.jobList = joblist.JobList{}
-		js.jobList.Load(js.config.Path)
 	case job.Del:
 		js.jobList.Del(event.Value)
-		js.Save()
 	case job.Add:
 		js.jobList.Add(event.Job)
-		js.Save()
 	}
+
+	js.SaveJobList()
+
 	js.Schedule()
 }

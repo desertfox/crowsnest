@@ -1,4 +1,4 @@
-package session
+package graylog
 
 import (
 	"bytes"
@@ -33,7 +33,7 @@ var (
 	sessionInstanceMap = make(map[string]*session)
 )
 
-func New(h, u, p string, httpClient *http.Client) *session {
+func newSession(h, u, p string, httpClient *http.Client) *session {
 	if _, exists := sessionInstanceMap[h]; !exists {
 		lock.Lock()
 		defer lock.Unlock()
@@ -59,17 +59,16 @@ func newLoginRequest(h, u, p string, httpClient *http.Client) (*loginRequest, er
 	return &loginRequest{h, u, p, httpClient}, nil
 }
 
-func (s *session) GetHeader() string {
+func (s *session) authHeader() string {
 	//check if token is old
-	if 1 == 1 {
-		sessionId, err := s.loginRequest.execute()
-		if err != nil {
-			panic(err.Error())
-		}
-
-		s.basicAuth = createAuthHeader(sessionId)
-		s.updated = time.Now()
+	sessionId, err := s.loginRequest.execute()
+	if err != nil {
+		panic(err.Error())
 	}
+
+	s.basicAuth = createAuthHeader(sessionId)
+	s.updated = time.Now()
+
 	// Token is good
 	return s.basicAuth
 }
