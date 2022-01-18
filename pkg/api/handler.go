@@ -102,7 +102,7 @@ func (a Api) getStatus(w http.ResponseWriter) {
 		sjobSize = len(sjobs)
 	)
 	for i, j := range a.Scheduler.Jobs() {
-		if sjobSize-1 <= i {
+		if i <= sjobSize-1 {
 			output += template.HTML(fmt.Sprintf(`
 				<div style="border-style: solid">
 				<label>Name: %v</label><br>
