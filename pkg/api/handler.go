@@ -106,7 +106,7 @@ func (a Api) getStatus(w http.ResponseWriter) {
 				<label>LastRun: %v</label><br>
 				<label>NextRun: %v</label><br>
 				<form method="POST" action="/delete">
-					<input type="hidden" name="tag" value="%v">
+					<input type="hidden" name="name" value="%v">
 					<input type="submit" value="DELETE">
 				</form>
 				</div>
@@ -189,6 +189,9 @@ func (a Api) deleteJob(w http.ResponseWriter, r *http.Request) {
 			}{
 				output,
 			})
+			return
 		}
 	}
+
+	log.Printf("Job not found in scheduled jobs list: %s", name)
 }

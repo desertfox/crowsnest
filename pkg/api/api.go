@@ -32,8 +32,6 @@ func (a Api) SetupRoute() {
 			a.createJob(w, r)
 		case "GET":
 			a.getJobForm(w)
-		case "DELETE":
-			a.deleteJob(w, r)
 		}
 	})
 
