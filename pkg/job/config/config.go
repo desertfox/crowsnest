@@ -16,7 +16,7 @@ type Config struct {
 	DelayJobs int
 }
 
-func LoadConfigFromEnv() *Config {
+func LoadFromEnv() *Config {
 	return &Config{
 		Username:  checkEnvStr("username", true),
 		Password:  checkEnvStr("password", true),

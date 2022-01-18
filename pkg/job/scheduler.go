@@ -20,7 +20,7 @@ type Scheduler struct {
 }
 
 func Load() *Scheduler {
-	config := config.LoadConfigFromEnv()
+	config := config.LoadFromEnv()
 
 	list := List{}
 

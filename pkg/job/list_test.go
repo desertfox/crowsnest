@@ -7,50 +7,100 @@ import (
 	"testing"
 )
 
-func Test_BuildFromConfig(t *testing.T) {
-	t.Run("BuildFromConfig", func(t *testing.T) {
+func Test_Load(t *testing.T) {
+	t.Run("Load", func(t *testing.T) {
+		jobFile := testLoad()
+		defer os.Remove(jobFile.Name())
 
-		file, err := ioutil.TempFile("", "test_yaml")
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer os.Remove(file.Name())
+		emptyList := List{}
+		got := emptyList.Load(jobFile.Name())
+		want := 1
 
-		fakeyaml := newFakeYaml()
-		file.Write(fakeyaml)
-		defer file.Close()
-
-		got := List{}
-
-		got = got.Load(file.Name())
-
-		log.Printf("%v", got)
-
-		jobCopy := (got)[0]
-
-		jobCopy.Name = "test"
-
-		gotErr := got.Add(jobCopy)
-		if gotErr != nil {
-			t.Error(gotErr.Error())
+		if len(got) != want {
+			t.Errorf("wrong number of jobs, got:%v, want:%v", got, want)
 		}
 
-		if len(got) != 2 {
-			t.Errorf("wrong number of jobs: %#v", got)
-		}
+		got.Save(jobFile.Name())
+		got.Load(jobFile.Name())
 
-		got.Save(file.Name())
-
-		got.Load(file.Name())
-
-		if len(got) != 2 {
+		if len(got) != want {
 			t.Errorf("wrong number of jobs: %#v", got)
 		}
 
 	})
+
+	t.Run("Load.Save", func(t *testing.T) {
+		file, err := ioutil.TempFile("", "LoadSave")
+		if err != nil {
+			log.Fatal(err)
+		}
+		file.Close()
+		defer os.Remove(file.Name())
+
+		list := List{}
+		list.Save(file.Name())
+
+		got, err := ioutil.ReadFile(file.Name())
+		if err != nil {
+			t.Error(err)
+		}
+
+		if len(got) < 1 {
+			t.Errorf("wrong number of jobs, got:%v, want:%v", got, "<1")
+		}
+	})
+
+	t.Run("Load.Add", func(t *testing.T) {
+		jobExample := testJob()
+
+		got := List{}
+		got.Add(jobExample)
+		want := 1
+
+		if len(got) != want {
+			t.Errorf("wrong number of jobs, got:%v, want:%v", got, want)
+		}
+	})
+
+	t.Run("Load.Del", func(t *testing.T) {
+		jobExample := testJob()
+		got := List([]Job{jobExample})
+
+		if len(got) != 1 {
+			t.Errorf("wrong number of jobs, got:%v, want:%v", got, "0")
+		}
+
+		got.Del(jobExample)
+
+		if len(got) != 0 {
+			t.Errorf("wrong number of jobs, got:%v, want:%v", got, "0")
+		}
+	})
+
+	t.Run("Load.Exists", func(t *testing.T) {
+		jobExample := testJob()
+		got := List([]Job{jobExample})
+
+		if !got.Exists(jobExample) {
+			t.Errorf("duplicate job returned true, got:%v, want:%v", got.Exists(jobExample), false)
+		}
+	})
 }
 
-func newFakeYaml() []byte {
+func testLoad() *os.File {
+	file, err := ioutil.TempFile("", "test_yaml")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fakeyaml := testJobYaml()
+	file.Write(fakeyaml)
+	defer file.Close()
+
+	return file
+}
+
+func testJobYaml() []byte {
 	return []byte(`jobs:
 - name: "DB Errors"
   frequency: 15
