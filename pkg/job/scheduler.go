@@ -84,13 +84,13 @@ func (js *Scheduler) Schedule() *Scheduler {
 func (js *Scheduler) HandleEvent() {
 	event := <-js.event
 
-	log.Printf("Event %#v", event)
+	log.Printf("Event %v", event)
 
 	switch event.Action {
 	case Reload:
 		js.list = List{}
 	case Del:
-		js.list.Del(event.Value)
+		js.list.Del(event.Job)
 	case Add:
 		js.list.Add(event.Job)
 	}

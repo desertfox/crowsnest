@@ -70,15 +70,16 @@ func (jl List) Exists(j Job) bool {
 	return false
 }
 
-func (jl *List) Del(name string) {
+func (jl *List) Del(delJob Job) {
 	jobs := []Job(*jl)
 
 	for i, j := range jobs {
-		if j.Name == name {
+		if j.Name == delJob.Name {
 			jobs[i] = jobs[len(jobs)-1]
 			jobs = jobs[:len(jobs)-1]
 
 			*jl = List(jobs)
+			break
 		}
 	}
 }
