@@ -122,15 +122,12 @@ func (a Api) getStatus(w http.ResponseWriter) {
 				j.Name,
 			))
 		} else {
-			w.Write(
-				[]byte(
-					fmt.Sprintf(
-						"Miss-match between jobs and schedule, try again in a moment jobs may be scheduling. jobs: %d, sheduled jobs: %d",
-						len(a.Scheduler.Jobs()),
-						len(a.Scheduler.SJobs()),
-					),
-				),
-			)
+			output += template.HTML(fmt.Sprintf(
+				"Miss-match between jobs and schedule, try again in a moment jobs may be scheduling. jobs: %d, sheduled jobs: %d",
+				len(a.Scheduler.Jobs()),
+				len(a.Scheduler.SJobs()),
+			))
+			break
 		}
 	}
 
