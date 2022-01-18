@@ -1,6 +1,6 @@
 package output
 
-import "github.com/desertfox/crowsnest/pkg/teams/report"
+import "github.com/desertfox/crowsnest/pkg/teams"
 
 type Output struct {
 	Verbose  int    `yaml:"verbose"`
@@ -15,7 +15,7 @@ func (o Output) IsVerbose() bool {
 }
 
 func (o Output) Service() Service {
-	return report.Report{
+	return teams.Report{
 		Url: o.TeamsURL,
 	}
 }

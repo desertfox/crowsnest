@@ -1,4 +1,4 @@
-package cards
+package teams
 
 type msCard struct {
 	Type        string       `json:"type"`
@@ -26,7 +26,7 @@ type body struct {
 	Markdown bool   `json:"markdown"`
 }
 
-func NewCard(text string) msCard {
+func newCard(text string) msCard {
 	b := body{
 		"TextBlock",
 		text,

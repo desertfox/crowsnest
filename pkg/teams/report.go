@@ -1,11 +1,9 @@
-package report
+package teams
 
 import (
 	"bytes"
 	"encoding/json"
 	"net/http"
-
-	"github.com/desertfox/crowsnest/pkg/teams/cards"
 )
 
 type Report struct {
@@ -13,7 +11,7 @@ type Report struct {
 }
 
 func (r Report) Send(text string) error {
-	card := cards.NewCard(text)
+	card := newCard(text)
 
 	json_data, err := json.Marshal(card)
 	if err != nil {
