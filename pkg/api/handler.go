@@ -96,9 +96,13 @@ func (a Api) getJobForm(w http.ResponseWriter) {
 }
 
 func (a Api) getStatus(w http.ResponseWriter) {
-	var output template.HTML
+	var (
+		output   template.HTML
+		sjobs    = a.Scheduler.SJobs()
+		sjobSize = len(sjobs)
+	)
 	for i, j := range a.Scheduler.Jobs() {
-		if v := a.Scheduler.SJobs()[i]; v != nil {
+		if sjobSize-1 <= i {
 			output += template.HTML(fmt.Sprintf(`
 				<div style="border-style: solid">
 				<label>Name: %v</label><br>
@@ -113,8 +117,8 @@ func (a Api) getStatus(w http.ResponseWriter) {
 				<br>`,
 				j.Name,
 				j.Search.Frequency,
-				v.NextRun(),
-				v.LastRun(),
+				sjobs[i].NextRun(),
+				sjobs[i].LastRun(),
 				j.Name,
 			))
 		} else {
