@@ -40,7 +40,7 @@ func (a Api) createJob(w http.ResponseWriter, r *http.Request) {
 
 	a.Scheduler.EventChannel() <- job.Event{
 		Action: job.Add,
-		Job:    j,
+		Job:    &j,
 	}
 
 	w.Write([]byte("Job Created"))
@@ -177,7 +177,7 @@ func (a Api) deleteJob(w http.ResponseWriter, r *http.Request) {
 		if name == j.Name {
 			a.Scheduler.EventChannel() <- job.Event{
 				Action: job.Del,
-				Job:    job.Job{Name: name},
+				Job:    &job.Job{Name: name},
 			}
 
 			output := template.HTML(

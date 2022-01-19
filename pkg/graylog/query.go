@@ -48,34 +48,23 @@ func (q query) urlEncodeRelative() string {
 	return params.Encode()
 }
 
-func (q query) execute(authToken string, httpClient *http.Client) (int, error) {
+func (q query) execute(authToken string, httpClient *http.Client) ([]byte, error) {
 	request, _ := http.NewRequest("GET", q.String(), nil)
 	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
 	request.Header.Set("Authorization", authToken)
 
 	response, err := httpClient.Do(request)
 	if err != nil {
-		return 0, err
+		return []byte{}, err
 	}
 	defer response.Body.Close()
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		log.Fatal(err)
+		return []byte{}, err
 	}
 
-	if os.Getenv("CROWSNEST_DEBUG") == "log" {
-		log.Println("Body: " + string(body))
-	}
-
-	count := strings.Count(string(body), "\n")
-
-	//Results include CSV header row, -1 to correct count.
-	if count > 1 {
-		count -= 1
-	}
-
-	return count, nil
+	return body, nil
 }
 
 func (q query) toURL() string {

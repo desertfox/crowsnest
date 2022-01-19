@@ -54,7 +54,7 @@ func Test_Load(t *testing.T) {
 		jobExample := testJob()
 
 		got := List{}
-		got.Add(jobExample)
+		got.Add(&jobExample)
 		want := 1
 
 		if len(got) != want {
@@ -64,13 +64,13 @@ func Test_Load(t *testing.T) {
 
 	t.Run("Load.Del", func(t *testing.T) {
 		jobExample := testJob()
-		got := List([]Job{jobExample})
+		got := List([]*Job{&jobExample})
 
 		if len(got) != 1 {
 			t.Errorf("wrong number of jobs, got:%v, want:%v", got, "0")
 		}
 
-		got.Del(jobExample)
+		got.Del(&jobExample)
 
 		if len(got) != 0 {
 			t.Errorf("wrong number of jobs, got:%v, want:%v", got, "0")
@@ -79,10 +79,10 @@ func Test_Load(t *testing.T) {
 
 	t.Run("Load.Exists", func(t *testing.T) {
 		jobExample := testJob()
-		got := List([]Job{jobExample})
+		got := List([]*Job{&jobExample})
 
-		if !got.Exists(jobExample) {
-			t.Errorf("duplicate job returned true, got:%v, want:%v", got.Exists(jobExample), false)
+		if !got.Exists(&jobExample) {
+			t.Errorf("duplicate job returned true, got:%v, want:%v", got.Exists(&jobExample), false)
 		}
 	})
 }

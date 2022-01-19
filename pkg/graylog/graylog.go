@@ -1,6 +1,9 @@
 package graylog
 
-import "net/http"
+import (
+	"net/http"
+	"strings"
+)
 
 type Graylog struct {
 	session    *session
@@ -29,7 +32,17 @@ func New(un, pw, h, q, streamid string, frequency int, fields []string, t string
 }
 
 func (g Graylog) Execute() (int, error) {
-	return g.query.execute(g.session.authHeader(), g.httpClient)
+	raw, err := g.query.execute(g.session.authHeader(), g.httpClient)
+	if err != nil {
+		return 0, err
+	}
+
+	count := strings.Count(string(raw), "\n")
+	if count > 1 {
+		count -= 1
+	}
+
+	return count, nil
 }
 
 func (g Graylog) BuildURL() string {

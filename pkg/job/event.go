@@ -11,5 +11,5 @@ const (
 type Event struct {
 	Action action
 	Value  string
-	Job    Job
+	Job    *Job
 }

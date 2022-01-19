@@ -9,7 +9,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type List []Job
+type List []*Job
 
 func (jl *List) Load(configPath string) List {
 	file, err := ioutil.ReadFile(configPath)
@@ -51,7 +51,7 @@ func (jl List) Save(configPath string) {
 	}
 }
 
-func (jl *List) Add(j Job) error {
+func (jl *List) Add(j *Job) error {
 	if jl.Exists(j) {
 		return errors.New("job exists")
 	}
@@ -61,7 +61,7 @@ func (jl *List) Add(j Job) error {
 	return nil
 }
 
-func (jl List) Exists(j Job) bool {
+func (jl List) Exists(j *Job) bool {
 	for _, job := range jl {
 		if job.Name == j.Name {
 			return true
@@ -70,8 +70,8 @@ func (jl List) Exists(j Job) bool {
 	return false
 }
 
-func (jl *List) Del(delJob Job) {
-	jobs := []Job(*jl)
+func (jl *List) Del(delJob *Job) {
+	jobs := []*Job(*jl)
 
 	for i, j := range jobs {
 		if j.Name == delJob.Name {
