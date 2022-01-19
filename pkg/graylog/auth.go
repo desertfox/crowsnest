@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -28,39 +27,21 @@ type loginRequest struct {
 }
 
 var (
-	errMissingParam    = errors.New("missing param")
 	lock               = &sync.Mutex{}
 	sessionInstanceMap = make(map[string]*session)
 )
 
 func newSession(h, u, p string, httpClient *http.Client) *session {
+	lock.Lock()
+	defer lock.Unlock()
 	if _, exists := sessionInstanceMap[h]; !exists {
-		lock.Lock()
-		defer lock.Unlock()
-
-		lr, err := newLoginRequest(h, u, p, httpClient)
-		if err != nil {
-			panic(err.Error())
-		}
-
-		sessionInstanceMap[h] = &session{"", time.Now(), lr}
+		sessionInstanceMap[h] = &session{"", time.Now(), &loginRequest{h, u, p, httpClient}}
 	}
 
 	return sessionInstanceMap[h]
 }
 
-func newLoginRequest(h, u, p string, httpClient *http.Client) (*loginRequest, error) {
-	for _, s := range []string{h, u, p} {
-		if s == "" {
-			return &loginRequest{}, errMissingParam
-		}
-	}
-
-	return &loginRequest{h, u, p, httpClient}, nil
-}
-
 func (s *session) authHeader() string {
-	//check if token is old
 	sessionId, err := s.loginRequest.execute()
 	if err != nil {
 		panic(err.Error())
@@ -69,7 +50,6 @@ func (s *session) authHeader() string {
 	s.basicAuth = createAuthHeader(sessionId)
 	s.updated = time.Now()
 
-	// Token is good
 	return s.basicAuth
 }
 

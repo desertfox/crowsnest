@@ -20,8 +20,6 @@ func (j Job) Func(searchService search.Service, reportService output.Service) fu
 	return func() {
 		j := j
 
-		log.Println("Job Start, name: " + j.Name)
-
 		count, err := searchService.Execute()
 		if err != nil {
 			log.Fatal(err.Error())
@@ -44,7 +42,5 @@ func (j Job) Func(searchService search.Service, reportService output.Service) fu
 				),
 			)
 		}
-
-		log.Println("Job Finish, name: " + j.Name)
 	}
 }

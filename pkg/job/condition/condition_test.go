@@ -49,9 +49,10 @@ func Test_condition(t *testing.T) {
 	})
 }
 
-func testCondition() Condition {
-	return Condition{
+func ExampleCondition() {
+	fmt.Println(Condition{
 		Threshold: 1,
 		State:     "<",
-	}
+	})
+	//Output: {1 <}
 }
