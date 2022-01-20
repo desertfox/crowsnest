@@ -6,11 +6,9 @@ import (
 	"net/http"
 )
 
-type Report struct {
-	Url string
-}
+type Report struct{}
 
-func (r Report) Send(text string) error {
+func (r Report) Send(url, text string) error {
 	card := newCard(text)
 
 	json_data, err := json.Marshal(card)
@@ -18,7 +16,7 @@ func (r Report) Send(text string) error {
 		return err
 	}
 
-	resp, err := http.Post(r.Url, "application/json", bytes.NewBuffer(json_data))
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(json_data))
 	if err != nil {
 		return err
 	}

@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/desertfox/crowsnest/pkg/job"
+	"github.com/desertfox/crowsnest/pkg/crows/job"
 )
 
 func (a Api) createJob(w http.ResponseWriter, r *http.Request) {

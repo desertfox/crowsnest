@@ -83,3 +83,14 @@ func (jl *List) Del(delJob *Job) {
 		}
 	}
 }
+
+func (jl *List) HandleEvent(event Event) {
+	switch event.Action {
+	case Reload:
+		jl = &List{}
+	case Del:
+		jl.Del(event.Job)
+	case Add:
+		jl.Add(event.Job)
+	}
+}

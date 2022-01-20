@@ -1,4 +1,4 @@
-package condition
+package job
 
 import (
 	"fmt"
@@ -34,16 +34,16 @@ func Test_condition(t *testing.T) {
 				got := Condition{
 					Threshold: tt.threshold,
 					State:     tt.state,
+					Count:     tt.count,
 				}
 
-				if got.IsAlert(tt.count) != tt.alert {
-					t.Fatalf("got: %v, want: %v", got.IsAlert(tt.count), tt.alert)
+				if got.IsAlert() != tt.alert {
+					t.Fatalf("got: %v, want: %v", got.IsAlert(), tt.alert)
 				}
 
-				if !strings.Contains(got.IsAlertText(tt.count), tt.alertStr) {
-					t.Fatalf("got: %v, want: %v", got.IsAlertText(tt.count), tt.alertStr)
+				if !strings.Contains(got.IsAlertText(), tt.alertStr) {
+					t.Fatalf("got: %v, want: %v", got.IsAlertText(), tt.alertStr)
 				}
-
 			})
 		}
 	})
@@ -54,5 +54,5 @@ func ExampleCondition() {
 		Threshold: 1,
 		State:     "<",
 	})
-	//Output: {1 <}
+	//Output: {1 < 0}
 }

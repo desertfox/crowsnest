@@ -1,4 +1,4 @@
-package search
+package job
 
 import (
 	"net/http"
@@ -6,8 +6,8 @@ import (
 	"github.com/desertfox/crowsnest/pkg/graylog"
 )
 
-type Service interface {
-	Execute() (int, error)
+type SearchService interface {
+	Execute() ([]byte, error)
 	BuildURL() string
 }
 
@@ -20,7 +20,7 @@ type Search struct {
 	Frequency int      `yaml:"frequency"`
 }
 
-func (s Search) Service(un, pw string, httpClient *http.Client) Service {
+func (s Search) Service(un, pw string, httpClient *http.Client) SearchService {
 	return graylog.New(
 		un,
 		pw,

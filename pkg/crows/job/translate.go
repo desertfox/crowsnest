@@ -4,10 +4,6 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-
-	"github.com/desertfox/crowsnest/pkg/job/condition"
-	"github.com/desertfox/crowsnest/pkg/job/output"
-	"github.com/desertfox/crowsnest/pkg/job/search"
 )
 
 type NewJobReq struct {
@@ -51,15 +47,15 @@ func (njr NewJobReq) ToJob() (Job, error) {
 
 	return Job{
 		Name: njr.Name,
-		Condition: condition.Condition{
+		Condition: Condition{
 			Threshold: njr.Threshold,
 			State:     njr.State,
 		},
-		Output: output.Output{
+		Output: Output{
 			Verbose:  njr.Verbose,
 			TeamsURL: njr.OutputLink,
 		},
-		Search: search.Search{
+		Search: Search{
 			Host:      "https://" + urlObj.Hostname(),
 			Type:      typeSearch,
 			Streamid:  getSteamId(urlObj.EscapedPath()),
