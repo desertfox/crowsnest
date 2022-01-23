@@ -2,33 +2,48 @@ package job
 
 import (
 	"fmt"
-	"log"
+	"net/http"
+
+	"github.com/desertfox/crowsnest/pkg/config"
+	"github.com/desertfox/crowsnest/pkg/crows/job/output"
+	"github.com/desertfox/crowsnest/pkg/crows/job/search"
+)
+
+var (
+	httpClient *http.Client = &http.Client{}
 )
 
 type Job struct {
-	Name      string    `yaml:"name"`
-	Condition Condition `yaml:"condition"`
-	Output    Output    `yaml:"output"`
-	Search    Search    `yaml:"search"`
+	Name      string        `yaml:"name"`
+	Host      string        `yaml:"host"`
+	Frequency int           `yaml:"frequency"`
+	Search    search.Search `yaml:"search"`
+	Output    output.Output `yaml:"output"`
+	Config    *config.Config
 }
 
-func (j Job) Func(searchService SearchService, reportService OutputService) func() {
+// S(un,pw) -> C(S(un,pw)) -> O(url)
+
+func (j Job) Func() func() {
 	return func() {
 		j := j
 
-		rawSearch, err := searchService.Execute()
-		if err != nil {
-			log.Fatal(err.Error())
-		}
+		j.Run()
 
-		j.Condition.Eval(rawSearch)
+		j.Send()
+	}
+}
 
-		if j.Output.IsVerbose() || j.Condition.IsAlert() {
-			reportService.Send(
-				j.Output.TeamsURL,
-				j.buildText(searchService.BuildURL()),
-			)
-		}
+func (j Job) Run() {
+	j.Search.Run(j.Host, j.Config.Username, j.Config.Password, j.Frequency, httpClient)
+}
+
+func (j Job) Send() {
+	if j.Output.IsVerbose() || j.Search.Condition.IsAlert() {
+		j.Output.Send(
+			j.Output.URL,
+			j.buildText(j.Search.BuildURL()),
+		)
 	}
 }
 
@@ -39,9 +54,9 @@ func (j Job) buildText(url string) string {
 		"🧮 Count : %d\n\r"+
 		"🔗 Link  : [GrayLog](%s)",
 		j.Name,
-		j.Search.Frequency,
-		j.Condition.IsAlertText(),
-		j.Condition.Count,
+		j.Frequency,
+		j.Search.Condition.IsAlertText(),
+		j.Search.Condition.Count,
 		url,
 	)
 }

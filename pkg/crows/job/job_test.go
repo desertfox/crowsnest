@@ -1,23 +1,28 @@
 package job
 
+import (
+	"github.com/desertfox/crowsnest/pkg/crows/job/output"
+	"github.com/desertfox/crowsnest/pkg/crows/job/search"
+)
+
 func testJob() Job {
 	return Job{
-		Name: "Test Job",
-		Condition: Condition{
-			Threshold: 1,
-			State:     ">",
+		Name:      "Test Job",
+		Host:      "https://host.com",
+		Frequency: 15,
+		Search: search.Search{
+			Type:     "relative",
+			Streamid: "abcd12345",
+			Query:    "error",
+			Fields:   []string{"source", "message"},
+			Condition: search.Condition{
+				Threshold: 1,
+				State:     ">",
+			},
 		},
-		Output: Output{
-			Verbose:  1,
-			TeamsURL: "https://mircosoft.com",
-		},
-		Search: Search{
-			Host:      "https://host.com",
-			Type:      "relative",
-			Streamid:  "abcd12345",
-			Query:     "error",
-			Fields:    []string{"source", "message"},
-			Frequency: 15,
+		Output: output.Output{
+			Verbose: 1,
+			URL:     "https://mircosoft.com",
 		},
 	}
 }

@@ -8,8 +8,18 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/desertfox/crowsnest/pkg/crows"
 	"github.com/desertfox/crowsnest/pkg/crows/job"
 )
+
+type NewJobReq struct {
+	Name       string
+	QueryLink  string
+	OutputLink string
+	Threshold  int
+	State      string
+	Verbose    int
+}
 
 func (a Api) createJob(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
@@ -24,8 +34,7 @@ func (a Api) createJob(w http.ResponseWriter, r *http.Request) {
 		log.Fatal("error translating threshold to int " + err.Error())
 	}
 
-	//Move to model
-	njr := job.NewJobReq{
+	njr := NewJobReq{
 		Name:       r.FormValue("name"),
 		QueryLink:  r.FormValue("querylink"),
 		OutputLink: r.FormValue("outputlink"),
@@ -34,13 +43,13 @@ func (a Api) createJob(w http.ResponseWriter, r *http.Request) {
 		Verbose:    verbose,
 	}
 
-	j, err := njr.ToJob()
+	j, err := translate(njr)
 	if err != nil {
 		log.Fatal("error translating job" + err.Error())
 	}
 
-	a.nest.EventCallback() <- job.Event{
-		Action: job.Add,
+	a.nest.EventCallback() <- crows.Event{
+		Action: crows.Add,
 		Job:    &j,
 	}
 
@@ -114,7 +123,7 @@ func (a Api) getStatus(w http.ResponseWriter) {
 				</div>
 				<br>`,
 			j.Name,
-			j.Search.Frequency,
+			j.Frequency,
 			a.nest.NextRun(j),
 			a.nest.LastRun(j),
 			j.Name,
@@ -144,8 +153,8 @@ func (a Api) getStatus(w http.ResponseWriter) {
 }
 
 func (a Api) reloadJobs(w http.ResponseWriter) {
-	a.nest.EventCallback() <- job.Event{
-		Action: job.Reload,
+	a.nest.EventCallback() <- crows.Event{
+		Action: crows.Reload,
 	}
 
 	a.getStatus(w)
@@ -165,8 +174,8 @@ func (a Api) deleteJob(w http.ResponseWriter, r *http.Request) {
 
 	for _, j := range a.nest.Jobs() {
 		if name == j.Name {
-			a.nest.EventCallback() <- job.Event{
-				Action: job.Del,
+			a.nest.EventCallback() <- crows.Event{
+				Action: crows.Del,
 				Job:    &job.Job{Name: name},
 			}
 

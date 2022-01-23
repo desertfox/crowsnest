@@ -1,17 +1,17 @@
 jobs:
-- name: test
-  condition:
-    threshold: 0
-    state: ">"
+- name: test 
+  frequency: 0 
+  host: https://something.com
   output:
     verbose: 0
     teamsurl: https://teamsurl.com
   search:
-    host: https://something.com
     type: ""
     streamid: "55555"
     query: '"ERROR"'
     fields:
     - message
     - source
-    frequency: 0
+    condition:
+      threshold: 0
+      state: ">"

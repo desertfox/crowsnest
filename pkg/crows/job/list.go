@@ -6,18 +6,24 @@ import (
 	"log"
 	"os"
 
+	"github.com/desertfox/crowsnest/pkg/config"
 	"gopkg.in/yaml.v2"
 )
 
-type List []*Job
+type List struct {
+	Jobs   []*Job
+	Config *config.Config
+}
 
-func (jl List) Load(configPath string) List {
-	file, err := ioutil.ReadFile(configPath)
+func (l *List) Load(config *config.Config) *List {
+	l.Config = config
+
+	file, err := ioutil.ReadFile(l.Config.Path)
 	if err != nil {
-		log.Fatalf("unable to read file %s", configPath)
+		log.Fatalf("unable to read file %s", l.Config.Path)
 	}
 
-	data := make(map[string]*List)
+	data := make(map[string][]*Job)
 	err = yaml.Unmarshal(file, &data)
 	if err != nil {
 		log.Fatalf("unable to load jobs %s", file)
@@ -27,42 +33,43 @@ func (jl List) Load(configPath string) List {
 		log.Fatalf("missing jobs yaml key %s", file)
 	}
 
-	var list List
-	if len(*data["jobs"]) > 0 {
-		for i, job := range *data["jobs"] {
+	if len(data["jobs"]) > 0 {
+		for i, job := range data["jobs"] {
 			log.Printf("loaded Job from config %d: %s", i, job.Name)
 
-			list.Add(job)
+			l.Add(job)
 		}
 	}
 
-	return list
+	return l
 }
 
-func (jl List) Save(configPath string) {
-	var list = map[string]List{"jobs": jl}
-	data, err := yaml.Marshal(&list)
+func (l List) Save() {
+	var jobs = map[string][]*Job{"jobs": l.Jobs}
+	data, err := yaml.Marshal(&jobs)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	if err := ioutil.WriteFile(configPath, data, os.FileMode(int(0777))); err != nil {
+	if err := ioutil.WriteFile(l.Config.Path, data, os.FileMode(int(0777))); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func (jl *List) Add(j *Job) error {
-	if jl.Exists(j) {
+func (l *List) Add(j *Job) error {
+	if l.Exists(j) {
 		return errors.New("job exists")
 	}
 
-	*jl = append(*jl, j)
+	j.Config = l.Config
+
+	l.Jobs = append(l.Jobs, j)
 
 	return nil
 }
 
-func (jl List) Exists(j *Job) bool {
-	for _, job := range jl {
+func (l List) Exists(j *Job) bool {
+	for _, job := range l.Jobs {
 		if job.Name == j.Name {
 			return true
 		}
@@ -70,15 +77,16 @@ func (jl List) Exists(j *Job) bool {
 	return false
 }
 
-func (jl *List) Del(delJob *Job) {
-	jobs := []*Job(*jl)
+func (l *List) Del(delJob *Job) {
+	jobs := []*Job(l.Jobs)
 
 	for i, j := range jobs {
 		if j.Name == delJob.Name {
 			jobs[i] = jobs[len(jobs)-1]
 			jobs = jobs[:len(jobs)-1]
 
-			*jl = List(jobs)
+			l.Jobs = jobs
+
 			break
 		}
 	}

@@ -1,7 +1,11 @@
-package job
+package api
 
 import (
 	"testing"
+
+	"github.com/desertfox/crowsnest/pkg/crows/job"
+	"github.com/desertfox/crowsnest/pkg/crows/job/output"
+	"github.com/desertfox/crowsnest/pkg/crows/job/search"
 )
 
 var (
@@ -22,29 +26,28 @@ var (
 func Test_translate(t *testing.T) {
 
 	t.Run("translate", func(t *testing.T) {
-
 		njr := NewJobReq{name, relativeQueryLink, outputLink, threshold, "<", verbose}
-		got, gotErr := njr.ToJob()
+		got, gotErr := translate(njr)
 		if gotErr != nil {
 			t.Errorf("error got: %#v", gotErr)
 		}
 
-		want := Job{
-			Name: name,
-			Condition: Condition{
-				Threshold: threshold,
+		want := job.Job{
+			Name:      name,
+			Frequency: frequency,
+			Host:      host,
+			Output: output.Output{
+				URL:     outputLink,
+				Verbose: verbose,
 			},
-			Output: Output{
-				TeamsURL: outputLink,
-				Verbose:  verbose,
-			},
-			Search: Search{
-				Frequency: frequency,
-				Host:      host,
-				Type:      searchTypeRelative,
-				Streamid:  streamid,
-				Query:     q,
-				Fields:    fields,
+			Search: search.Search{
+				Type:     searchTypeRelative,
+				Streamid: streamid,
+				Query:    q,
+				Fields:   fields,
+				Condition: search.Condition{
+					Threshold: threshold,
+				},
 			},
 		}
 
@@ -52,20 +55,20 @@ func Test_translate(t *testing.T) {
 			t.Errorf("error got: %#v, want %#v", got.Name, want.Name)
 		}
 
-		if got.Search.Frequency != want.Search.Frequency {
-			t.Errorf("error got: %#v, want %#v", got.Search.Frequency, want.Search.Frequency)
+		if got.Frequency != want.Frequency {
+			t.Errorf("error got: %#v, want %#v", got.Frequency, want.Frequency)
 		}
 
-		if got.Condition.Threshold != want.Condition.Threshold {
-			t.Errorf("error got: %#v, want %#v", got.Condition.Threshold, want.Condition.Threshold)
+		if got.Search.Condition.Threshold != want.Search.Condition.Threshold {
+			t.Errorf("error got: %#v, want %#v", got.Search.Condition.Threshold, want.Search.Condition.Threshold)
 		}
 
-		if got.Output.TeamsURL != want.Output.TeamsURL {
-			t.Errorf("error got: %#v, want %#v", got.Output.TeamsURL, want.Output.TeamsURL)
+		if got.Output.URL != want.Output.URL {
+			t.Errorf("error got: %#v, want %#v", got.Output.URL, want.Output.URL)
 		}
 
-		if got.Search.Host != want.Search.Host {
-			t.Errorf("error got: %#v, want %#v", got.Search.Host, want.Search.Host)
+		if got.Host != want.Host {
+			t.Errorf("error got: %#v, want %#v", got.Host, want.Host)
 		}
 
 		if got.Search.Type != want.Search.Type {
