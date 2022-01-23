@@ -15,7 +15,7 @@ type Nest struct {
 	eventCallback chan Event
 }
 
-func (n *Nest) Load(config *config.Config, list *job.List, scheduler *schedule.Schedule) *Nest {
+func (n *Nest) Load(config *config.Config, scheduler *schedule.Schedule, list *job.List) *Nest {
 	return &Nest{
 		config:        config,
 		list:          list,

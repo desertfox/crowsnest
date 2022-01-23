@@ -27,7 +27,7 @@ func main() {
 	scheduler.Load(config.DelayJobs)
 
 	nest := &crows.Nest{}
-	nest.Load(config, list, scheduler)
+	nest.Load(config, scheduler, list)
 	nest.Run()
 
 	api.New(nest).Run()
