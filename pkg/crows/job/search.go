@@ -3,7 +3,7 @@ package job
 import (
 	"net/http"
 
-	"github.com/desertfox/crowsnest/pkg/graylog"
+	"github.com/desertfox/crowsnest/pkg/crows/job/graylog"
 )
 
 type SearchService interface {

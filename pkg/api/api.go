@@ -8,25 +8,25 @@ import (
 )
 
 type Api struct {
-	Mux       *http.ServeMux
-	Scheduler *crows.Scheduler
+	mux  *http.ServeMux
+	nest *crows.Nest
 }
 
-func New(j *crows.Scheduler) Api {
+func New(nest *crows.Nest) Api {
 	return Api{
-		Mux:       &http.ServeMux{},
-		Scheduler: j,
+		mux:  &http.ServeMux{},
+		nest: nest,
 	}
 }
 
 func (a Api) Run() {
 	a.SetupRoute()
 
-	log.Fatal(http.ListenAndServe(":8080", a.Mux))
+	log.Fatal(http.ListenAndServe(":8080", a.mux))
 }
 
 func (a Api) SetupRoute() {
-	a.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	a.mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "POST":
 			a.createJob(w, r)
@@ -35,7 +35,7 @@ func (a Api) SetupRoute() {
 		}
 	})
 
-	a.Mux.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
+	a.mux.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "GET":
 			a.getStatus(w)
@@ -44,7 +44,7 @@ func (a Api) SetupRoute() {
 		}
 	})
 
-	a.Mux.HandleFunc("/delete", func(w http.ResponseWriter, r *http.Request) {
+	a.mux.HandleFunc("/delete", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "POST":
 			a.deleteJob(w, r)

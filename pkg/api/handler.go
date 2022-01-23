@@ -24,6 +24,7 @@ func (a Api) createJob(w http.ResponseWriter, r *http.Request) {
 		log.Fatal("error translating threshold to int " + err.Error())
 	}
 
+	//Move to model
 	njr := job.NewJobReq{
 		Name:       r.FormValue("name"),
 		QueryLink:  r.FormValue("querylink"),
@@ -38,7 +39,7 @@ func (a Api) createJob(w http.ResponseWriter, r *http.Request) {
 		log.Fatal("error translating job" + err.Error())
 	}
 
-	a.Scheduler.EventChannel() <- job.Event{
+	a.nest.EventCallback() <- job.Event{
 		Action: job.Add,
 		Job:    &j,
 	}
@@ -97,13 +98,10 @@ func (a Api) getJobForm(w http.ResponseWriter) {
 
 func (a Api) getStatus(w http.ResponseWriter) {
 	var (
-		output   template.HTML
-		sjobs    = a.Scheduler.SJobs()
-		sjobSize = len(sjobs)
+		output template.HTML
 	)
-	for i, j := range a.Scheduler.Jobs() {
-		if i <= sjobSize-1 {
-			output += template.HTML(fmt.Sprintf(`
+	for _, j := range a.nest.Jobs() {
+		output += template.HTML(fmt.Sprintf(`
 				<div style="border-style: solid">
 				<label>Name: %v</label><br>
 				<label>Frequency: %v min(s)</label><br>
@@ -115,20 +113,12 @@ func (a Api) getStatus(w http.ResponseWriter) {
 				</form>
 				</div>
 				<br>`,
-				j.Name,
-				j.Search.Frequency,
-				sjobs[i].NextRun(),
-				sjobs[i].LastRun(),
-				j.Name,
-			))
-		} else {
-			output += template.HTML(fmt.Sprintf(
-				"Miss-match between jobs and schedule, try again in a moment jobs may be scheduling. jobs: %d, sheduled jobs: %d",
-				len(a.Scheduler.Jobs()),
-				len(a.Scheduler.SJobs()),
-			))
-			break
-		}
+			j.Name,
+			j.Search.Frequency,
+			a.nest.NextRun(j),
+			a.nest.LastRun(j),
+			j.Name,
+		))
 	}
 
 	tmpl, err := template.New("status_form").Parse(`
@@ -154,7 +144,7 @@ func (a Api) getStatus(w http.ResponseWriter) {
 }
 
 func (a Api) reloadJobs(w http.ResponseWriter) {
-	a.Scheduler.EventChannel() <- job.Event{
+	a.nest.EventCallback() <- job.Event{
 		Action: job.Reload,
 	}
 
@@ -173,9 +163,9 @@ func (a Api) deleteJob(w http.ResponseWriter, r *http.Request) {
 		log.Fatalln(err.Error())
 	}
 
-	for _, j := range a.Scheduler.Jobs() {
+	for _, j := range a.nest.Jobs() {
 		if name == j.Name {
-			a.Scheduler.EventChannel() <- job.Event{
+			a.nest.EventCallback() <- job.Event{
 				Action: job.Del,
 				Job:    &job.Job{Name: name},
 			}

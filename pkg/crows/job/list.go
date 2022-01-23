@@ -11,7 +11,7 @@ import (
 
 type List []*Job
 
-func (jl *List) Load(configPath string) List {
+func (jl List) Load(configPath string) List {
 	file, err := ioutil.ReadFile(configPath)
 	if err != nil {
 		log.Fatalf("unable to read file %s", configPath)
@@ -81,16 +81,5 @@ func (jl *List) Del(delJob *Job) {
 			*jl = List(jobs)
 			break
 		}
-	}
-}
-
-func (jl *List) HandleEvent(event Event) {
-	switch event.Action {
-	case Reload:
-		jl = &List{}
-	case Del:
-		jl.Del(event.Job)
-	case Add:
-		jl.Add(event.Job)
 	}
 }

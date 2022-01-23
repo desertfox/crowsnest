@@ -10,10 +10,10 @@ import (
 var prefix string = "CROWSNEST_"
 
 type Config struct {
-	Username  string
-	Password  string
-	Path      string
-	DelayJobs int
+	Username  string //Used by job
+	Password  string //""
+	Path      string //Used by joblist
+	DelayJobs int    //Used by scheduler
 }
 
 func LoadFromEnv() *Config {

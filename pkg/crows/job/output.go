@@ -1,6 +1,6 @@
 package job
 
-import "github.com/desertfox/crowsnest/pkg/teams"
+import "github.com/desertfox/crowsnest/pkg/crows/job/teams"
 
 type Output struct {
 	Verbose  int    `yaml:"verbose"`
