@@ -10,30 +10,6 @@ import (
 )
 
 func Test_Load(t *testing.T) {
-	t.Run("Load", func(t *testing.T) {
-		jobFile := testLoad()
-		defer os.Remove(jobFile.Name())
-
-		emptyList := List{}
-		got := emptyList.Load(&config.Config{
-			Path: jobFile.Name(),
-		})
-		want := 1
-
-		if len(got.Jobs) != want {
-			t.Errorf("wrong number of jobs, got:%v, want:%v", got, want)
-		}
-
-		got.Save()
-		got.Load(&config.Config{
-			Path: jobFile.Name(),
-		})
-
-		if len(got.Jobs) != want {
-			t.Errorf("wrong number of jobs: %#v", got)
-		}
-
-	})
 
 	t.Run("Load.Save", func(t *testing.T) {
 		file, err := ioutil.TempFile("", "LoadSave")
@@ -43,10 +19,12 @@ func Test_Load(t *testing.T) {
 		file.Close()
 		defer os.Remove(file.Name())
 
+		testJob := testJob()
 		list := List{
 			Config: &config.Config{
 				Path: file.Name(),
 			},
+			Jobs: []*Job{&testJob},
 		}
 		list.Save()
 
@@ -55,16 +33,67 @@ func Test_Load(t *testing.T) {
 			t.Error(err)
 		}
 
-		if len(got) < 1 {
+		if len(got) == 1 {
 			t.Errorf("wrong number of jobs, got:%v, want:%v", got, "<1")
 		}
 	})
 
-	t.Run("Load.Add", func(t *testing.T) {
-		jobExample := testJob()
+	t.Run("Load", func(t *testing.T) {
+		file, err := ioutil.TempFile("", "Load")
+		if err != nil {
+			log.Fatal(err)
+		}
+		file.Close()
+		defer os.Remove(file.Name())
 
-		got := List{}
-		got.Add(&jobExample)
+		config := &config.Config{
+			Path: file.Name(),
+		}
+
+		testJob := testJob()
+		list := List{
+			Config: config,
+			Jobs:   []*Job{&testJob},
+		}
+		list.Save()
+
+		emptyList := List{
+			Config: config,
+		}
+		emptyList.Load()
+		got := emptyList
+		want := 1
+
+		if len(got.Jobs) != want {
+			t.Errorf("wrong number of jobs, got:%v, want:%v", got, want)
+		}
+
+		got.Save()
+		got.Load()
+
+		if len(got.Jobs) != want {
+			t.Errorf("wrong number of jobs: %#v", got)
+		}
+
+	})
+
+	t.Run("Load.Add", func(t *testing.T) {
+		file, err := ioutil.TempFile("", "LoadAdd")
+		if err != nil {
+			log.Fatal(err)
+		}
+		file.Close()
+		defer os.Remove(file.Name())
+
+		config := &config.Config{
+			Path: file.Name(),
+		}
+
+		got := List{
+			Config: config,
+		}
+		job := testJob()
+		got.Add(&job)
 		want := 1
 
 		if len(got.Jobs) != want {
@@ -99,34 +128,4 @@ func Test_Load(t *testing.T) {
 			t.Errorf("duplicate job returned true, got:%v, want:%v", got.Exists(&jobExample), false)
 		}
 	})
-}
-
-func testLoad() *os.File {
-	file, err := ioutil.TempFile("", "test_yaml")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fakeyaml := testJobYaml()
-	file.Write(fakeyaml)
-	defer file.Close()
-
-	return file
-}
-
-func testJobYaml() []byte {
-	return []byte(`jobs:
-- name: "DB Errors"
-  frequency: 15
-  threshold: 20
-  teamsurl: ""
-  options:
-    host: "http://catfacts.com"
-    type: "relative"
-    streamid: "adfasdfasdf"
-    query: "region:production AND DBI AND error"
-    fields:
-      - "message"
-      - "region"
-      - "kubernetes_namespace_name"`)
 }

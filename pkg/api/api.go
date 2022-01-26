@@ -19,7 +19,7 @@ func New(nest *crows.Nest) Api {
 	}
 }
 
-func (a Api) Run() {
+func (a Api) Load() {
 	a.SetupRoute()
 
 	log.Fatal(http.ListenAndServe(":8080", a.mux))

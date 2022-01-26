@@ -6,9 +6,9 @@ import (
 	"net/http"
 )
 
-type Report struct{}
+type Client struct{}
 
-func (r Report) Send(url, text string) error {
+func (c Client) Send(url, text string) error {
 	card := newCard(text)
 
 	json_data, err := json.Marshal(card)

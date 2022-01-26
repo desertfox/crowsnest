@@ -17,38 +17,37 @@ var (
 	//absoluteStrTempalte string = "%v/api/search/universal/absolute?%v"
 )
 
-type query struct {
-	host, query, streamid string
-	frequnecy             int
-	fields                []string
-	Type                  string
+type Query struct {
+	Host, Query, Streamid, Type string
+	Frequency                   int
+	Fields                      []string
 }
 
-func (q query) String() string {
+func (q Query) String() string {
 	switch q.Type {
 	case "relative":
 		if os.Getenv("CROWSNEST_DEBUG") == "1" {
-			log.Printf(relativeStrTempalte, q.host, q.urlEncodeRelative())
+			log.Printf(relativeStrTempalte, q.Host, q.urlEncodeRelative())
 		}
-		return fmt.Sprintf(relativeStrTempalte, q.host, q.urlEncodeRelative())
+		return fmt.Sprintf(relativeStrTempalte, q.Host, q.urlEncodeRelative())
 	}
 	return ""
 }
 
-func (q query) urlEncodeRelative() string {
+func (q Query) urlEncodeRelative() string {
 	params := url.Values{}
 
-	params.Add("query", q.query)
-	params.Add("range", strconv.Itoa(q.frequnecy*60))
-	params.Add("filter", fmt.Sprintf("streams:%s", q.streamid))
+	params.Add("query", q.Query)
+	params.Add("range", strconv.Itoa(q.Frequency*60))
+	params.Add("filter", fmt.Sprintf("streams:%s", q.Streamid))
 	params.Add("sort", "timestamp:desc")
-	params.Add("fields", strings.Join(q.fields, ", "))
+	params.Add("fields", strings.Join(q.Fields, ", "))
 	params.Add("limit", "10000")
 
 	return params.Encode()
 }
 
-func (q query) execute(authToken string, httpClient *http.Client) ([]byte, error) {
+func (q Query) execute(authToken string, httpClient *http.Client) ([]byte, error) {
 	request, _ := http.NewRequest("GET", q.String(), nil)
 	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
 	request.Header.Set("Authorization", authToken)
@@ -67,13 +66,13 @@ func (q query) execute(authToken string, httpClient *http.Client) ([]byte, error
 	return body, nil
 }
 
-func (q query) toURL() string {
+func (q Query) toURL() string {
 	params := url.Values{}
 
-	params.Add("q", q.query)
+	params.Add("q", q.Query)
 	params.Add("interval", "minute")
 	params.Add("rangetype", "relative")
-	params.Add("relative", strconv.Itoa(q.frequnecy*60))
+	params.Add("relative", strconv.Itoa(q.Frequency*60))
 
-	return fmt.Sprintf("%s/streams/%s/search?%s", q.host, q.streamid, params.Encode())
+	return fmt.Sprintf("%s/streams/%s/search?%s", q.Host, q.Streamid, params.Encode())
 }

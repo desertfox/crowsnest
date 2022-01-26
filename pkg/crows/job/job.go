@@ -2,24 +2,17 @@ package job
 
 import (
 	"fmt"
-	"net/http"
 
 	"github.com/desertfox/crowsnest/pkg/config"
-	"github.com/desertfox/crowsnest/pkg/crows/job/output"
 	"github.com/desertfox/crowsnest/pkg/crows/job/search"
 )
 
-var (
-	httpClient *http.Client = &http.Client{}
-)
-
 type Job struct {
-	Name      string        `yaml:"name"`
-	Host      string        `yaml:"host"`
-	Frequency int           `yaml:"frequency"`
-	Search    search.Search `yaml:"search"`
-	Output    output.Output `yaml:"output"`
-	Config    *config.Config
+	Name      string         `yaml:"name"`
+	Host      string         `yaml:"host"`
+	Frequency int            `yaml:"frequency"`
+	Search    search.Search  `yaml:"search"`
+	Config    *config.Config `yaml:"-"`
 }
 
 // S(un,pw) -> C(S(un,pw)) -> O(url)
@@ -35,13 +28,13 @@ func (j Job) Func() func() {
 }
 
 func (j Job) Run() {
-	j.Search.Run(j.Host, j.Config.Username, j.Config.Password, j.Frequency, httpClient)
+	j.Search.Run(j.Frequency)
 }
 
 func (j Job) Send() {
-	if j.Output.IsVerbose() || j.Search.Condition.IsAlert() {
-		j.Output.Send(
-			j.Output.URL,
+	if j.Search.Output.IsVerbose() || j.Search.Condition.IsAlert() {
+		j.Search.Output.Send(
+			j.Search.Output.URL,
 			j.buildText(j.Search.BuildURL()),
 		)
 	}

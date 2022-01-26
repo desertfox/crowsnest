@@ -8,7 +8,7 @@ import (
 type Condition struct {
 	Threshold int    `yaml:"threshold"`
 	State     string `yaml:"state"`
-	Count     int
+	Count     int    `yaml:"-"`
 }
 
 func (c Condition) IsAlert() bool {
@@ -29,7 +29,7 @@ func (c Condition) IsAlertText() string {
 	return fmt.Sprintf("✔️%d %s= %d✔️", c.Count, c.State, c.Threshold)
 }
 
-func (c *Condition) Eval(rawSearch []byte) {
+func (c *Condition) Measure(rawSearch []byte) {
 	count := bytes.Count(rawSearch, []byte("\n"))
 	if count > 1 {
 		count -= 1

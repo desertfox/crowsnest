@@ -4,10 +4,17 @@ import (
 	"errors"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/desertfox/crowsnest/pkg/config"
+	"github.com/desertfox/crowsnest/pkg/graylog"
+	"github.com/desertfox/crowsnest/pkg/teams"
 	"gopkg.in/yaml.v2"
+)
+
+var (
+	httpClient *http.Client = &http.Client{}
 )
 
 type List struct {
@@ -15,9 +22,7 @@ type List struct {
 	Config *config.Config
 }
 
-func (l *List) Load(config *config.Config) *List {
-	l.Config = config
-
+func (l *List) Load() {
 	file, err := ioutil.ReadFile(l.Config.Path)
 	if err != nil {
 		log.Fatalf("unable to read file %s", l.Config.Path)
@@ -40,8 +45,6 @@ func (l *List) Load(config *config.Config) *List {
 			l.Add(job)
 		}
 	}
-
-	return l
 }
 
 func (l List) Save() {
@@ -62,6 +65,15 @@ func (l *List) Add(j *Job) error {
 	}
 
 	j.Config = l.Config
+
+	j.Search.Client = graylog.New(
+		j.Config.Username,
+		j.Config.Password,
+		j.Host,
+		httpClient,
+	)
+
+	j.Search.Output.Client = teams.Client{}
 
 	l.Jobs = append(l.Jobs, j)
 
@@ -90,4 +102,9 @@ func (l *List) Del(delJob *Job) {
 			break
 		}
 	}
+}
+
+func (l *List) Clear() *List {
+	l.Jobs = []*Job{}
+	return l
 }

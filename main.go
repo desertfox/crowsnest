@@ -2,12 +2,14 @@ package main
 
 import (
 	"log"
+	"time"
 
 	"github.com/desertfox/crowsnest/pkg/api"
 	"github.com/desertfox/crowsnest/pkg/config"
 	"github.com/desertfox/crowsnest/pkg/crows"
 	"github.com/desertfox/crowsnest/pkg/crows/job"
 	"github.com/desertfox/crowsnest/pkg/crows/schedule"
+	"github.com/go-co-op/gocron"
 )
 
 const (
@@ -20,15 +22,22 @@ func main() {
 	config := &config.Config{}
 	config.Load()
 
-	list := &job.List{}
-	list.Load(config)
+	list := &job.List{
+		Config: config,
+	}
+	list.Load()
 
-	scheduler := &schedule.Schedule{}
-	scheduler.Load(config.DelayJobs)
+	scheduler := &schedule.Schedule{
+		Config: config,
+		Gocron: gocron.NewScheduler(time.UTC),
+	}
+	scheduler.Load(list)
 
-	nest := &crows.Nest{}
-	nest.Load(config, scheduler, list)
-	nest.Run()
+	nest := &crows.Nest{
+		List:      list,
+		Scheduler: scheduler,
+	}
+	nest.Load()
 
-	api.New(nest).Run()
+	api.New(nest).Load()
 }

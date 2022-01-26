@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/desertfox/crowsnest/pkg/crows/job"
-	"github.com/desertfox/crowsnest/pkg/crows/job/output"
+
 	"github.com/desertfox/crowsnest/pkg/crows/job/search"
 )
 
@@ -36,10 +36,6 @@ func Test_translate(t *testing.T) {
 			Name:      name,
 			Frequency: frequency,
 			Host:      host,
-			Output: output.Output{
-				URL:     outputLink,
-				Verbose: verbose,
-			},
 			Search: search.Search{
 				Type:     searchTypeRelative,
 				Streamid: streamid,
@@ -47,6 +43,10 @@ func Test_translate(t *testing.T) {
 				Fields:   fields,
 				Condition: search.Condition{
 					Threshold: threshold,
+				},
+				Output: search.Output{
+					URL:     outputLink,
+					Verbose: verbose,
 				},
 			},
 		}
@@ -63,8 +63,8 @@ func Test_translate(t *testing.T) {
 			t.Errorf("error got: %#v, want %#v", got.Search.Condition.Threshold, want.Search.Condition.Threshold)
 		}
 
-		if got.Output.URL != want.Output.URL {
-			t.Errorf("error got: %#v, want %#v", got.Output.URL, want.Output.URL)
+		if got.Search.Output.URL != want.Search.Output.URL {
+			t.Errorf("error got: %#v, want %#v", got.Search.Output.URL, want.Search.Output.URL)
 		}
 
 		if got.Host != want.Host {

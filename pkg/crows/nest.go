@@ -1,51 +1,73 @@
 package crows
 
 import (
+	"sync"
 	"time"
 
-	"github.com/desertfox/crowsnest/pkg/config"
 	"github.com/desertfox/crowsnest/pkg/crows/job"
 	"github.com/desertfox/crowsnest/pkg/crows/schedule"
 )
 
+var (
+	loadEventCallbackOnce sync.Once
+)
+
+type action int
+
+const (
+	Add action = iota
+	Del
+	Reload
+)
+
+type Event struct {
+	Action action
+	Value  string
+	Job    *job.Job
+}
+
 type Nest struct {
-	config        *config.Config
-	list          *job.List
-	scheduler     *schedule.Schedule
-	eventCallback chan Event
+	List          *job.List
+	Scheduler     *schedule.Schedule
+	EventCallback chan Event
 }
 
-func (n *Nest) Load(config *config.Config, scheduler *schedule.Schedule, list *job.List) *Nest {
-	return &Nest{
-		config:        config,
-		list:          list,
-		scheduler:     scheduler,
-		eventCallback: make(chan Event),
-	}
-}
-
-func (n Nest) Run() {
+//All the nest methods bellow are used to expose schedule and job state to API
+func (n Nest) Load() {
 	loadEventCallback(n)
-
-	n.scheduler.Run(n.list)
 }
-
-/*
-All the nest methods bellow are used to expose schedule and job state to API
-*/
 
 func (n Nest) Jobs() []*job.Job {
-	return n.list.Jobs
+	return n.List.Jobs
 }
 
 func (n Nest) NextRun(job *job.Job) time.Time {
-	return n.scheduler.NextRun(job)
+	return n.Scheduler.NextRun(job)
 }
 
 func (n Nest) LastRun(job *job.Job) time.Time {
-	return n.scheduler.LastRun(job)
+	return n.Scheduler.LastRun(job)
 }
 
-func (n Nest) EventCallback() chan Event {
-	return n.eventCallback
+func loadEventCallback(n Nest) {
+	loadEventCallbackOnce.Do(func() {
+		go func() {
+			n := n
+			event := <-n.EventCallback
+
+			switch event.Action {
+			case Reload:
+				n.List.Clear()
+				n.List.Load()
+			case Del:
+				n.List.Del(event.Job)
+			case Add:
+				n.List.Add(event.Job)
+			}
+
+			n.List.Save()
+
+			n.Scheduler.ClearAndLoad(n.List)
+		}()
+	})
 }

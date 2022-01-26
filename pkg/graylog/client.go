@@ -6,11 +6,12 @@ import (
 
 type Client struct {
 	session    *session
-	query      query
+	query      Query
+	host       string
 	httpClient *http.Client
 }
 
-func New(un, pw, h, q, streamid string, frequency int, fields []string, t string, httpClient *http.Client) *Client {
+func New(un, pw, h string, httpClient *http.Client) *Client {
 	return &Client{
 		session: newSession(
 			h,
@@ -18,19 +19,21 @@ func New(un, pw, h, q, streamid string, frequency int, fields []string, t string
 			pw,
 			httpClient,
 		),
-		query: query{
-			h,
-			q,
-			streamid,
-			frequency,
-			fields,
-			t,
-		},
+		host:       h,
 		httpClient: httpClient,
 	}
 }
 
-func (c Client) Execute() ([]byte, error) {
+func (c *Client) Execute(query, streamid, typ string, frequency int, fields []string) ([]byte, error) {
+	c.query = Query{
+		Host:      c.host,
+		Query:     query,
+		Streamid:  streamid,
+		Frequency: frequency,
+		Fields:    fields,
+		Type:      typ,
+	}
+
 	raw, err := c.query.execute(c.session.authHeader(), c.httpClient)
 	if err != nil {
 		return []byte{}, err

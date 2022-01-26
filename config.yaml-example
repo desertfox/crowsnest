@@ -2,9 +2,6 @@ jobs:
 - name: test 
   frequency: 0 
   host: https://something.com
-  output:
-    verbose: 0
-    teamsurl: https://teamsurl.com
   search:
     type: ""
     streamid: "55555"
@@ -15,3 +12,6 @@ jobs:
     condition:
       threshold: 0
       state: ">"
+    output:
+      verbose: 0
+      teamsurl: https://teamsurl.com

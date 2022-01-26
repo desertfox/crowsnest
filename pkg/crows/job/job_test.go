@@ -1,7 +1,6 @@
 package job
 
 import (
-	"github.com/desertfox/crowsnest/pkg/crows/job/output"
 	"github.com/desertfox/crowsnest/pkg/crows/job/search"
 )
 
@@ -19,10 +18,10 @@ func testJob() Job {
 				Threshold: 1,
 				State:     ">",
 			},
-		},
-		Output: output.Output{
-			Verbose: 1,
-			URL:     "https://mircosoft.com",
+			Output: search.Output{
+				Verbose: 1,
+				URL:     "https://mircosoft.com",
+			},
 		},
 	}
 }
