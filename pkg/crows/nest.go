@@ -8,20 +8,18 @@ import (
 	"github.com/desertfox/crowsnest/pkg/crows/schedule"
 )
 
-var (
-	loadEventCallbackOnce sync.Once
-)
-
-type action int
-
 const (
-	Add action = iota
+	Add int = iota
 	Del
 	Reload
 )
 
+var (
+	loadEventCallbackOnce sync.Once
+)
+
 type Event struct {
-	Action action
+	Action int
 	Value  string
 	Job    *job.Job
 }
@@ -34,22 +32,6 @@ type Nest struct {
 
 //All the nest methods bellow are used to expose schedule and job state to API
 func (n Nest) Load() {
-	loadEventCallback(n)
-}
-
-func (n Nest) Jobs() []*job.Job {
-	return n.List.Jobs
-}
-
-func (n Nest) NextRun(job *job.Job) time.Time {
-	return n.Scheduler.NextRun(job)
-}
-
-func (n Nest) LastRun(job *job.Job) time.Time {
-	return n.Scheduler.LastRun(job)
-}
-
-func loadEventCallback(n Nest) {
 	loadEventCallbackOnce.Do(func() {
 		go func() {
 			n := n
@@ -67,7 +49,19 @@ func loadEventCallback(n Nest) {
 
 			n.List.Save()
 
-			n.Scheduler.ClearAndLoad(n.List)
+			n.Scheduler.Load(n.List)
 		}()
 	})
+}
+
+func (n Nest) Jobs() []*job.Job {
+	return n.List.Jobs
+}
+
+func (n Nest) NextRun(job *job.Job) time.Time {
+	return n.Scheduler.NextRun(job)
+}
+
+func (n Nest) LastRun(job *job.Job) time.Time {
+	return n.Scheduler.LastRun(job)
 }

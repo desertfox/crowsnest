@@ -4,34 +4,27 @@ import (
 	"log"
 	"time"
 
-	"github.com/desertfox/crowsnest/pkg/config"
 	"github.com/desertfox/crowsnest/pkg/crows/job"
 	"github.com/go-co-op/gocron"
 )
 
 type Schedule struct {
-	Gocron *gocron.Scheduler
-	Config *config.Config
+	Gocron    *gocron.Scheduler
+	DelayJobs int
 }
 
 func (s *Schedule) Load(list *job.List) {
+	s.Gocron.Clear()
+
 	for i, j := range list.Jobs {
 		s.Gocron.Every(j.Frequency).Minutes().Tag(j.Name).Do(j.Func())
 
 		log.Printf("⏲️ Scheduled Job %d: %s for every %d min(s)", i, j.Name, j.Frequency)
 
-		time.Sleep(time.Duration(s.Config.DelayJobs) * time.Second)
+		time.Sleep(time.Duration(s.DelayJobs) * time.Second)
 	}
 
 	s.Gocron.StartAsync()
-}
-
-func (s *Schedule) ClearAndLoad(list *job.List) {
-	log.Printf("Schedule Clearing Jobs : %v", len(s.Gocron.Jobs()))
-
-	s.Gocron.Clear()
-
-	s.Load(list)
 }
 
 func (s Schedule) NextRun(job *job.Job) time.Time {

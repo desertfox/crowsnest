@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/desertfox/crowsnest/pkg/config"
+	"github.com/desertfox/crowsnest/config"
 )
 
 func Test_Load(t *testing.T) {

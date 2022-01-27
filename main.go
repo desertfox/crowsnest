@@ -4,8 +4,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/desertfox/crowsnest/pkg/api"
-	"github.com/desertfox/crowsnest/pkg/config"
+	"github.com/desertfox/crowsnest/api"
+	"github.com/desertfox/crowsnest/config"
 	"github.com/desertfox/crowsnest/pkg/crows"
 	"github.com/desertfox/crowsnest/pkg/crows/job"
 	"github.com/desertfox/crowsnest/pkg/crows/schedule"
@@ -28,8 +28,8 @@ func main() {
 	list.Load()
 
 	scheduler := &schedule.Schedule{
-		Config: config,
-		Gocron: gocron.NewScheduler(time.UTC),
+		DelayJobs: config.DelayJobs,
+		Gocron:    gocron.NewScheduler(time.UTC),
 	}
 	scheduler.Load(list)
 

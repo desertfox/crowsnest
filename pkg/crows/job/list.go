@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/desertfox/crowsnest/pkg/config"
-	"github.com/desertfox/crowsnest/pkg/graylog"
-	"github.com/desertfox/crowsnest/pkg/teams"
+	"github.com/desertfox/crowsnest/config"
+	"github.com/desertfox/crowsnest/graylog"
+	"github.com/desertfox/crowsnest/teams"
 	"gopkg.in/yaml.v2"
 )
 
