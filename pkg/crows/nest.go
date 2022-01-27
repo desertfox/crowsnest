@@ -1,6 +1,7 @@
 package crows
 
 import (
+	"log"
 	"sync"
 	"time"
 
@@ -31,11 +32,12 @@ type Nest struct {
 }
 
 //All the nest methods bellow are used to expose schedule and job state to API
-func (n Nest) Load() {
+func (n *Nest) Load() {
 	loadEventCallbackOnce.Do(func() {
-		go func() {
-			n := n
+		go func(n *Nest) {
 			event := <-n.EventCallback
+
+			log.Printf("event %#v", event)
 
 			switch event.Action {
 			case Reload:
@@ -50,7 +52,7 @@ func (n Nest) Load() {
 			n.List.Save()
 
 			n.Scheduler.Load(n.List)
-		}()
+		}(n)
 	})
 }
 

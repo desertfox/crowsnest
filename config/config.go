@@ -16,14 +16,13 @@ type Config struct {
 	DelayJobs int    //Used by scheduler
 }
 
-func (c *Config) Load() *Config {
-	c = &Config{
+func Load() *Config {
+	return &Config{
 		Username:  checkEnvStr("username", true),
 		Password:  checkEnvStr("password", true),
 		Path:      checkEnvStr("config", true),
 		DelayJobs: checkEnvInt("delay", false),
 	}
-	return c
 }
 
 func loadEnv(s string) string {

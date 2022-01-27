@@ -16,6 +16,7 @@ type NewJobReq struct {
 	Name       string
 	QueryLink  string
 	OutputLink string
+	OutputName string
 	Threshold  int
 	State      string
 	Verbose    int
@@ -34,10 +35,30 @@ func (a Api) createJob(w http.ResponseWriter, r *http.Request) {
 		log.Fatal("error translating threshold to int " + err.Error())
 	}
 
+	var (
+		outputlink    string
+		outputname    string
+		existRoomName string = r.FormValue("exist")
+	)
+
+	if existRoomName != "" {
+		for _, j := range a.nest.Jobs() {
+			if j.Search.Output.Teams.Name == existRoomName {
+				outputlink = j.Search.Output.Teams.Url
+				outputname = j.Search.Output.Teams.Name
+				break
+			}
+		}
+	} else {
+		outputlink = r.FormValue("outputlink")
+		outputname = r.FormValue("outputname")
+	}
+
 	njr := NewJobReq{
 		Name:       r.FormValue("name"),
 		QueryLink:  r.FormValue("querylink"),
-		OutputLink: r.FormValue("outputlink"),
+		OutputLink: outputlink,
+		OutputName: outputname,
 		Threshold:  threshold,
 		State:      r.FormValue("state"),
 		Verbose:    verbose,
@@ -69,9 +90,20 @@ func (a Api) getJobForm(w http.ResponseWriter) {
 	<label>GrayLog Query Link:</label><br />
 	<textarea id="querylink" name="querylink" value="https://graylogquery.com?something"></textarea><br /><br />
 
+	<label>Teams Room Name/Label:</label>
+	<input type="text" name="outputname"> <br>
 	<label>Teams URL:</label>
 	<input type="text" name="outputlink" value="https://teamsurl.com">
 	<a href="https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook" target="_blank">webhook instructions</a>
+	<br>
+
+	OR<br>
+	<select name="exist">
+		<option value="" selected>None</option>
+		{{range .RoomNames}}
+			<option value="{{ . }}">{{ . }}</option>
+		{{end}}
+	</select>
 	<br>
 
 	<br>
@@ -84,7 +116,6 @@ func (a Api) getJobForm(w http.ResponseWriter) {
 
 	<label>Number of cases to alert(n):</label>
 	<input type="text" name="threshold" value="0"><br /><br />
-
 
 	<label>Condition:</label>
 	<select name="state">
@@ -102,7 +133,16 @@ func (a Api) getJobForm(w http.ResponseWriter) {
 		log.Fatalln(err.Error())
 	}
 
-	tmpl.Execute(w, nil)
+	var roomNames []string
+	for _, j := range a.nest.Jobs() {
+		roomNames = append(roomNames, j.Search.Output.Teams.Name)
+	}
+
+	tmpl.Execute(w, struct {
+		RoomNames []string
+	}{
+		roomNames,
+	})
 }
 
 func (a Api) getStatus(w http.ResponseWriter) {

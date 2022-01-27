@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 	"time"
 
 	"github.com/desertfox/crowsnest/api"
@@ -13,19 +14,23 @@ import (
 )
 
 const (
-	version string = "v1.6"
+	version string = "v1.7"
 )
 
 func main() {
 	log.Printf("Crowsnest Startup Version %s ", version)
 
-	config := &config.Config{}
-	config.Load()
+	config := config.Load()
 
-	list := &job.List{
-		Config: config,
+	var list *job.List
+	if os.Getenv("CROWSNEST_DEBUG") == "1" {
+		list = &job.List{}
+	} else {
+		list = &job.List{
+			Config: config,
+		}
+		list.Load()
 	}
-	list.Load()
 
 	scheduler := &schedule.Schedule{
 		DelayJobs: config.DelayJobs,
@@ -34,8 +39,9 @@ func main() {
 	scheduler.Load(list)
 
 	nest := &crows.Nest{
-		List:      list,
-		Scheduler: scheduler,
+		List:          list,
+		Scheduler:     scheduler,
+		EventCallback: make(chan crows.Event),
 	}
 	nest.Load()
 

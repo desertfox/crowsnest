@@ -38,7 +38,7 @@ func (s *Search) Run(frequency int) {
 func (s *Search) Send(name string, frequency int) {
 	if s.Output.IsVerbose() || s.Condition.IsAlert() {
 		s.Output.Send(
-			s.Output.URL,
+			s.Output.URL(),
 			s.buildText(name, frequency),
 		)
 	}

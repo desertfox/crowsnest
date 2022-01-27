@@ -1,8 +1,12 @@
 package search
 
+type Teams struct {
+	Name string `yaml:"name"`
+	Url  string `yaml:"url"`
+}
 type Output struct {
 	Verbose int           `yaml:"verbose"`
-	URL     string        `yaml:"teamsurl"`
+	Teams   Teams         `yaml:"teams"`
 	Client  OutputService `yaml:"-"`
 }
 type OutputService interface {
@@ -15,4 +19,8 @@ func (o Output) IsVerbose() bool {
 
 func (o Output) Send(url string, text string) {
 	o.Client.Send(url, text)
+}
+
+func (o Output) URL() string {
+	return o.Teams.Url
 }

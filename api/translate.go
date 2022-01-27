@@ -55,7 +55,10 @@ func translate(njr NewJobReq) (job.Job, error) {
 			},
 			Output: search.Output{
 				Verbose: njr.Verbose,
-				URL:     njr.OutputLink,
+				Teams: search.Teams{
+					Url:  njr.OutputLink,
+					Name: njr.OutputName,
+				},
 			},
 		},
 	}, nil

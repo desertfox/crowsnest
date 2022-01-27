@@ -25,7 +25,7 @@ type List struct {
 func (l *List) Load() {
 	file, err := ioutil.ReadFile(l.Config.Path)
 	if err != nil {
-		log.Fatalf("unable to read file %s", l.Config.Path)
+		log.Fatalf("unable to read file %v, %s", l.Config.Path, err)
 	}
 
 	data := make(map[string][]*Job)

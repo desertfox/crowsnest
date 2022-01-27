@@ -21,12 +21,13 @@ var (
 	q                  string   = "\"Error Checking Out\""
 	fields             []string = []string{"source", "message"}
 	verbose            int      = 1
+	room                        = "test room"
 )
 
 func Test_translate(t *testing.T) {
 
 	t.Run("translate", func(t *testing.T) {
-		njr := NewJobReq{name, relativeQueryLink, outputLink, threshold, "<", verbose}
+		njr := NewJobReq{name, relativeQueryLink, outputLink, room, threshold, "<", verbose}
 		got, gotErr := translate(njr)
 		if gotErr != nil {
 			t.Errorf("error got: %#v", gotErr)
@@ -45,7 +46,10 @@ func Test_translate(t *testing.T) {
 					Threshold: threshold,
 				},
 				Output: search.Output{
-					URL:     outputLink,
+					Teams: search.Teams{
+						Url:  outputLink,
+						Name: room,
+					},
 					Verbose: verbose,
 				},
 			},
@@ -63,8 +67,8 @@ func Test_translate(t *testing.T) {
 			t.Errorf("error got: %#v, want %#v", got.Search.Condition.Threshold, want.Search.Condition.Threshold)
 		}
 
-		if got.Search.Output.URL != want.Search.Output.URL {
-			t.Errorf("error got: %#v, want %#v", got.Search.Output.URL, want.Search.Output.URL)
+		if got.Search.Output.URL() != want.Search.Output.URL() {
+			t.Errorf("error got: %#v, want %#v", got.Search.Output.URL(), want.Search.Output.URL())
 		}
 
 		if got.Host != want.Host {

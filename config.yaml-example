@@ -14,4 +14,6 @@ jobs:
       state: ">"
     output:
       verbose: 0
-      teamsurl: https://teamsurl.com
+      teams:
+        url: https://teamsurl.com
+        name: "Teams room name" 

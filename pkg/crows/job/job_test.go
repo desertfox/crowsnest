@@ -20,7 +20,10 @@ func testJob() Job {
 			},
 			Output: search.Output{
 				Verbose: 1,
-				URL:     "https://mircosoft.com",
+				Teams: search.Teams{
+					Url:  "https://mircosoft.com",
+					Name: "Room Name",
+				},
 			},
 		},
 	}
