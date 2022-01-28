@@ -22,10 +22,11 @@ type List struct {
 	Config *config.Config
 }
 
-func (l *List) Load() {
+func (l *List) Load() *List {
 	file, err := ioutil.ReadFile(l.Config.Path)
 	if err != nil {
-		log.Fatalf("unable to read file %v, %s", l.Config.Path, err)
+		log.Printf("error unable to config file: %v, error: %s", l.Config.Path, err)
+		return &List{}
 	}
 
 	data := make(map[string][]*Job)
@@ -45,6 +46,8 @@ func (l *List) Load() {
 			l.Add(job)
 		}
 	}
+
+	return l
 }
 
 func (l List) Save() {
