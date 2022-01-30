@@ -1,5 +1,7 @@
 package job
 
+import "fmt"
+
 type Teams struct {
 	Name string `yaml:"name"`
 	Url  string `yaml:"url"`
@@ -17,8 +19,23 @@ func (o Output) IsVerbose() bool {
 	return o.Verbose > 0
 }
 
-func (o Output) Send(url string, text string) {
-	o.Client.Send(url, text)
+func (o Output) Send(name string, frequency int, s Search, c Condition, r Result) {
+	if o.IsVerbose() || c.IsAlert(r) {
+		o.Client.Send(
+			o.URL(),
+			fmt.Sprintf("🔎 Name  : %s\n\r"+
+				"⌚ Freq  : %d\n\r"+
+				"📜 Status: %s\n\r"+
+				"🧮 Count : %d\n\r"+
+				"🔗 Link  : [GrayLog](%s)",
+				name,
+				frequency,
+				c.IsAlertText(r),
+				r.Count,
+				s.BuildURL(),
+			),
+		)
+	}
 }
 
 func (o Output) URL() string {

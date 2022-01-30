@@ -10,16 +10,16 @@ func testJob() Job {
 			Streamid: "abcd12345",
 			Query:    "error",
 			Fields:   []string{"source", "message"},
-			Condition: Condition{
-				Threshold: 1,
-				State:     ">",
-			},
-			Output: Output{
-				Verbose: 1,
-				Teams: Teams{
-					Url:  "https://mircosoft.com",
-					Name: "Room Name",
-				},
+		},
+		Condition: Condition{
+			Threshold: 1,
+			State:     ">",
+		},
+		Output: Output{
+			Verbose: 1,
+			Teams: Teams{
+				Url:  "https://mircosoft.com",
+				Name: "Room Name",
 			},
 		},
 	}

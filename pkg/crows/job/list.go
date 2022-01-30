@@ -61,16 +61,16 @@ func (l *List) Add(j *Job) error {
 		return errors.New("job exists")
 	}
 
-	j.Config = l.Config
-
 	j.Search.Client = graylog.New(
-		j.Config.Username,
-		j.Config.Password,
+		l.Config.Username,
+		l.Config.Password,
 		j.Host,
 		httpClient,
 	)
 
-	j.Search.Output.Client = teams.Client{}
+	j.Output.Client = teams.Client{}
+
+	j.History = newHistory()
 
 	l.Jobs = append(l.Jobs, j)
 

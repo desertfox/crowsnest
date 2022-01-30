@@ -3,6 +3,7 @@ package job
 import (
 	"bytes"
 	"fmt"
+	"time"
 )
 
 type Condition struct {
@@ -28,10 +29,13 @@ func (c Condition) IsAlertText(r Result) string {
 	return fmt.Sprintf("✔️%d %s= %d✔️", r.Count, c.State, c.Threshold)
 }
 
-func (c *Condition) Parse(rawSearch []byte) int {
+func (c *Condition) Parse(rawSearch []byte) Result {
 	count := bytes.Count(rawSearch, []byte("\n"))
 	if count > 1 {
 		count -= 1
 	}
-	return count
+	return Result{
+		Count: count,
+		When:  time.Now(),
+	}
 }

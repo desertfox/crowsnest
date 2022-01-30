@@ -53,5 +53,5 @@ func ExampleCondition() {
 		Threshold: 1,
 		State:     "<",
 	})
-	//Output: {1 < 0}
+	//Output: {1 <}
 }

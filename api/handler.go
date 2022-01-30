@@ -43,9 +43,9 @@ func (a Api) createJob(w http.ResponseWriter, r *http.Request) {
 
 	if existRoomName != "" {
 		for _, j := range a.nest.Jobs() {
-			if j.Search.Output.Teams.Name == existRoomName {
-				outputlink = j.Search.Output.Teams.Url
-				outputname = j.Search.Output.Teams.Name
+			if j.Output.Teams.Name == existRoomName {
+				outputlink = j.Output.Teams.Url
+				outputname = j.Output.Teams.Name
 				break
 			}
 		}
@@ -135,7 +135,7 @@ func (a Api) getJobForm(w http.ResponseWriter) {
 
 	var roomNames []string
 	for _, j := range a.nest.Jobs() {
-		roomNames = append(roomNames, j.Search.Output.Teams.Name)
+		roomNames = append(roomNames, j.Output.Teams.Name)
 	}
 
 	tmpl.Execute(w, struct {
@@ -146,15 +146,21 @@ func (a Api) getJobForm(w http.ResponseWriter) {
 }
 
 func (a Api) getStatus(w http.ResponseWriter) {
-	var (
-		output template.HTML
-	)
+	var output template.HTML
 	for _, j := range a.nest.Jobs() {
+		var results template.HTML
+		for _, r := range j.History.Results() {
+			results += template.HTML(fmt.Sprintf(`When: %s, Count: %d<br>`, r.When, r.Count))
+		}
+
 		output += template.HTML(fmt.Sprintf(`
 				<div style="border-style: solid">
 				<label>Name: %v</label><br>
 				<label>Frequency: %v min(s)</label><br>
 				<label>LastRun: %v</label><br>
+				<label>Results:<br>
+				%s
+				</label>
 				<label>NextRun: %v</label><br>
 				<form method="POST" action="/delete">
 					<input type="hidden" name="name" value="%v">
@@ -165,6 +171,7 @@ func (a Api) getStatus(w http.ResponseWriter) {
 			j.Name,
 			j.Frequency,
 			a.nest.NextRun(j),
+			results,
 			a.nest.LastRun(j),
 			j.Name,
 		))

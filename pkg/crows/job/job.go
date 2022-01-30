@@ -1,18 +1,17 @@
 package job
 
 import (
-	"time"
-
 	"github.com/desertfox/crowsnest/config"
 )
 
 type Job struct {
-	Name      string         `yaml:"name"`
-	Host      string         `yaml:"host"`
-	Frequency int            `yaml:"frequency"`
-	Search    Search         `yaml:"search"`
-	Config    *config.Config `yaml:"-"`
-	Results   Results        `yaml:"-"`
+	Name      string    `yaml:"name"`
+	Host      string    `yaml:"host"`
+	Frequency int       `yaml:"frequency"`
+	Search    Search    `yaml:"search"`
+	Condition Condition `yaml:"condition"`
+	Output    Output    `yaml:"output"`
+	History   History   `yaml:"-"`
 }
 
 type List struct {
@@ -26,15 +25,10 @@ func (j *Job) Func() func() {
 
 		rawCSV := j.Search.Run(j.Frequency)
 
-		count := j.Search.Condition.Parse(rawCSV)
+		result := j.Condition.Parse(rawCSV)
 
-		result := Result{
-			Count: count,
-			When:  time.Now(),
-		}
+		j.History.Push(result)
 
-		j.Results = append(j.Results, result)
-
-		j.Search.Send(j.Name, j.Frequency, result)
+		j.Output.Send(j.Name, j.Frequency, j.Search, j.Condition, result)
 	}
 }

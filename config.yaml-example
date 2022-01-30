@@ -9,11 +9,11 @@ jobs:
     fields:
     - message
     - source
-    condition:
-      threshold: 0
-      state: ">"
-    output:
-      verbose: 0
-      teams:
-        url: https://teamsurl.com
-        name: "Teams room name" 
+  condition:
+    threshold: 0
+    state: ">"
+  output:
+    verbose: 0
+    teams:
+      url: https://teamsurl.com
+      name: "Teams room name"

@@ -42,22 +42,21 @@ func translate(njr NewJobReq) (job.Job, error) {
 		Name:      njr.Name,
 		Host:      "https://" + urlObj.Hostname(),
 		Frequency: frequency / 60,
-
 		Search: job.Search{
 			Type:     typeSearch,
 			Streamid: getSteamId(urlObj.EscapedPath()),
 			Query:    parsedQuery["q"][0],
 			Fields:   fields,
-			Condition: job.Condition{
-				Threshold: njr.Threshold,
-				State:     njr.State,
-			},
-			Output: job.Output{
-				Verbose: njr.Verbose,
-				Teams: job.Teams{
-					Url:  njr.OutputLink,
-					Name: njr.OutputName,
-				},
+		},
+		Condition: job.Condition{
+			Threshold: njr.Threshold,
+			State:     njr.State,
+		},
+		Output: job.Output{
+			Verbose: njr.Verbose,
+			Teams: job.Teams{
+				Url:  njr.OutputLink,
+				Name: njr.OutputName,
 			},
 		},
 	}, nil
