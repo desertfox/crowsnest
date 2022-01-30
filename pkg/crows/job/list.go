@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/desertfox/crowsnest/config"
 	"github.com/desertfox/crowsnest/graylog"
 	"github.com/desertfox/crowsnest/teams"
 	"gopkg.in/yaml.v2"
@@ -16,11 +15,6 @@ import (
 var (
 	httpClient *http.Client = &http.Client{}
 )
-
-type List struct {
-	Jobs   []*Job
-	Config *config.Config
-}
 
 func (l *List) Load() *List {
 	file, err := ioutil.ReadFile(l.Config.Path)

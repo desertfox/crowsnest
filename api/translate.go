@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/desertfox/crowsnest/pkg/crows/job"
-	"github.com/desertfox/crowsnest/pkg/crows/job/search"
 )
 
 func translate(njr NewJobReq) (job.Job, error) {
@@ -44,18 +43,18 @@ func translate(njr NewJobReq) (job.Job, error) {
 		Host:      "https://" + urlObj.Hostname(),
 		Frequency: frequency / 60,
 
-		Search: search.Search{
+		Search: job.Search{
 			Type:     typeSearch,
 			Streamid: getSteamId(urlObj.EscapedPath()),
 			Query:    parsedQuery["q"][0],
 			Fields:   fields,
-			Condition: search.Condition{
+			Condition: job.Condition{
 				Threshold: njr.Threshold,
 				State:     njr.State,
 			},
-			Output: search.Output{
+			Output: job.Output{
 				Verbose: njr.Verbose,
-				Teams: search.Teams{
+				Teams: job.Teams{
 					Url:  njr.OutputLink,
 					Name: njr.OutputName,
 				},

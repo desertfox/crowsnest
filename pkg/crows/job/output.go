@@ -1,4 +1,4 @@
-package search
+package job
 
 type Teams struct {
 	Name string `yaml:"name"`

@@ -4,8 +4,6 @@ import (
 	"testing"
 
 	"github.com/desertfox/crowsnest/pkg/crows/job"
-
-	"github.com/desertfox/crowsnest/pkg/crows/job/search"
 )
 
 var (
@@ -37,16 +35,16 @@ func Test_translate(t *testing.T) {
 			Name:      name,
 			Frequency: frequency,
 			Host:      host,
-			Search: search.Search{
+			Search: job.Search{
 				Type:     searchTypeRelative,
 				Streamid: streamid,
 				Query:    q,
 				Fields:   fields,
-				Condition: search.Condition{
+				Condition: job.Condition{
 					Threshold: threshold,
 				},
-				Output: search.Output{
-					Teams: search.Teams{
+				Output: job.Output{
+					Teams: job.Teams{
 						Url:  outputLink,
 						Name: room,
 					},

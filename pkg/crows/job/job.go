@@ -1,26 +1,40 @@
 package job
 
 import (
+	"time"
+
 	"github.com/desertfox/crowsnest/config"
-	"github.com/desertfox/crowsnest/pkg/crows/job/search"
 )
 
 type Job struct {
 	Name      string         `yaml:"name"`
 	Host      string         `yaml:"host"`
 	Frequency int            `yaml:"frequency"`
-	Search    search.Search  `yaml:"search"`
+	Search    Search         `yaml:"search"`
 	Config    *config.Config `yaml:"-"`
+	Results   Results        `yaml:"-"`
 }
 
-// S(un,pw) -> C(S(un,pw)) -> O(url)
+type List struct {
+	Jobs   []*Job
+	Config *config.Config
+}
 
-func (j Job) Func() func() {
+func (j *Job) Func() func() {
 	return func() {
 		j := j
 
-		j.Search.Run(j.Frequency)
+		rawCSV := j.Search.Run(j.Frequency)
 
-		j.Search.Send(j.Name, j.Frequency)
+		count := j.Search.Condition.Parse(rawCSV)
+
+		result := Result{
+			Count: count,
+			When:  time.Now(),
+		}
+
+		j.Results = append(j.Results, result)
+
+		j.Search.Send(j.Name, j.Frequency, result)
 	}
 }

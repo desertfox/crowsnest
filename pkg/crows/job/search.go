@@ -1,4 +1,4 @@
-package search
+package job
 
 import (
 	"fmt"
@@ -20,7 +20,7 @@ type Search struct {
 	Client    SearchService `yaml:"-"`
 }
 
-func (s *Search) Run(frequency int) {
+func (s *Search) Run(frequency int) []byte {
 	results, err := s.Client.Execute(
 		s.Query,
 		s.Streamid,
@@ -29,22 +29,23 @@ func (s *Search) Run(frequency int) {
 		s.Fields,
 	)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return []byte{}
 	}
 
-	s.Condition.Measure(results)
+	return results
 }
 
-func (s *Search) Send(name string, frequency int) {
-	if s.Output.IsVerbose() || s.Condition.IsAlert() {
+func (s *Search) Send(name string, frequency int, r Result) {
+	if s.Output.IsVerbose() || s.Condition.IsAlert(r) {
 		s.Output.Send(
 			s.Output.URL(),
-			s.buildText(name, frequency),
+			s.buildText(name, frequency, r),
 		)
 	}
 }
 
-func (s *Search) buildText(name string, frequency int) string {
+func (s *Search) buildText(name string, frequency int, r Result) string {
 	return fmt.Sprintf("🔎 Name  : %s\n\r"+
 		"⌚ Freq  : %d\n\r"+
 		"📜 Status: %s\n\r"+
@@ -52,8 +53,8 @@ func (s *Search) buildText(name string, frequency int) string {
 		"🔗 Link  : [GrayLog](%s)",
 		name,
 		frequency,
-		s.Condition.IsAlertText(),
-		s.Condition.Count,
+		s.Condition.IsAlertText(r),
+		r.Count,
 		s.BuildURL(),
 	)
 }
