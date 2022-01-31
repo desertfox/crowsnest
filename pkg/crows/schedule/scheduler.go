@@ -27,12 +27,12 @@ func (s *Schedule) Load(list *job.List) {
 	s.Gocron.StartAsync()
 }
 
-func (s Schedule) NextRun(job *job.Job) time.Time {
-	return s.getCronByTag(job.Name).NextRun()
+func (s Schedule) NextRun(job *job.Job) string {
+	return s.getCronByTag(job.Name).NextRun().Format(time.RFC822)
 }
 
-func (s Schedule) LastRun(job *job.Job) time.Time {
-	return s.getCronByTag(job.Name).LastRun()
+func (s Schedule) LastRun(job *job.Job) string {
+	return s.getCronByTag(job.Name).LastRun().Format(time.RFC822)
 }
 
 func (s Schedule) getCronByTag(tag string) *gocron.Job {

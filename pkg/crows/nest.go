@@ -1,9 +1,7 @@
 package crows
 
 import (
-	"log"
 	"sync"
-	"time"
 
 	"github.com/desertfox/crowsnest/pkg/crows/job"
 	"github.com/desertfox/crowsnest/pkg/crows/schedule"
@@ -37,8 +35,6 @@ func (n *Nest) Load() {
 		go func(n *Nest) {
 			event := <-n.EventCallback
 
-			log.Printf("event %#v", event)
-
 			switch event.Action {
 			case Reload:
 				n.List.Clear()
@@ -60,10 +56,10 @@ func (n Nest) Jobs() []*job.Job {
 	return n.List.Jobs
 }
 
-func (n Nest) NextRun(job *job.Job) time.Time {
+func (n Nest) NextRun(job *job.Job) string {
 	return n.Scheduler.NextRun(job)
 }
 
-func (n Nest) LastRun(job *job.Job) time.Time {
+func (n Nest) LastRun(job *job.Job) string {
 	return n.Scheduler.LastRun(job)
 }
