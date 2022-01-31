@@ -28,11 +28,21 @@ func (s *Schedule) Load(list *job.List) {
 }
 
 func (s Schedule) NextRun(job *job.Job) string {
-	return s.getCronByTag(job.Name).NextRun().Format(time.RFC822)
+	central, err := time.LoadLocation("America/Chicago")
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	return s.getCronByTag(job.Name).NextRun().In(central).Format(time.RFC822)
 }
 
 func (s Schedule) LastRun(job *job.Job) string {
-	return s.getCronByTag(job.Name).LastRun().Format(time.RFC822)
+	central, err := time.LoadLocation("America/Chicago")
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
+	return s.getCronByTag(job.Name).LastRun().In(central).Format(time.RFC822)
 }
 
 func (s Schedule) getCronByTag(tag string) *gocron.Job {

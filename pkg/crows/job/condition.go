@@ -3,6 +3,7 @@ package job
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"time"
 )
 
@@ -12,7 +13,7 @@ type Condition struct {
 }
 type Result struct {
 	Count int
-	When  time.Time
+	When  string
 }
 
 func (c Condition) IsAlert(r Result) bool {
@@ -38,8 +39,14 @@ func (c *Condition) Parse(rawSearch []byte) Result {
 	if count > 1 {
 		count -= 1
 	}
+
+	central, err := time.LoadLocation("America/Chicago")
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
 	return Result{
 		Count: count,
-		When:  time.Now(),
+		When:  time.Now().In(central).Format(time.RFC822),
 	}
 }

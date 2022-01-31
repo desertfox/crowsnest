@@ -150,7 +150,7 @@ func (a Api) getStatus(w http.ResponseWriter) {
 	for _, j := range a.nest.Jobs() {
 		var results template.HTML
 		for i, r := range j.History.Results() {
-			results += template.HTML(fmt.Sprintf(`Index: %d, When: %s, Count: %d<br>`, i, r.When.Format(time.RFC822), r.Count))
+			results += template.HTML(fmt.Sprintf(`Index: %d, When: %s, Count: %d<br>`, i, r.When, r.Count))
 		}
 
 		output += template.HTML(fmt.Sprintf(`
