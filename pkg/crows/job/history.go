@@ -1,5 +1,7 @@
 package job
 
+import "log"
+
 const maxHistory int = 10
 
 type History struct {
@@ -19,11 +21,17 @@ func (h History) Results() []Result {
 func (h *History) Push(r Result) {
 	results := make([]Result, 0, maxHistory)
 
+	log.Printf("Empty %#v", results)
+
 	results = append(results, r)
+
+	log.Printf("NewOne %#v", results)
 
 	if len(h.results) > 0 {
 		results = append(results, h.results[1:]...)
 	}
+
+	log.Printf("The rest %#v", results)
 
 	h.results = results
 }
