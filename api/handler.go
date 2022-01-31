@@ -170,9 +170,9 @@ func (a Api) getStatus(w http.ResponseWriter) {
 				<br>`,
 			j.Name,
 			j.Frequency,
-			a.nest.NextRun(j),
-			results,
 			a.nest.LastRun(j),
+			results,
+			a.nest.NextRun(j),
 			j.Name,
 		))
 	}
