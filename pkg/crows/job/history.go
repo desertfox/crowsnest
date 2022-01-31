@@ -27,6 +27,8 @@ func (h *History) Push(r Result) {
 
 	log.Printf("NewOne %#v", results)
 
+	log.Printf("Current %#v", h.results[1:])
+
 	if len(h.results) > 0 {
 		results = append(results, h.results[1:]...)
 	}
