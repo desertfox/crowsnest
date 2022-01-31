@@ -10,7 +10,7 @@ type History struct {
 
 func newHistory() *History {
 	return &History{
-		results: make([]Result, 0, maxHistory),
+		results: []Result{},
 	}
 }
 
@@ -19,21 +19,15 @@ func (h History) Results() []Result {
 }
 
 func (h *History) Push(r Result) {
-	results := make([]Result, 0, maxHistory)
+	results := []Result{r}
 
-	log.Printf("Empty %#v", results)
+	results = append(results, h.results...)
 
-	results = append(results, r)
-
-	log.Printf("NewOne %#v", results)
-
-	log.Printf("Current %#v", h.results)
-
-	if len(h.results) > 0 {
-		results = append(results, h.results[1:]...)
+	if len(h.results) >= maxHistory {
+		results = results[:maxHistory]
 	}
 
-	log.Printf("The rest %#v", results)
+	log.Printf("results %#v", results)
 
 	h.results = results
 }
