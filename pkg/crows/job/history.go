@@ -1,22 +1,13 @@
 package job
 
-import (
-	"time"
-)
-
 const maxHistory int = 10
 
 type History struct {
 	results []Result
 }
 
-type Result struct {
-	Count int
-	When  time.Time
-}
-
-func newHistory() History {
-	return History{
+func newHistory() *History {
+	return &History{
 		results: make([]Result, 0, maxHistory),
 	}
 }

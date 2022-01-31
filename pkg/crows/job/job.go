@@ -11,7 +11,7 @@ type Job struct {
 	Search    Search    `yaml:"search"`
 	Condition Condition `yaml:"condition"`
 	Output    Output    `yaml:"output"`
-	History   History   `yaml:"-"`
+	History   *History  `yaml:"-"`
 }
 
 type List struct {

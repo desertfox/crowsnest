@@ -10,6 +10,10 @@ type Condition struct {
 	Threshold int    `yaml:"threshold"`
 	State     string `yaml:"state"`
 }
+type Result struct {
+	Count int
+	When  time.Time
+}
 
 func (c Condition) IsAlert(r Result) bool {
 	switch c.State {

@@ -1,5 +1,27 @@
 package job
 
+import "testing"
+
+func Test_job(t *testing.T) {
+	t.Run("Job", func(t *testing.T) {
+		j := testJob()
+
+		tests := []struct {
+			name string
+			job  Job
+		}{
+			{"Job Run", j},
+		}
+
+		for _, tt := range tests {
+			tt := tt
+			t.Run(tt.name, func(t *testing.T) {
+				tt.job.Func()
+			})
+		}
+	})
+}
+
 func testJob() Job {
 	return Job{
 		Name:      "Test Job",
