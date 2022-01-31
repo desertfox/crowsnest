@@ -155,15 +155,15 @@ func (a Api) getStatus(w http.ResponseWriter) {
 
 		output += template.HTML(fmt.Sprintf(`
 				<div style="border-style: solid">
-				<label>Name: %v</label><br>
-				<label>Frequency: %v min(s)</label><br>
-				<label>LastRun: %v</label><br>
+				<label>Name: %s</label><br>
+				<label>Frequency: %d min(s)</label><br>
+				<label>LastRun: %s</label><br>
+				<label>NextRun: %s</label><br>
 				<label>Results:<br>
 				%s
 				</label>
-				<label>NextRun: %v</label><br>
 				<form method="POST" action="/delete">
-					<input type="hidden" name="name" value="%v">
+					<input type="hidden" name="name" value="%s">
 					<input type="submit" value="DELETE">
 				</form>
 				</div>
@@ -171,8 +171,8 @@ func (a Api) getStatus(w http.ResponseWriter) {
 			j.Name,
 			j.Frequency,
 			a.nest.LastRun(j),
-			results,
 			a.nest.NextRun(j),
+			results,
 			j.Name,
 		))
 	}
