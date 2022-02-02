@@ -18,7 +18,7 @@ func Test_history(t *testing.T) {
 			want int
 		}{
 			{"One", Result{Count: 1}, History{}, 1},
-			{"Five", Result{Count: 1}, History{results[:5]}, 5},
+			{"Five", Result{Count: 1}, History{results[:5]}, 6},
 			{"Max", Result{Count: 1}, History{results: results}, 10},
 		}
 

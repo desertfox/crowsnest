@@ -27,12 +27,14 @@ func (a Api) createJob(w http.ResponseWriter, r *http.Request) {
 
 	threshold, err := strconv.Atoi(r.FormValue("threshold"))
 	if err != nil {
-		log.Fatal("error translating threshold to int " + err.Error())
+		w.Write([]byte("error translating threshold to int " + err.Error()))
+		return
 	}
 
 	verbose, err := strconv.Atoi(r.FormValue("verbose"))
 	if err != nil {
-		log.Fatal("error translating threshold to int " + err.Error())
+		w.Write([]byte("error translating verbose to int " + err.Error()))
+		return
 	}
 
 	var (
@@ -66,7 +68,8 @@ func (a Api) createJob(w http.ResponseWriter, r *http.Request) {
 
 	j, err := translate(njr)
 	if err != nil {
-		log.Fatal("error translating job" + err.Error())
+		w.Write([]byte("error translating job" + err.Error()))
+		return
 	}
 
 	a.nest.EventCallback <- crows.Event{
