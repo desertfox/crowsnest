@@ -160,19 +160,23 @@ func (a Api) getStatus(w http.ResponseWriter) {
 				<div style="border-style: solid">
 				<label>Name: %s</label><br>
 				<label>Frequency: %d min(s)</label><br>
+				<label>Threshold: %d </label><br>
+				<label>Operator: %s </label><br>
+				<label><a href="%s" tagert="_blank">GrayLog</a></label><br>
 				<label>LastRun: %s</label><br>
 				<label>NextRun: %s</label><br>
 				<label>Results:<br>
 				%s
-				</label>
+				</label><br>
 				<form method="POST" action="/delete">
 					<input type="hidden" name="name" value="%s">
 					<input type="submit" value="DELETE">
-				</form>
-				</div>
-				<br>`,
+				</form></div><br>`,
 			j.Name,
 			j.Frequency,
+			j.Condition.Threshold,
+			j.Condition.State,
+			j.Search.BuildURL(),
 			a.nest.LastRun(j),
 			a.nest.NextRun(j),
 			results,
