@@ -1,6 +1,7 @@
 package crows
 
 import (
+	"log"
 	"sync"
 
 	"github.com/desertfox/crowsnest/pkg/crows/job"
@@ -34,6 +35,8 @@ func (n *Nest) Load() {
 	loadEventCallbackOnce.Do(func() {
 		go func(n *Nest) {
 			event := <-n.EventCallback
+
+			log.Printf("inbound event:%#v", event)
 
 			switch event.Action {
 			case Reload:
