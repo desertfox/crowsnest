@@ -25,7 +25,10 @@ func translate(njr NewJobReq) (job.Job, error) {
 	switch parsedQuery["rangetype"][0] {
 	case "relative":
 		typeSearch = "relative"
-		frequency, _ = strconv.Atoi(parsedQuery["relative"][0])
+		frequency, err = strconv.Atoi(parsedQuery["relative"][0])
+		if err != nil {
+			return job.Job{}, err
+		}
 		/*
 			case "absolute":
 				typeSearch = "absolute"
