@@ -2,6 +2,7 @@ package crows
 
 import (
 	"log"
+	"sync"
 
 	"github.com/desertfox/crowsnest/pkg/crows/job"
 	"github.com/desertfox/crowsnest/pkg/crows/schedule"
@@ -22,11 +23,15 @@ type Event struct {
 type Nest struct {
 	List      *job.List
 	Scheduler *schedule.Schedule
+	mutex     *sync.RWMutex
 }
 
 //All the nest methods bellow are used to expose schedule and job state to API
 func (n *Nest) HandleEvent(event Event) {
 	go func(n *Nest, event Event) {
+		n.mutex.Lock()
+		defer n.mutex.Unlock()
+
 		switch event.Action {
 		case Reload:
 			n.List.Clear()
