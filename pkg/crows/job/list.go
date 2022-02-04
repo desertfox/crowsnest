@@ -16,11 +16,11 @@ var (
 	httpClient *http.Client = &http.Client{}
 )
 
-func (l *List) Load() *List {
+func (l *List) Load() {
 	file, err := ioutil.ReadFile(l.Config.Path)
 	if err != nil {
 		log.Printf("error unable to config file: %v, error: %s", l.Config.Path, err)
-		return &List{}
+		return
 	}
 
 	data := make(map[string][]*Job)
@@ -40,8 +40,6 @@ func (l *List) Load() *List {
 			l.Add(job)
 		}
 	}
-
-	return l
 }
 
 func (l List) Save() {

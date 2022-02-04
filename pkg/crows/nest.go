@@ -48,6 +48,8 @@ func (n *Nest) Load() {
 				n.List.Add(event.Job)
 			}
 
+			log.Printf("save list:%#v", n.List)
+
 			n.List.Save()
 
 			n.Scheduler.Load(n.List)
