@@ -33,11 +33,8 @@ func main() {
 	scheduler.Load(list)
 
 	nest := &crows.Nest{
-		List:          list,
-		Scheduler:     scheduler,
-		EventCallback: make(chan crows.Event),
+		List:      list,
+		Scheduler: scheduler,
 	}
-	nest.Load()
-
 	api.New(nest).Load()
 }

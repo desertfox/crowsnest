@@ -72,7 +72,7 @@ func (a Api) createJob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.nest.EventCallback <- crows.Event{
+	a.nest.EventChannel() <- crows.Event{
 		Action: crows.Add,
 		Job:    &j,
 	}
