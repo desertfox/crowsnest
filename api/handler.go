@@ -72,10 +72,10 @@ func (a Api) createJob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.nest.EventChannel() <- crows.Event{
+	a.nest.HandleEvent(crows.Event{
 		Action: crows.Add,
 		Job:    &j,
-	}
+	})
 
 	w.Write([]byte("Job Created"))
 }
@@ -207,9 +207,9 @@ func (a Api) getStatus(w http.ResponseWriter) {
 }
 
 func (a Api) reloadJobs(w http.ResponseWriter) {
-	a.nest.EventCallback <- crows.Event{
+	a.nest.HandleEvent(crows.Event{
 		Action: crows.Reload,
-	}
+	})
 
 	a.getStatus(w)
 }
@@ -228,10 +228,10 @@ func (a Api) deleteJob(w http.ResponseWriter, r *http.Request) {
 
 	for _, j := range a.nest.Jobs() {
 		if name == j.Name {
-			a.nest.EventCallback <- crows.Event{
+			a.nest.HandleEvent(crows.Event{
 				Action: crows.Del,
 				Job:    &job.Job{Name: name},
-			}
+			})
 
 			output := template.HTML(
 				fmt.Sprintf(`Deleted Tag %s from jobs list<br>
