@@ -26,21 +26,23 @@ type Nest struct {
 
 //All the nest methods bellow are used to expose schedule and job state to API
 func (n *Nest) HandleEvent(event Event) {
-	switch event.Action {
-	case Reload:
-		n.List.Clear()
-		n.List.Load()
-	case Del:
-		n.List.Del(event.Job)
-	case Add:
-		n.List.Add(event.Job)
-	}
+	go func(n *Nest, event Event) {
+		switch event.Action {
+		case Reload:
+			n.List.Clear()
+			n.List.Load()
+		case Del:
+			n.List.Del(event.Job)
+		case Add:
+			n.List.Add(event.Job)
+		}
 
-	log.Printf("save list:%#v", n.List)
+		log.Printf("save list:%#v", n.List)
 
-	n.List.Save()
+		n.List.Save()
 
-	n.Scheduler.Load(n.List)
+		n.Scheduler.Load(n.List)
+	}(n, event)
 }
 
 func (n Nest) Jobs() []*job.Job {
