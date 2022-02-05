@@ -151,9 +151,14 @@ func (a Api) getJobForm(w http.ResponseWriter) {
 func (a Api) getStatus(w http.ResponseWriter) {
 	var output template.HTML
 	for _, j := range a.nest.Jobs() {
-		var results template.HTML
+		var results template.HTML = template.HTML(fmt.Sprintf("Average: %d", j.History.Avg()))
 		for i, r := range j.History.Results() {
-			results += template.HTML(fmt.Sprintf(`Index: %d, When: %s, Count: %d<br>`, i, r.When, r.Count))
+			results += template.HTML(fmt.Sprintf(`Index: %d, When: %s, Count: %d, Link: <a href="%s" tagert="_blank">GrayLog</a><br>`,
+				i,
+				r.When,
+				r.Count,
+				j.Search.BuildURL(r.When.Add(time.Duration(-1*j.Frequency*int(time.Minute))), r.When)),
+			)
 		}
 
 		output += template.HTML(fmt.Sprintf(`
@@ -162,7 +167,6 @@ func (a Api) getStatus(w http.ResponseWriter) {
 				<label>Frequency: %d min(s)</label><br>
 				<label>Threshold: %d </label><br>
 				<label>Operator: %s </label><br>
-				<label><a href="%s" tagert="_blank">GrayLog</a></label><br>
 				<label>LastRun: %s</label><br>
 				<label>NextRun: %s</label><br>
 				<label>Results:<br>
@@ -176,7 +180,6 @@ func (a Api) getStatus(w http.ResponseWriter) {
 			j.Frequency,
 			j.Condition.Threshold,
 			j.Condition.State,
-			j.Search.BuildURL(),
 			a.nest.LastRun(j),
 			a.nest.NextRun(j),
 			results,

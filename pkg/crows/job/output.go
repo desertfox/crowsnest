@@ -1,6 +1,9 @@
 package job
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type Teams struct {
 	Name string `yaml:"name"`
@@ -32,7 +35,7 @@ func (o Output) Send(name string, frequency int, s Search, c Condition, r Result
 				frequency,
 				c.IsAlertText(r),
 				r.Count,
-				s.BuildURL(),
+				s.BuildURL(r.When.Add(time.Duration(-1*frequency*int(time.Minute))), r.When),
 			),
 		)
 	}

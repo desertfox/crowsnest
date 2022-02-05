@@ -42,18 +42,6 @@ func (l *List) Load() {
 	}
 }
 
-func (l List) Save() {
-	var jobs = map[string][]*Job{"jobs": l.Jobs}
-	data, err := yaml.Marshal(&jobs)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if err := ioutil.WriteFile(l.Config.Path, data, os.FileMode(int(0777))); err != nil {
-		log.Fatal(err)
-	}
-}
-
 func (l *List) Add(j *Job) error {
 	if l.Exists(j) {
 		return errors.New("job exists")
@@ -82,6 +70,18 @@ func (l List) Exists(j *Job) bool {
 		}
 	}
 	return false
+}
+
+func (l List) Save() {
+	var jobs = map[string][]*Job{"jobs": l.Jobs}
+	data, err := yaml.Marshal(&jobs)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := ioutil.WriteFile(l.Config.Path, data, os.FileMode(int(0777))); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (l *List) Del(delJob *Job) {

@@ -26,3 +26,16 @@ func (h *History) Push(r Result) {
 
 	h.results = results
 }
+
+func (h History) Avg() int {
+	if len(h.results) == 0 {
+		return 0
+	}
+
+	var sum int = 0
+	for _, v := range h.results {
+		sum += v.Count
+	}
+
+	return sum / len(h.results)
+}

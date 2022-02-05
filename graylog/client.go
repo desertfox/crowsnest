@@ -2,6 +2,7 @@ package graylog
 
 import (
 	"net/http"
+	"time"
 )
 
 type Client struct {
@@ -41,6 +42,6 @@ func (c *Client) Execute(query, streamid, typ string, frequency int, fields []st
 	return raw, nil
 }
 
-func (c Client) BuildURL() string {
-	return c.query.toURL()
+func (c Client) BuildURL(from, to time.Time) string {
+	return c.query.toURL(from, to)
 }

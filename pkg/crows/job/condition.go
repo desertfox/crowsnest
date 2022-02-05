@@ -13,7 +13,7 @@ type Condition struct {
 }
 type Result struct {
 	Count int
-	When  string
+	When  time.Time
 }
 
 func (c Condition) IsAlert(r Result) bool {
@@ -47,6 +47,6 @@ func (c *Condition) Parse(rawSearch []byte) Result {
 
 	return Result{
 		Count: count,
-		When:  time.Now().In(central).Format(time.RFC822),
+		When:  time.Now().In(central),
 	}
 }

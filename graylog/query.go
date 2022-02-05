@@ -3,16 +3,15 @@ package graylog
 import (
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
-	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var (
-	//grayLogDateFormat   string = "2006-02-02T15:04:05.000Z"
+	grayLogDateFormat   string = "2006-02-02T15:04:05.000Z"
 	relativeStrTempalte string = "%v/api/search/universal/relative?%v"
 	//absoluteStrTempalte string = "%v/api/search/universal/absolute?%v"
 )
@@ -26,9 +25,6 @@ type Query struct {
 func (q Query) String() string {
 	switch q.Type {
 	case "relative":
-		if os.Getenv("CROWSNEST_DEBUG") == "1" {
-			log.Printf(relativeStrTempalte, q.Host, q.urlEncodeRelative())
-		}
 		return fmt.Sprintf(relativeStrTempalte, q.Host, q.urlEncodeRelative())
 	}
 	return ""
@@ -66,13 +62,19 @@ func (q Query) execute(authToken string, httpClient *http.Client) ([]byte, error
 	return body, nil
 }
 
-func (q Query) toURL() string {
+func (q Query) toURL(from, to time.Time) string {
 	params := url.Values{}
 
 	params.Add("q", q.Query)
-	params.Add("interval", "minute")
-	params.Add("rangetype", "relative")
-	params.Add("relative", strconv.Itoa(q.Frequency*60))
+	params.Add("fields", strings.Join(q.Fields, ", "))
+
+	params.Add("rangetype", "absolute")
+	params.Add("from", from.Format(grayLogDateFormat))
+	params.Add("to", to.Format(grayLogDateFormat))
+
+	//params.Add("interval", "minute")
+	//params.Add("rangetype", "relative")
+	//params.Add("relative", strconv.Itoa(q.Frequency*60))
 
 	return fmt.Sprintf("%s/streams/%s/search?%s", q.Host, q.Streamid, params.Encode())
 }
