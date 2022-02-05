@@ -1,7 +1,6 @@
 package crows
 
 import (
-	"log"
 	"sync"
 
 	"github.com/desertfox/crowsnest/pkg/crows/job"
@@ -14,6 +13,10 @@ const (
 	Reload
 )
 
+var (
+	mutex sync.Mutex
+)
+
 type Event struct {
 	Action int
 	Value  string
@@ -23,14 +26,13 @@ type Event struct {
 type Nest struct {
 	List      *job.List
 	Scheduler *schedule.Schedule
-	mutex     *sync.RWMutex
 }
 
 //All the nest methods bellow are used to expose schedule and job state to API
 func (n *Nest) HandleEvent(event Event) {
 	go func(n *Nest, event Event) {
-		n.mutex.Lock()
-		defer n.mutex.Unlock()
+		mutex.Lock()
+		defer mutex.Unlock()
 
 		switch event.Action {
 		case Reload:
@@ -41,8 +43,6 @@ func (n *Nest) HandleEvent(event Event) {
 		case Add:
 			n.List.Add(event.Job)
 		}
-
-		log.Printf("save list:%#v", n.List)
 
 		n.List.Save()
 
