@@ -1,7 +1,7 @@
 jobs:
-- name: test 
-  frequency: 0 
+- name: test
   host: https://something.com
+  frequency: 0
   search:
     type: ""
     streamid: "55555"
@@ -11,9 +11,9 @@ jobs:
     - source
   condition:
     threshold: 0
-    state: ">"
+    state: '>'
   output:
     verbose: 0
     teams:
+      name: Teams room name
       url: https://teamsurl.com
-      name: "Teams room name"
