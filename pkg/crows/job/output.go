@@ -2,7 +2,6 @@ package job
 
 import (
 	"fmt"
-	"time"
 )
 
 type Teams struct {
@@ -35,7 +34,7 @@ func (o Output) Send(name string, frequency int, s Search, c Condition, r Result
 				frequency,
 				c.IsAlertText(r),
 				r.Count,
-				s.BuildURL(r.When.Add(time.Duration(-1*frequency*int(time.Minute))), r.When),
+				s.BuildURL(r.From(frequency), r.To()),
 			),
 		)
 	}

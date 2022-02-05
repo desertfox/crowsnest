@@ -155,10 +155,10 @@ func (a Api) getStatus(w http.ResponseWriter) {
 		for i, r := range j.History.Results() {
 			results += template.HTML(fmt.Sprintf(`Index: %d, When: %s, Count: %d, Link: <a href="%s" tagert="_blank">GrayLog</a><br>`,
 				i,
-				r.When,
+				r.When.Format(time.RFC822),
 				r.Count,
-				j.Search.BuildURL(r.When.Add(time.Duration(-1*j.Frequency*int(time.Minute))), r.When)),
-			)
+				j.Search.BuildURL(r.From(j.Frequency), r.To()),
+			))
 		}
 
 		output += template.HTML(fmt.Sprintf(`
@@ -201,10 +201,10 @@ func (a Api) getStatus(w http.ResponseWriter) {
 	}
 
 	tmpl.Execute(w, struct {
-		Now    time.Time
+		Now    string
 		Output template.HTML
 	}{
-		time.Now(),
+		time.Now().Format(time.RFC822),
 		output,
 	})
 }

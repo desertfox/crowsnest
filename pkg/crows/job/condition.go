@@ -50,3 +50,11 @@ func (c *Condition) Parse(rawSearch []byte) Result {
 		When:  time.Now().In(central),
 	}
 }
+
+func (r Result) From(f int) time.Time {
+	return r.When.Add(time.Duration(-1 * f * int(time.Minute)))
+}
+
+func (r Result) To() time.Time {
+	return r.When
+}
