@@ -151,9 +151,9 @@ func (a Api) getJobForm(w http.ResponseWriter) {
 func (a Api) getStatus(w http.ResponseWriter) {
 	var output template.HTML
 	for _, j := range a.nest.Jobs() {
-		var results template.HTML = template.HTML(fmt.Sprintf("Average: %d", j.History.Avg()))
+		var results template.HTML = template.HTML(fmt.Sprintf("Average: %d<br>", j.History.Avg()))
 		for i, r := range j.History.Results() {
-			results += template.HTML(fmt.Sprintf(`Index: %d, When: %s, Count: %d, Link: <a href="%s" tagert="_blank">GrayLog</a><br>`,
+			results += template.HTML(fmt.Sprintf(`Index: %d, When: %s, Count: %d, Link: <a href="%s" target="_blank">GrayLog</a><br>`,
 				i,
 				r.When.Format(time.RFC822),
 				r.Count,
