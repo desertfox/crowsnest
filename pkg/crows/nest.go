@@ -2,6 +2,7 @@ package crows
 
 import (
 	"sync"
+	"time"
 
 	"github.com/desertfox/crowsnest/pkg/crows/job"
 	"github.com/desertfox/crowsnest/pkg/crows/schedule"
@@ -54,10 +55,10 @@ func (n Nest) Jobs() []*job.Job {
 	return n.List.Jobs
 }
 
-func (n Nest) NextRun(job *job.Job) string {
+func (n Nest) NextRun(job *job.Job) time.Time {
 	return n.Scheduler.NextRun(job)
 }
 
-func (n Nest) LastRun(job *job.Job) string {
+func (n Nest) LastRun(job *job.Job) time.Time {
 	return n.Scheduler.LastRun(job)
 }
