@@ -3,7 +3,6 @@ package job
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"time"
 )
 
@@ -40,14 +39,9 @@ func (c *Condition) Parse(rawSearch []byte) Result {
 		count -= 1
 	}
 
-	central, err := time.LoadLocation("America/Chicago")
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-
 	return Result{
 		Count: count,
-		When:  time.Now().In(central),
+		When:  time.Now(),
 	}
 }
 
