@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	grayLogDateFormat   string = "2006-02-02T15:04:05.000Z"
+	grayLogDateFormat   string = "2006-01-02T15:04:05.000Z"
 	relativeStrTempalte string = "%v/api/search/universal/relative?%v"
 	//absoluteStrTempalte string = "%v/api/search/universal/absolute?%v"
 )
