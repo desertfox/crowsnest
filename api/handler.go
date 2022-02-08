@@ -136,9 +136,15 @@ func (a Api) getJobForm(w http.ResponseWriter) {
 		log.Fatalln(err.Error())
 	}
 
-	var roomNames []string
+	var (
+		roomNames []string
+		uniqRooms map[string]bool = make(map[string]bool)
+	)
 	for _, j := range a.nest.Jobs() {
-		roomNames = append(roomNames, j.Output.Teams.Name)
+		if _, ok := uniqRooms[j.Output.Teams.Name]; !ok {
+			uniqRooms[j.Output.Teams.Name] = true
+			roomNames = append(roomNames, j.Output.Teams.Name)
+		}
 	}
 
 	tmpl.Execute(w, struct {
