@@ -3,7 +3,6 @@ package graylog
 import (
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -70,7 +69,6 @@ func (q Query) toURL(from, to time.Time) string {
 	params.Add("fields", strings.Join(q.Fields, ", "))
 
 	params.Add("rangetype", "absolute")
-	log.Println(from.Format(grayLogDateFormat), to.Format(grayLogDateFormat))
 	params.Add("from", from.Format(grayLogDateFormat))
 	params.Add("to", to.Format(grayLogDateFormat))
 
