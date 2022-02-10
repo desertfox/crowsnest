@@ -25,6 +25,10 @@ func (s Schedule) Load(list *job.List) {
 	s.Gocron.StartAsync()
 }
 
+func (s Schedule) scheduleJob(j *job.Job) {
+	s.Gocron.Every(j.Frequency).Minutes().StartAt(j.GetOffSetTime()).Tag(j.Name).Do(j.Func())
+}
+
 func (s Schedule) NextRun(job *job.Job) time.Time {
 	return s.getCronByTag(job.Name).NextRun()
 }
@@ -42,8 +46,4 @@ func (s Schedule) getCronByTag(tag string) *gocron.Job {
 		}
 	}
 	return &gocron.Job{}
-}
-
-func (s Schedule) scheduleJob(j *job.Job) {
-	s.Gocron.Every(j.Frequency).Minutes().StartAt(j.GetOffSetTime()).Tag(j.Name).Do(j.Func())
 }

@@ -43,13 +43,14 @@ func (j Job) HasOffset() bool {
 }
 
 func (j Job) GetOffSetTime() time.Time {
+	today := time.Now()
 	if j.Offset == "" {
-		return time.Now()
+		return today.Add(1 * time.Minute)
 	}
+
 	offSet := strings.Split(j.Offset, ":")
 	hour, _ := strconv.Atoi(offSet[0])
 	min, _ := strconv.Atoi(offSet[1])
 
-	today := time.Now()
 	return time.Date(today.Year(), today.Month(), today.Day(), hour, min, 0, 0, time.UTC)
 }
