@@ -20,6 +20,7 @@ type NewJobReq struct {
 	Threshold  int
 	State      string
 	Verbose    int
+	OffSet     string
 }
 
 func (a Api) createJob(w http.ResponseWriter, r *http.Request) {
@@ -64,6 +65,7 @@ func (a Api) createJob(w http.ResponseWriter, r *http.Request) {
 		Threshold:  threshold,
 		State:      r.FormValue("state"),
 		Verbose:    verbose,
+		OffSet:     r.FormValue("offset"),
 	}
 
 	j, err := translate(njr)
@@ -89,17 +91,16 @@ func (a Api) getJobForm(w http.ResponseWriter) {
 	<form method="POST">
 	<label>Job Name:</label>
 	<input type="text" name="name"><br /><br />
-
 	<label>GrayLog Query Link:</label><br />
 	<textarea id="querylink" name="querylink" value="https://graylogquery.com?something"></textarea><br /><br />
-
+	<label>OffSet ##:##:</label>
+	<input type="text" name="offset"><br /><br />
 	<label>Teams Room Name/Label:</label>
 	<input type="text" name="outputname"> <br>
 	<label>Teams URL:</label>
 	<input type="text" name="outputlink" value="https://teamsurl.com">
 	<a href="https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook" target="_blank">webhook instructions</a>
 	<br>
-
 	OR<br>
 	<select name="exist">
 		<option value="" selected>None</option>
@@ -108,7 +109,6 @@ func (a Api) getJobForm(w http.ResponseWriter) {
 		{{end}}
 	</select>
 	<br>
-
 	<br>
 	<label>When to message room:</label>
 	<select name="verbose">
@@ -116,16 +116,13 @@ func (a Api) getJobForm(w http.ResponseWriter) {
 		<option value="1">all</option>
 	</select>
 	<br><br>
-
 	<label>Number of cases to alert(n):</label>
 	<input type="text" name="threshold" value="0"><br /><br />
-
 	<label>Condition:</label>
 	<select name="state">
     	<option value=">">Alert when cases >= n#</option>
 		<option value="<">Alert when cases <= n#</option>
 	</select><br />
-
 	<br />
 	<input type="submit" method="POST" value="Create Job">
 </form>

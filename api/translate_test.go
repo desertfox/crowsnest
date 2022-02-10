@@ -25,7 +25,7 @@ var (
 func Test_translate(t *testing.T) {
 
 	t.Run("translate", func(t *testing.T) {
-		njr := NewJobReq{name, relativeQueryLink, outputLink, room, threshold, "<", verbose}
+		njr := NewJobReq{name, relativeQueryLink, outputLink, room, threshold, "<", verbose, "11:00"}
 		got, gotErr := translate(njr)
 		if gotErr != nil {
 			t.Errorf("error got: %#v", gotErr)
@@ -35,6 +35,7 @@ func Test_translate(t *testing.T) {
 			Name:      name,
 			Frequency: frequency,
 			Host:      host,
+			Offset:    "11:00",
 			Search: job.Search{
 				Type:     searchTypeRelative,
 				Streamid: streamid,

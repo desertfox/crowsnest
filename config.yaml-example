@@ -2,6 +2,7 @@ jobs:
 - name: test
   host: https://something.com
   frequency: 0
+  offset: 24:00
   search:
     type: ""
     streamid: "55555"

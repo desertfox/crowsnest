@@ -13,15 +13,13 @@ type Schedule struct {
 	DelayJobs int
 }
 
-func (s *Schedule) Load(list *job.List) {
+func (s Schedule) Load(list *job.List) {
 	s.Gocron.Clear()
 
-	for i, j := range list.Jobs {
-		s.Gocron.Every(j.Frequency).Minutes().Tag(j.Name).Do(j.Func())
+	for _, j := range list.Jobs {
+		log.Printf("⏲️ Schedule Job %s for every %d min(s) to begin at %s", j.Name, j.Frequency, j.GetOffSetTime())
 
-		log.Printf("⏲️ Scheduled Job %d: %s for every %d min(s)", i, j.Name, j.Frequency)
-
-		time.Sleep(time.Duration(s.DelayJobs) * time.Second)
+		go s.scheduleJob(j)
 	}
 
 	s.Gocron.StartAsync()
@@ -44,4 +42,8 @@ func (s Schedule) getCronByTag(tag string) *gocron.Job {
 		}
 	}
 	return &gocron.Job{}
+}
+
+func (s Schedule) scheduleJob(j *job.Job) {
+	s.Gocron.Every(j.Frequency).Minutes().StartAt(j.GetOffSetTime()).Tag(j.Name).Do(j.Func())
 }
