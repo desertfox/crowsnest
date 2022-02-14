@@ -14,10 +14,6 @@ const (
 	Reload
 )
 
-var (
-	mutex sync.Mutex
-)
-
 type Event struct {
 	Action int
 	Value  string
@@ -25,6 +21,7 @@ type Event struct {
 }
 
 type Nest struct {
+	mu        sync.Mutex
 	List      *job.List
 	Scheduler *schedule.Schedule
 }
@@ -32,8 +29,8 @@ type Nest struct {
 //All the nest methods bellow are used to expose schedule and job state to API
 func (n *Nest) HandleEvent(event Event) {
 	go func(n *Nest, event Event) {
-		mutex.Lock()
-		defer mutex.Unlock()
+		n.mu.Lock()
+		defer n.mu.Unlock()
 
 		switch event.Action {
 		case Reload:
@@ -51,14 +48,14 @@ func (n *Nest) HandleEvent(event Event) {
 	}(n, event)
 }
 
-func (n Nest) Jobs() []*job.Job {
+func (n *Nest) Jobs() []*job.Job {
 	return n.List.Jobs
 }
 
-func (n Nest) NextRun(job *job.Job) time.Time {
+func (n *Nest) NextRun(job *job.Job) time.Time {
 	return n.Scheduler.NextRun(job)
 }
 
-func (n Nest) LastRun(job *job.Job) time.Time {
+func (n *Nest) LastRun(job *job.Job) time.Time {
 	return n.Scheduler.LastRun(job)
 }

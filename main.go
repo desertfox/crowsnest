@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	version string = "v2.1"
+	version string = "v2.2"
 )
 
 func main() {
@@ -27,8 +27,7 @@ func main() {
 	list.Load()
 
 	scheduler := &schedule.Schedule{
-		DelayJobs: config.DelayJobs,
-		Gocron:    gocron.NewScheduler(time.UTC),
+		Gocron: gocron.NewScheduler(time.UTC),
 	}
 	scheduler.Load(list)
 

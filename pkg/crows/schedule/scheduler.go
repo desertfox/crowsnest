@@ -9,8 +9,7 @@ import (
 )
 
 type Schedule struct {
-	Gocron    *gocron.Scheduler
-	DelayJobs int
+	Gocron *gocron.Scheduler
 }
 
 func (s Schedule) Load(list *job.List) {

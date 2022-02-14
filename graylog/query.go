@@ -3,6 +3,7 @@ package graylog
 import (
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -50,12 +51,14 @@ func (q Query) execute(authToken string, httpClient *http.Client) ([]byte, error
 
 	response, err := httpClient.Do(request)
 	if err != nil {
+		log.Printf("error making request:%#v, error:%v", response, err)
 		return []byte{}, err
 	}
 	defer response.Body.Close()
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
+		log.Printf("error reading response:%#v, error:%v", response, err)
 		return []byte{}, err
 	}
 
