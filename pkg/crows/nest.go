@@ -1,6 +1,7 @@
 package crows
 
 import (
+	"log"
 	"sync"
 	"time"
 
@@ -31,6 +32,8 @@ func (n *Nest) HandleEvent(event Event) {
 	go func(n *Nest, event Event) {
 		n.mu.Lock()
 		defer n.mu.Unlock()
+
+		log.Printf("inbound event: %#v", event)
 
 		switch event.Action {
 		case Reload:

@@ -3,25 +3,22 @@ package config
 import (
 	"log"
 	"os"
-	"strconv"
 	"strings"
 )
 
 var prefix string = "CROWSNEST_"
 
 type Config struct {
-	Username  string //Used by job
-	Password  string //""
-	Path      string //Used by joblist
-	DelayJobs int    //Used by scheduler
+	Username string //Used by job
+	Password string //""
+	Path     string //Used by joblist
 }
 
 func Load() *Config {
 	return &Config{
-		Username:  checkEnvStr("username", true),
-		Password:  checkEnvStr("password", true),
-		Path:      checkEnvStr("config", true),
-		DelayJobs: checkEnvInt("delay", false),
+		Username: checkEnvStr("username", false),
+		Password: checkEnvStr("password", false),
+		Path:     checkEnvStr("config", true),
 	}
 }
 
@@ -45,23 +42,4 @@ func checkEnvStr(s string, required bool) string {
 	}
 
 	return str
-}
-
-func checkEnvInt(s string, required bool) int {
-	str := loadEnv(s)
-
-	if str == "" && !required {
-		return 0
-	}
-
-	if str == "" && required {
-		log.Fatalf("missing enviromental variable: %s", buildEnvStr(s))
-	}
-
-	i, err := strconv.Atoi(str)
-	if err != nil {
-		log.Fatalf("cannot convert string to int: %s=%s", buildEnvStr(s), str)
-	}
-
-	return i
 }
