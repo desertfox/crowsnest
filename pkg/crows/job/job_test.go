@@ -37,7 +37,7 @@ func Test_OffSet(t *testing.T) {
 			hour       int
 			min        int
 		}{
-			{"No OffSet", "", now.Hour(), now.Minute()},
+			{"No OffSet", "", now.Hour(), now.Minute() + 1}, //smell
 			{"AM", "01:33", 01, 33},
 			{"PM", "13:30", 13, 30},
 		}
@@ -53,7 +53,7 @@ func Test_OffSet(t *testing.T) {
 				}
 
 				if offset.Minute() != tt.min {
-					t.Fatalf("OffSet hour does not match expected. offset:%v, got:%v, want:%v", offset, offset.Minute(), tt.min)
+					t.Fatalf("OffSet minute does not match expected. offset:%v, got:%v, want:%v", offset, offset.Minute(), tt.min)
 				}
 			})
 		}

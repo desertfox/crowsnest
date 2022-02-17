@@ -4,7 +4,6 @@ import (
 	"errors"
 	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 
 	"github.com/desertfox/crowsnest/graylog"
@@ -12,14 +11,12 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var (
-	httpClient *http.Client = &http.Client{}
-)
+var JobPath string = os.Getenv("JOBS_PATH")
 
 func (l *List) Load() {
-	file, err := ioutil.ReadFile(l.Config.Path)
+	file, err := ioutil.ReadFile(JobPath)
 	if err != nil {
-		log.Printf("error unable to config file: %v, error: %s", l.Config.Path, err)
+		log.Printf("error unable to config file: %v, error: %s", JobPath, err)
 		return
 	}
 
@@ -47,12 +44,7 @@ func (l *List) Add(j *Job) error {
 		return errors.New("job exists")
 	}
 
-	j.Search.Client = graylog.New(
-		l.Config.Username,
-		l.Config.Password,
-		j.Host,
-		httpClient,
-	)
+	j.Search.Client = graylog.New(j.Host)
 
 	j.Output.Client = teams.Client{}
 
@@ -79,7 +71,7 @@ func (l List) Save() {
 		log.Fatal(err)
 	}
 
-	if err := ioutil.WriteFile(l.Config.Path, data, os.FileMode(int(0777))); err != nil {
+	if err := ioutil.WriteFile(JobPath, data, os.FileMode(int(0777))); err != nil {
 		log.Fatal(err)
 	}
 }

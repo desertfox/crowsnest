@@ -5,29 +5,24 @@ import (
 	"time"
 )
 
+var HttpClient = http.Client{}
+
 type Client struct {
-	session    *session
-	query      Query
-	host       string
-	httpClient *http.Client
+	session *session
+	query   Query
 }
 
-func New(un, pw, h string, httpClient *http.Client) *Client {
+func New(h string) *Client {
 	return &Client{
 		session: newSession(
 			h,
-			un,
-			pw,
-			httpClient,
 		),
-		host:       h,
-		httpClient: httpClient,
 	}
 }
 
 func (c *Client) Execute(query, streamid, typ string, frequency int, fields []string) ([]byte, error) {
 	c.query = Query{
-		Host:      c.host,
+		Host:      c.session.loginRequest.Host,
 		Query:     query,
 		Streamid:  streamid,
 		Frequency: frequency,
@@ -35,7 +30,7 @@ func (c *Client) Execute(query, streamid, typ string, frequency int, fields []st
 		Type:      typ,
 	}
 
-	raw, err := c.query.execute(c.session.authHeader(), c.httpClient)
+	raw, err := c.query.execute(c.session.authHeader())
 	if err != nil {
 		return []byte{}, err
 	}

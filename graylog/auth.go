@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 )
@@ -20,10 +21,9 @@ type session struct {
 }
 
 type loginRequest struct {
-	Host       string `json:"host"`
-	Username   string `json:"username"`
-	Password   string `json:"password"`
-	httpClient *http.Client
+	Host     string `json:"host"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 var (
@@ -31,11 +31,12 @@ var (
 	sessionInstanceMap = make(map[string]*session)
 )
 
-func newSession(h, u, p string, httpClient *http.Client) *session {
+func newSession(h string) *session {
 	lock.Lock()
 	defer lock.Unlock()
+
 	if _, exists := sessionInstanceMap[h]; !exists {
-		sessionInstanceMap[h] = &session{"", time.Now(), &loginRequest{h, u, p, httpClient}}
+		sessionInstanceMap[h] = &session{"", time.Now(), &loginRequest{h, os.Getenv("GRAYLOG_USERNAME"), os.Getenv("GRAYLOG_PASSWORD")}}
 	}
 
 	return sessionInstanceMap[h]
@@ -64,7 +65,7 @@ func (lr loginRequest) execute() (string, error) {
 	request, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
 	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
 
-	response, err := lr.httpClient.Do(request)
+	response, err := HttpClient.Do(request)
 	if err != nil {
 		return "", err
 	}

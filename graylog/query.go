@@ -15,6 +15,7 @@ var (
 	grayLogDateFormat   string = "2006-01-02T15:04:05.000Z"
 	relativeStrTempalte string = "%v/api/search/universal/relative?%v"
 	//absoluteStrTempalte string = "%v/api/search/universal/absolute?%v"
+	httpClient = http.Client{}
 )
 
 type Query struct {
@@ -44,7 +45,7 @@ func (q Query) urlEncodeRelative() string {
 	return params.Encode()
 }
 
-func (q Query) execute(authToken string, httpClient *http.Client) ([]byte, error) {
+func (q Query) execute(authToken string) ([]byte, error) {
 	request, _ := http.NewRequest("GET", q.String(), nil)
 	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
 	request.Header.Set("Authorization", authToken)

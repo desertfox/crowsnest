@@ -5,8 +5,6 @@ import (
 	"log"
 	"os"
 	"testing"
-
-	"github.com/desertfox/crowsnest/config"
 )
 
 func Test_Load(t *testing.T) {
@@ -20,10 +18,8 @@ func Test_Load(t *testing.T) {
 		defer os.Remove(file.Name())
 
 		testJob := testJob()
+		JobPath = file.Name()
 		list := List{
-			Config: &config.Config{
-				Path: file.Name(),
-			},
 			Jobs: []*Job{&testJob},
 		}
 		list.Save()
@@ -46,20 +42,14 @@ func Test_Load(t *testing.T) {
 		file.Close()
 		defer os.Remove(file.Name())
 
-		config := &config.Config{
-			Path: file.Name(),
-		}
-
 		testJob := testJob()
+		JobPath = file.Name()
 		list := List{
-			Config: config,
-			Jobs:   []*Job{&testJob},
+			Jobs: []*Job{&testJob},
 		}
 		list.Save()
 
-		emptyList := List{
-			Config: config,
-		}
+		emptyList := List{}
 		emptyList.Load()
 		got := emptyList
 		want := 1
@@ -85,13 +75,7 @@ func Test_Load(t *testing.T) {
 		file.Close()
 		defer os.Remove(file.Name())
 
-		config := &config.Config{
-			Path: file.Name(),
-		}
-
-		got := List{
-			Config: config,
-		}
+		got := List{}
 		job := testJob()
 		got.Add(&job)
 		want := 1

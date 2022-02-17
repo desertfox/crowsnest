@@ -4,8 +4,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/desertfox/crowsnest/config"
 )
 
 type Job struct {
@@ -20,8 +18,7 @@ type Job struct {
 }
 
 type List struct {
-	Jobs   []*Job
-	Config *config.Config
+	Jobs []*Job
 }
 
 func (j *Job) Func() func() {

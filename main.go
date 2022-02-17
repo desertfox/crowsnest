@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/desertfox/crowsnest/api"
-	"github.com/desertfox/crowsnest/config"
 	"github.com/desertfox/crowsnest/pkg/crows"
 	"github.com/desertfox/crowsnest/pkg/crows/job"
 	"github.com/desertfox/crowsnest/pkg/crows/schedule"
@@ -13,17 +12,13 @@ import (
 )
 
 const (
-	version string = "v2.2"
+	version string = "v2.4"
 )
 
 func main() {
 	log.Printf("Crowsnest Startup Version %s ", version)
 
-	config := config.Load()
-
-	list := &job.List{
-		Config: config,
-	}
+	list := &job.List{}
 	list.Load()
 
 	scheduler := &schedule.Schedule{
