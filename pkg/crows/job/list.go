@@ -11,7 +11,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var JobPath string = os.Getenv("JOBS_PATH")
+var JobPath string = os.Getenv("CROWSNEST_CONFIG")
 
 func (l *List) Load() {
 	file, err := ioutil.ReadFile(JobPath)

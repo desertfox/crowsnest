@@ -23,7 +23,7 @@ func (s Schedule) Load(list *job.List) {
 }
 
 func (s Schedule) scheduleJob(j *job.Job) {
-	log.Printf("⏲️ Schedule Job %s for every %d min(s) to begin at %s", j.Name, j.Frequency, j.GetOffSetTime())
+	log.Printf("schedule Job %s for every %d min(s) to begin at %s", j.Name, j.Frequency, j.GetOffSetTime())
 
 	s.Gocron.Every(j.Frequency).Minutes().StartAt(j.GetOffSetTime()).Tag(j.Name).Do(j.Func())
 }

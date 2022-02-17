@@ -36,7 +36,7 @@ func newSession(h string) *session {
 	defer lock.Unlock()
 
 	if _, exists := sessionInstanceMap[h]; !exists {
-		sessionInstanceMap[h] = &session{"", time.Now(), &loginRequest{h, os.Getenv("GRAYLOG_USERNAME"), os.Getenv("GRAYLOG_PASSWORD")}}
+		sessionInstanceMap[h] = &session{"", time.Now(), &loginRequest{h, os.Getenv("CROWSNEST_USERNAME"), os.Getenv("CROWSNEST_PASSWORD")}}
 	}
 
 	return sessionInstanceMap[h]
