@@ -1,6 +1,7 @@
 package crows
 
 import (
+	"errors"
 	"log"
 	"sync"
 	"time"
@@ -44,10 +45,8 @@ func (n *Nest) HandleEvent(event job.Event) {
 }
 
 func (n *Nest) add(name string, frequency int, startAt time.Time, do func(), replaceExisting bool) {
-	existingJob := n.getCronByTag(name)
-	log.Printf("add name, %v, ej: %#v", name, existingJob)
-
-	if existingJob.IsRunning() {
+	existingJob, err := n.getCronByTag(name)
+	if err == nil && existingJob.IsRunning() {
 		log.Printf("Job is already running with this tag: %s, replace: %t", name, replaceExisting)
 		if !replaceExisting {
 			return
@@ -60,17 +59,15 @@ func (n *Nest) add(name string, frequency int, startAt time.Time, do func(), rep
 	n.gocron.Every(frequency).Minutes().StartAt(startAt).Tag(name).Do(do)
 }
 
-func (n *Nest) getCronByTag(tag string) *gocron.Job {
+func (n *Nest) getCronByTag(tag string) (*gocron.Job, error) {
 	for _, cj := range n.gocron.Jobs() {
 		for _, t := range cj.Tags() {
 			if tag == t {
-				log.Printf("tag ej: %v", cj)
-				return cj
+				return cj, nil
 			}
 		}
 	}
-	log.Printf("tag ej: %v", nil)
-	return &gocron.Job{}
+	return &gocron.Job{}, errors.New("no job found for tag:" + tag)
 }
 
 func (n *Nest) Jobs() []*job.Job {
@@ -78,9 +75,17 @@ func (n *Nest) Jobs() []*job.Job {
 }
 
 func (n *Nest) NextRun(name string) time.Time {
-	return n.getCronByTag(name).NextRun()
+	j, err := n.getCronByTag(name)
+	if err != nil {
+		return time.Now()
+	}
+	return j.NextRun()
 }
 
 func (n *Nest) LastRun(name string) time.Time {
-	return n.getCronByTag(name).LastRun()
+	j, err := n.getCronByTag(name)
+	if err != nil {
+		return time.Now()
+	}
+	return j.LastRun()
 }
