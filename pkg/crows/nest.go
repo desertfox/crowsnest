@@ -44,7 +44,8 @@ func (n *Nest) HandleEvent(event job.Event) {
 
 func (n *Nest) add(name string, frequency int, startAt time.Time, do func(), replaceExisting bool) {
 	existingJob := n.getCronByTag(name)
-	if existingJob.IsRunning() {
+	log.Printf("add ej: %v", existingJob)
+	if existingJob != nil && existingJob.IsRunning() {
 		log.Printf("Job is already running with this tag: %s, replace: %t", name, replaceExisting)
 		if !replaceExisting {
 			return
