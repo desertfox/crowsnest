@@ -6,20 +6,25 @@ import (
 	"time"
 
 	"github.com/desertfox/crowsnest/pkg/crows/job"
-	"github.com/desertfox/crowsnest/pkg/crows/schedule"
+	"github.com/go-co-op/gocron"
 )
 
 type Nest struct {
-	mu       sync.Mutex
-	list     job.Lister
-	schedule schedule.Scheduler
+	mu     sync.Mutex
+	list   job.Lister
+	gocron *gocron.Scheduler
 }
 
-func NewNest(list job.Lister, scheduler schedule.Scheduler) *Nest {
-	return &Nest{
-		list:     list,
-		schedule: scheduler,
+func NewNest(list job.Lister, goc *gocron.Scheduler) *Nest {
+	goc.StartAsync()
+
+	n := &Nest{list: list, gocron: goc}
+
+	for _, j := range list.Jobs() {
+		n.add(j.Name, j.Frequency, j.GetOffSetTime(), j.GetFunc(), true)
 	}
+
+	return n
 }
 
 func (n *Nest) HandleEvent(event job.Event) {
@@ -32,9 +37,35 @@ func (n *Nest) HandleEvent(event job.Event) {
 		n.list.HandleEvent(event)
 
 		for _, j := range n.list.Jobs() {
-			n.schedule.Add(j.Name, j.Frequency, j.GetOffSetTime(), j.GetFunc(), true)
+			n.add(j.Name, j.Frequency, j.GetOffSetTime(), j.GetFunc(), true)
 		}
 	}(n, event)
+}
+
+func (n *Nest) add(name string, frequency int, startAt time.Time, do func(), replaceExisting bool) {
+	existingJob := n.getCronByTag(name)
+	if existingJob.IsRunning() {
+		log.Printf("Job is already running with this tag: %s, replace: %t", name, replaceExisting)
+		if !replaceExisting {
+			return
+		}
+		n.gocron.Remove(existingJob)
+	}
+
+	log.Printf("schedule %s every %d min(s) to begin at %s", name, frequency, startAt)
+
+	n.gocron.Every(frequency).Minutes().StartAt(startAt).Tag(name).Do(do)
+}
+
+func (n *Nest) getCronByTag(tag string) *gocron.Job {
+	for _, cj := range n.gocron.Jobs() {
+		for _, t := range cj.Tags() {
+			if tag == t {
+				return cj
+			}
+		}
+	}
+	return &gocron.Job{}
 }
 
 func (n *Nest) Jobs() []*job.Job {
@@ -42,9 +73,9 @@ func (n *Nest) Jobs() []*job.Job {
 }
 
 func (n *Nest) NextRun(name string) time.Time {
-	return n.schedule.NextRun(name)
+	return n.getCronByTag(name).NextRun()
 }
 
 func (n *Nest) LastRun(name string) time.Time {
-	return n.schedule.LastRun(name)
+	return n.getCronByTag(name).LastRun()
 }
