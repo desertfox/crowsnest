@@ -12,14 +12,13 @@ import (
 )
 
 const (
-	version string = "v2.5"
+	version string = "v2.6"
 )
 
 func main() {
 	log.Printf("Crowsnest Startup Version %s ", version)
 
-	list := job.NewList()
-	list.Load()
+	list := job.Load()
 
 	scheduler := schedule.NewSchedule(gocron.NewScheduler(time.UTC))
 	scheduler.Load(list)

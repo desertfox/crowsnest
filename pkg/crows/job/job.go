@@ -17,7 +17,7 @@ type Job struct {
 	History   *History  `yaml:"-"`
 }
 
-func (j *Job) Func() func() {
+func (j *Job) GetFunc() func() {
 	return func() {
 		j := j
 

@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/desertfox/crowsnest/pkg/crows"
 	"github.com/desertfox/crowsnest/pkg/crows/job"
 )
 
@@ -74,8 +73,8 @@ func (a Api) createJob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.nest.HandleEvent(crows.Event{
-		Action: crows.Add,
+	a.nest.HandleEvent(job.Event{
+		Action: job.Add,
 		Job:    &j,
 	})
 
@@ -218,8 +217,8 @@ func (a Api) getStatus(w http.ResponseWriter) {
 }
 
 func (a Api) reloadJobs(w http.ResponseWriter) {
-	a.nest.HandleEvent(crows.Event{
-		Action: crows.Reload,
+	a.nest.HandleEvent(job.Event{
+		Action: job.Reload,
 	})
 
 	a.getStatus(w)
@@ -239,8 +238,8 @@ func (a Api) deleteJob(w http.ResponseWriter, r *http.Request) {
 
 	for _, j := range a.nest.Jobs() {
 		if name == j.Name {
-			a.nest.HandleEvent(crows.Event{
-				Action: crows.Del,
+			a.nest.HandleEvent(job.Event{
+				Action: job.Del,
 				Job:    &job.Job{Name: name},
 			})
 

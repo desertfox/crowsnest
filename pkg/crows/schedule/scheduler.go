@@ -8,6 +8,16 @@ import (
 	"github.com/go-co-op/gocron"
 )
 
+type List interface {
+	Jobs() []*job.Job
+}
+
+type Scheduler interface {
+	Load(List)
+	NextRun(string) time.Time
+	LastRun(string) time.Time
+}
+
 type Schedule struct {
 	gocron *gocron.Scheduler
 }
@@ -18,20 +28,20 @@ func NewSchedule(goc *gocron.Scheduler) *Schedule {
 	}
 }
 
-func (s Schedule) Load(list *job.List) {
+func (s Schedule) Load(list List) {
 	s.gocron.Clear()
 
-	for _, j := range list.Jobs {
-		go s.scheduleJob(j)
+	for _, j := range list.Jobs() {
+		go s.schedule(j.Name, j.Frequency, j.GetOffSetTime(), j.GetFunc())
 	}
 
 	s.gocron.StartAsync()
 }
 
-func (s Schedule) scheduleJob(j *job.Job) {
-	log.Printf("schedule Job %s for every %d min(s) to begin at %s", j.Name, j.Frequency, j.GetOffSetTime())
+func (s Schedule) schedule(name string, frequency int, startAt time.Time, do func()) {
+	log.Printf("schedule %s every %d min(s) to begin at %s", name, frequency, startAt)
 
-	s.gocron.Every(j.Frequency).Minutes().StartAt(j.GetOffSetTime()).Tag(j.Name).Do(j.Func())
+	s.gocron.Every(frequency).Minutes().StartAt(startAt).Tag(name).Do(do)
 }
 
 func (s Schedule) NextRun(name string) time.Time {

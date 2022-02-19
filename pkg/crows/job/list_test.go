@@ -20,7 +20,7 @@ func Test_Load(t *testing.T) {
 		testJob := testJob()
 		JobPath = file.Name()
 		list := List{
-			Jobs: []*Job{&testJob},
+			jobs: []*Job{&testJob},
 		}
 		list.Save()
 
@@ -45,23 +45,22 @@ func Test_Load(t *testing.T) {
 		testJob := testJob()
 		JobPath = file.Name()
 		list := List{
-			Jobs: []*Job{&testJob},
+			jobs: []*Job{&testJob},
 		}
 		list.Save()
 
-		emptyList := List{}
-		emptyList.Load()
+		emptyList := Load()
 		got := emptyList
 		want := 1
 
-		if len(got.Jobs) != want {
+		if len(got.Jobs()) != want {
 			t.Errorf("wrong number of jobs, got:%v, want:%v", got, want)
 		}
 
 		got.Save()
-		got.Load()
+		got = Load()
 
-		if len(got.Jobs) != want {
+		if len(got.Jobs()) != want {
 			t.Errorf("wrong number of jobs: %#v", got)
 		}
 
@@ -80,7 +79,7 @@ func Test_Load(t *testing.T) {
 		got.Add(&job)
 		want := 1
 
-		if len(got.Jobs) != want {
+		if len(got.Jobs()) != want {
 			t.Errorf("wrong number of jobs, got:%v, want:%v", got, want)
 		}
 	})
@@ -88,16 +87,16 @@ func Test_Load(t *testing.T) {
 	t.Run("Load.Del", func(t *testing.T) {
 		jobExample := testJob()
 		got := List{
-			Jobs: []*Job{&jobExample},
+			jobs: []*Job{&jobExample},
 		}
 
-		if len(got.Jobs) != 1 {
+		if len(got.Jobs()) != 1 {
 			t.Errorf("wrong number of jobs, got:%v, want:%v", got, "0")
 		}
 
 		got.Del(&jobExample)
 
-		if len(got.Jobs) != 0 {
+		if len(got.Jobs()) != 0 {
 			t.Errorf("wrong number of jobs, got:%v, want:%v", got, "0")
 		}
 	})
@@ -105,7 +104,7 @@ func Test_Load(t *testing.T) {
 	t.Run("Load.Exists", func(t *testing.T) {
 		jobExample := testJob()
 		got := List{
-			Jobs: []*Job{&jobExample},
+			jobs: []*Job{&jobExample},
 		}
 
 		if !got.Exists(&jobExample) {

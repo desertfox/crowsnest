@@ -9,69 +9,40 @@ import (
 	"github.com/desertfox/crowsnest/pkg/crows/schedule"
 )
 
-const (
-	Add int = iota
-	Del
-	Reload
-)
-
-type Event struct {
-	Action int
-	Value  string
-	Job    *job.Job
-}
-
-type Scheduler interface {
-	Load(*job.List)
-	NextRun(string) time.Time
-	LastRun(string) time.Time
-}
-
 type Nest struct {
-	mu        sync.Mutex
-	list      *job.List
-	scheduler *schedule.Schedule
+	mu       sync.Mutex
+	list     job.Lister
+	schedule schedule.Scheduler
 }
 
-func NewNest(list *job.List, scheduler *schedule.Schedule) *Nest {
+func NewNest(list job.Lister, scheduler schedule.Scheduler) *Nest {
 	return &Nest{
-		list:      list,
-		scheduler: scheduler,
+		list:     list,
+		schedule: scheduler,
 	}
 }
 
-//All the nest methods bellow are used to expose schedule and job state to API
-func (n *Nest) HandleEvent(event Event) {
-	go func(n *Nest, event Event) {
+func (n *Nest) HandleEvent(event job.Event) {
+	go func(n *Nest, event job.Event) {
 		n.mu.Lock()
 		defer n.mu.Unlock()
 
 		log.Printf("inbound event: %#v", event)
 
-		switch event.Action {
-		case Reload:
-			n.list.Clear()
-			n.list.Load()
-		case Del:
-			n.list.Del(event.Job)
-		case Add:
-			n.list.Add(event.Job)
-		}
+		n.list.HandleEvent(event)
 
-		n.list.Save()
-
-		n.scheduler.Load(n.list)
+		n.schedule.Load(n.list)
 	}(n, event)
 }
 
 func (n *Nest) Jobs() []*job.Job {
-	return n.list.Jobs
+	return n.list.Jobs()
 }
 
 func (n *Nest) NextRun(name string) time.Time {
-	return n.scheduler.NextRun(name)
+	return n.schedule.NextRun(name)
 }
 
 func (n *Nest) LastRun(name string) time.Time {
-	return n.scheduler.LastRun(name)
+	return n.schedule.LastRun(name)
 }
