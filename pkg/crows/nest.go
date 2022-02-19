@@ -22,7 +22,6 @@ func NewNest(list job.Lister, goc *gocron.Scheduler) *Nest {
 	n := &Nest{list: list, gocron: goc}
 
 	for _, j := range list.Jobs() {
-		log.Printf("add j: %v", j)
 		n.add(j.Name, j.Frequency, j.GetOffSetTime(), j.GetFunc(), true)
 	}
 
