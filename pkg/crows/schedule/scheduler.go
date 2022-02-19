@@ -4,16 +4,11 @@ import (
 	"log"
 	"time"
 
-	"github.com/desertfox/crowsnest/pkg/crows/job"
 	"github.com/go-co-op/gocron"
 )
 
-type List interface {
-	Jobs() []*job.Job
-}
-
 type Scheduler interface {
-	Load(List)
+	Add(string, int, time.Time, func(), bool)
 	NextRun(string) time.Time
 	LastRun(string) time.Time
 }
@@ -23,22 +18,24 @@ type Schedule struct {
 }
 
 func NewSchedule(goc *gocron.Scheduler) *Schedule {
+	goc.StartAsync()
+
 	return &Schedule{
 		gocron: goc,
 	}
 }
 
-func (s Schedule) Load(list List) {
-	s.gocron.Clear()
+func (s Schedule) Add(name string, frequency int, startAt time.Time, do func(), replaceExisting bool) {
+	existingJob := s.getCronByTag(name)
 
-	for _, j := range list.Jobs() {
-		go s.schedule(j.Name, j.Frequency, j.GetOffSetTime(), j.GetFunc())
+	if existingJob.IsRunning() {
+		log.Printf("Job is already running with this tag: %s, replace: %t", name, replaceExisting)
+		if !replaceExisting {
+			return
+		}
+		s.gocron.Remove(existingJob)
 	}
 
-	s.gocron.StartAsync()
-}
-
-func (s Schedule) schedule(name string, frequency int, startAt time.Time, do func()) {
 	log.Printf("schedule %s every %d min(s) to begin at %s", name, frequency, startAt)
 
 	s.gocron.Every(frequency).Minutes().StartAt(startAt).Tag(name).Do(do)

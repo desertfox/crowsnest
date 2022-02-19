@@ -49,8 +49,7 @@ func Test_Load(t *testing.T) {
 		}
 		list.Save()
 
-		emptyList := Load()
-		got := emptyList
+		got := NewList()
 		want := 1
 
 		if len(got.Jobs()) != want {
@@ -58,7 +57,7 @@ func Test_Load(t *testing.T) {
 		}
 
 		got.Save()
-		got = Load()
+		got = NewList()
 
 		if len(got.Jobs()) != want {
 			t.Errorf("wrong number of jobs: %#v", got)

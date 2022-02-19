@@ -31,7 +31,9 @@ func (n *Nest) HandleEvent(event job.Event) {
 
 		n.list.HandleEvent(event)
 
-		n.schedule.Load(n.list)
+		for _, j := range n.list.Jobs() {
+			n.schedule.Add(j.Name, j.Frequency, j.GetOffSetTime(), j.GetFunc(), true)
+		}
 	}(n, event)
 }
 

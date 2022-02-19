@@ -22,8 +22,9 @@ type List struct {
 	jobs []*Job
 }
 
-func Load() *List {
-	var l *List
+func NewList() *List {
+	var l *List = &List{}
+
 	file, err := ioutil.ReadFile(JobPath)
 	if err != nil {
 		log.Printf("error unable to config file: %v, error: %s", JobPath, err)
@@ -110,7 +111,7 @@ func (l *List) Del(delJob *Job) {
 func (l *List) HandleEvent(event Event) {
 	switch event.Action {
 	case Reload:
-		l = Load()
+		l = NewList()
 	case Del:
 		l.Del(event.Job)
 	case Add:

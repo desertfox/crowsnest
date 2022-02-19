@@ -12,18 +12,21 @@ import (
 )
 
 const (
-	version string = "v2.6"
+	version string = "v2.7"
 )
 
 func main() {
 	log.Printf("Crowsnest Startup Version %s ", version)
 
-	list := job.Load()
+	l := job.NewList()
 
-	scheduler := schedule.NewSchedule(gocron.NewScheduler(time.UTC))
-	scheduler.Load(list)
+	s := schedule.NewSchedule(gocron.NewScheduler(time.UTC))
 
-	nest := crows.NewNest(list, scheduler)
+	for _, j := range l.Jobs() {
+		s.Add(j.Name, j.Frequency, j.GetOffSetTime(), j.GetFunc(), true)
+	}
+
+	nest := crows.NewNest(l, s)
 
 	api.New(nest).Load()
 }
