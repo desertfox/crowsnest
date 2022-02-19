@@ -188,8 +188,8 @@ func (a Api) getStatus(w http.ResponseWriter) {
 			j.Frequency,
 			j.Condition.Threshold,
 			j.Condition.State,
-			a.nest.LastRun(j).In(central).Format(time.RFC822),
-			a.nest.NextRun(j).In(central).Format(time.RFC822),
+			a.nest.LastRun(j.Name).In(central).Format(time.RFC822),
+			a.nest.NextRun(j.Name).In(central).Format(time.RFC822),
 			results,
 			j.Name,
 		))

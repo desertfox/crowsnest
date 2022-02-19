@@ -9,35 +9,41 @@ import (
 )
 
 type Schedule struct {
-	Gocron *gocron.Scheduler
+	gocron *gocron.Scheduler
+}
+
+func NewSchedule(goc *gocron.Scheduler) *Schedule {
+	return &Schedule{
+		gocron: goc,
+	}
 }
 
 func (s Schedule) Load(list *job.List) {
-	s.Gocron.Clear()
+	s.gocron.Clear()
 
 	for _, j := range list.Jobs {
 		go s.scheduleJob(j)
 	}
 
-	s.Gocron.StartAsync()
+	s.gocron.StartAsync()
 }
 
 func (s Schedule) scheduleJob(j *job.Job) {
 	log.Printf("schedule Job %s for every %d min(s) to begin at %s", j.Name, j.Frequency, j.GetOffSetTime())
 
-	s.Gocron.Every(j.Frequency).Minutes().StartAt(j.GetOffSetTime()).Tag(j.Name).Do(j.Func())
+	s.gocron.Every(j.Frequency).Minutes().StartAt(j.GetOffSetTime()).Tag(j.Name).Do(j.Func())
 }
 
-func (s Schedule) NextRun(job *job.Job) time.Time {
-	return s.getCronByTag(job.Name).NextRun()
+func (s Schedule) NextRun(name string) time.Time {
+	return s.getCronByTag(name).NextRun()
 }
 
-func (s Schedule) LastRun(job *job.Job) time.Time {
-	return s.getCronByTag(job.Name).LastRun()
+func (s Schedule) LastRun(name string) time.Time {
+	return s.getCronByTag(name).LastRun()
 }
 
 func (s Schedule) getCronByTag(tag string) *gocron.Job {
-	for _, cj := range s.Gocron.Jobs() {
+	for _, cj := range s.gocron.Jobs() {
 		for _, t := range cj.Tags() {
 			if tag == t {
 				return cj

@@ -17,10 +17,6 @@ type Job struct {
 	History   *History  `yaml:"-"`
 }
 
-type List struct {
-	Jobs []*Job
-}
-
 func (j *Job) Func() func() {
 	return func() {
 		j := j

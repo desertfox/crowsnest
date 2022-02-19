@@ -21,10 +21,23 @@ type Event struct {
 	Job    *job.Job
 }
 
+type Scheduler interface {
+	Load(*job.List)
+	NextRun(string) time.Time
+	LastRun(string) time.Time
+}
+
 type Nest struct {
 	mu        sync.Mutex
-	List      *job.List
-	Scheduler *schedule.Schedule
+	list      *job.List
+	scheduler *schedule.Schedule
+}
+
+func NewNest(list *job.List, scheduler *schedule.Schedule) *Nest {
+	return &Nest{
+		list:      list,
+		scheduler: scheduler,
+	}
 }
 
 //All the nest methods bellow are used to expose schedule and job state to API
@@ -37,28 +50,28 @@ func (n *Nest) HandleEvent(event Event) {
 
 		switch event.Action {
 		case Reload:
-			n.List.Clear()
-			n.List.Load()
+			n.list.Clear()
+			n.list.Load()
 		case Del:
-			n.List.Del(event.Job)
+			n.list.Del(event.Job)
 		case Add:
-			n.List.Add(event.Job)
+			n.list.Add(event.Job)
 		}
 
-		n.List.Save()
+		n.list.Save()
 
-		n.Scheduler.Load(n.List)
+		n.scheduler.Load(n.list)
 	}(n, event)
 }
 
 func (n *Nest) Jobs() []*job.Job {
-	return n.List.Jobs
+	return n.list.Jobs
 }
 
-func (n *Nest) NextRun(job *job.Job) time.Time {
-	return n.Scheduler.NextRun(job)
+func (n *Nest) NextRun(name string) time.Time {
+	return n.scheduler.NextRun(name)
 }
 
-func (n *Nest) LastRun(job *job.Job) time.Time {
-	return n.Scheduler.LastRun(job)
+func (n *Nest) LastRun(name string) time.Time {
+	return n.scheduler.LastRun(name)
 }

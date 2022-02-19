@@ -13,6 +13,14 @@ import (
 
 var JobPath string = os.Getenv("CROWSNEST_CONFIG")
 
+type List struct {
+	Jobs []*Job
+}
+
+func NewList() *List {
+	return &List{}
+}
+
 func (l *List) Load() {
 	file, err := ioutil.ReadFile(JobPath)
 	if err != nil {
