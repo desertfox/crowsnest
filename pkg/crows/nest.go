@@ -21,9 +21,15 @@ func NewNest(list job.Lister, goc *gocron.Scheduler) *Nest {
 
 	n := &Nest{list: list, gocron: goc}
 
+	var wg sync.WaitGroup
 	for _, j := range list.Jobs() {
-		n.add(j.Name, j.Frequency, j.GetOffSetTime(), j.GetFunc(), true)
+		wg.Add(1)
+		go func(n *Nest, name string, frequency int, startAt time.Time, f func()) {
+			defer wg.Done()
+			n.add(name, frequency, startAt, f, true)
+		}(n, j.Name, j.Frequency, j.GetOffSetTime(), j.GetFunc())
 	}
+	wg.Wait()
 
 	return n
 }
@@ -37,13 +43,22 @@ func (n *Nest) HandleEvent(event job.Event) {
 
 		n.list.HandleEvent(event)
 
+		var wg sync.WaitGroup
 		for _, j := range n.list.Jobs() {
-			n.add(j.Name, j.Frequency, j.GetOffSetTime(), j.GetFunc(), true)
+			wg.Add(1)
+			go func(n *Nest, name string, frequency int, startAt time.Time, f func()) {
+				defer wg.Done()
+				n.add(name, frequency, startAt, f, true)
+			}(n, j.Name, j.Frequency, j.GetOffSetTime(), j.GetFunc())
 		}
+		wg.Wait()
 	}(n, event)
 }
 
 func (n *Nest) add(name string, frequency int, startAt time.Time, do func(), replaceExisting bool) {
+	n.mu.Lock()
+	defer n.mu.Unlock()
+
 	existingJob, err := n.getCronByTag(name)
 	if err == nil && existingJob.IsRunning() {
 		log.Printf("Job is already running with this tag: %s, replace: %t", name, replaceExisting)
@@ -59,6 +74,8 @@ func (n *Nest) add(name string, frequency int, startAt time.Time, do func(), rep
 }
 
 func (n *Nest) getCronByTag(tag string) (*gocron.Job, error) {
+	n.mu.Lock()
+	defer n.mu.Unlock()
 	for _, cj := range n.gocron.Jobs() {
 		for _, t := range cj.Tags() {
 			if tag == t {
