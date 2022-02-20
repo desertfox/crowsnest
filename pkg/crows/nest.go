@@ -10,6 +10,8 @@ import (
 	"github.com/go-co-op/gocron"
 )
 
+var wg sync.WaitGroup
+
 type Nest struct {
 	mu     sync.Mutex
 	list   job.Lister
@@ -21,7 +23,10 @@ func NewNest(list job.Lister, goc *gocron.Scheduler) *Nest {
 
 	n := &Nest{list: list, gocron: goc}
 
-	var wg sync.WaitGroup
+	if len(n.list.Jobs()) == 0 {
+		return n
+	}
+
 	for _, j := range list.Jobs() {
 		wg.Add(1)
 		go func(n *Nest, name string, frequency int, startAt time.Time, f func()) {
@@ -43,7 +48,6 @@ func (n *Nest) HandleEvent(event job.Event) {
 
 		n.list.HandleEvent(event)
 
-		var wg sync.WaitGroup
 		for _, j := range n.list.Jobs() {
 			wg.Add(1)
 			go func(n *Nest, name string, frequency int, startAt time.Time, f func()) {
@@ -56,21 +60,22 @@ func (n *Nest) HandleEvent(event job.Event) {
 }
 
 func (n *Nest) add(name string, frequency int, startAt time.Time, do func(), replaceExisting bool) {
-	n.mu.Lock()
-	defer n.mu.Unlock()
-
 	existingJob, err := n.getCronByTag(name)
 	if err == nil && existingJob.IsRunning() {
 		log.Printf("Job is already running with this tag: %s, replace: %t", name, replaceExisting)
 		if !replaceExisting {
 			return
 		}
+		n.mu.Lock()
 		n.gocron.Remove(existingJob)
+		n.mu.Unlock()
 	}
 
 	log.Printf("schedule %s every %d min(s) to begin at %s", name, frequency, startAt)
 
+	n.mu.Lock()
 	n.gocron.Every(frequency).Minutes().StartAt(startAt).Tag(name).Do(do)
+	n.mu.Unlock()
 }
 
 func (n *Nest) getCronByTag(tag string) (*gocron.Job, error) {
