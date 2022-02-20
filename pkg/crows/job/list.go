@@ -1,10 +1,10 @@
 package job
 
 import (
-	"errors"
 	"io/ioutil"
 	"log"
 	"os"
+	"sync"
 
 	"github.com/desertfox/crowsnest/graylog"
 	"github.com/desertfox/crowsnest/teams"
@@ -19,6 +19,7 @@ type Lister interface {
 }
 
 type List struct {
+	mu   sync.Mutex
 	jobs []*Job
 }
 
@@ -42,23 +43,30 @@ func NewList() *List {
 	}
 
 	if len(data["jobs"]) > 0 {
+		var wg sync.WaitGroup
 		for i, job := range data["jobs"] {
 			log.Printf("loaded Job from config %d: %s", i, job.Name)
-
-			l.Add(job)
+			wg.Add(1)
+			go func(job *Job) {
+				defer wg.Done()
+				l.add(job)
+			}(job)
 		}
+		wg.Wait()
 	}
 
 	return l
 }
 
-func (l List) Jobs() []*Job {
+func (l *List) Jobs() []*Job {
+	l.mu.Lock()
+	defer l.mu.Unlock()
 	return l.jobs
 }
 
-func (l *List) Add(j *Job) error {
-	if l.Exists(j) {
-		return errors.New("job exists")
+func (l *List) add(j *Job) {
+	if l.exists(j) {
+		return
 	}
 
 	j.Search.Client = graylog.New(j.Host)
@@ -67,12 +75,12 @@ func (l *List) Add(j *Job) error {
 
 	j.History = newHistory()
 
+	l.mu.Lock()
 	l.jobs = append(l.jobs, j)
-
-	return nil
+	l.mu.Unlock()
 }
 
-func (l List) Exists(j *Job) bool {
+func (l *List) exists(j *Job) bool {
 	for _, job := range l.jobs {
 		if job.Name == j.Name {
 			return true
@@ -81,7 +89,7 @@ func (l List) Exists(j *Job) bool {
 	return false
 }
 
-func (l List) Save() {
+func (l *List) save() {
 	var jobs = map[string][]*Job{"jobs": l.jobs}
 	data, err := yaml.Marshal(&jobs)
 	if err != nil {
@@ -93,17 +101,17 @@ func (l List) Save() {
 	}
 }
 
-func (l *List) Del(delJob *Job) {
+func (l *List) del(delJob *Job) {
 	jobs := []*Job(l.jobs)
-
 	for i, j := range jobs {
 		if j.Name == delJob.Name {
 			jobs[i] = jobs[len(jobs)-1]
 			jobs = jobs[:len(jobs)-1]
 
+			l.mu.Lock()
 			l.jobs = jobs
-
-			break
+			l.mu.Unlock()
+			return
 		}
 	}
 }
@@ -113,9 +121,9 @@ func (l *List) HandleEvent(event Event) {
 	case Reload:
 		l = NewList()
 	case Del:
-		l.Del(event.Job)
+		l.del(event.Job)
 	case Add:
-		l.Add(event.Job)
+		l.add(event.Job)
 	}
-	l.Save()
+	l.save()
 }

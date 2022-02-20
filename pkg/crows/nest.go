@@ -10,10 +10,12 @@ import (
 	"github.com/go-co-op/gocron"
 )
 
-var wg sync.WaitGroup
+var (
+	wg sync.WaitGroup
+	mu sync.Mutex
+)
 
 type Nest struct {
-	mu     sync.Mutex
 	list   job.Lister
 	gocron *gocron.Scheduler
 }
@@ -23,11 +25,27 @@ func NewNest(list job.Lister, goc *gocron.Scheduler) *Nest {
 
 	n := &Nest{list: list, gocron: goc}
 
+	n.schedule()
+
+	return n
+}
+
+func (n *Nest) HandleEvent(event job.Event) {
+	go func(n *Nest, event job.Event) {
+		log.Printf("inbound event: %#v", event)
+
+		n.list.HandleEvent(event)
+
+		n.schedule()
+	}(n, event)
+}
+
+func (n *Nest) schedule() {
 	if len(n.list.Jobs()) == 0 {
-		return n
+		return
 	}
 
-	for _, j := range list.Jobs() {
+	for _, j := range n.list.Jobs() {
 		wg.Add(1)
 		go func(n *Nest, name string, frequency int, startAt time.Time, f func()) {
 			defer wg.Done()
@@ -35,28 +53,6 @@ func NewNest(list job.Lister, goc *gocron.Scheduler) *Nest {
 		}(n, j.Name, j.Frequency, j.GetOffSetTime(), j.GetFunc())
 	}
 	wg.Wait()
-
-	return n
-}
-
-func (n *Nest) HandleEvent(event job.Event) {
-	go func(n *Nest, event job.Event) {
-		n.mu.Lock()
-		defer n.mu.Unlock()
-
-		log.Printf("inbound event: %#v", event)
-
-		n.list.HandleEvent(event)
-
-		for _, j := range n.list.Jobs() {
-			wg.Add(1)
-			go func(n *Nest, name string, frequency int, startAt time.Time, f func()) {
-				defer wg.Done()
-				n.add(name, frequency, startAt, f, true)
-			}(n, j.Name, j.Frequency, j.GetOffSetTime(), j.GetFunc())
-		}
-		wg.Wait()
-	}(n, event)
 }
 
 func (n *Nest) add(name string, frequency int, startAt time.Time, do func(), replaceExisting bool) {
@@ -66,21 +62,21 @@ func (n *Nest) add(name string, frequency int, startAt time.Time, do func(), rep
 		if !replaceExisting {
 			return
 		}
-		n.mu.Lock()
+		mu.Lock()
 		n.gocron.Remove(existingJob)
-		n.mu.Unlock()
+		mu.Unlock()
 	}
 
 	log.Printf("schedule %s every %d min(s) to begin at %s", name, frequency, startAt)
 
-	n.mu.Lock()
+	mu.Lock()
 	n.gocron.Every(frequency).Minutes().StartAt(startAt).Tag(name).Do(do)
-	n.mu.Unlock()
+	mu.Unlock()
 }
 
 func (n *Nest) getCronByTag(tag string) (*gocron.Job, error) {
-	n.mu.Lock()
-	defer n.mu.Unlock()
+	mu.Lock()
+	defer mu.Unlock()
 	for _, cj := range n.gocron.Jobs() {
 		for _, t := range cj.Tags() {
 			if tag == t {

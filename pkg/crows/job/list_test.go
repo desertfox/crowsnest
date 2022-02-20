@@ -22,7 +22,7 @@ func Test_Load(t *testing.T) {
 		list := List{
 			jobs: []*Job{&testJob},
 		}
-		list.Save()
+		list.save()
 
 		got, err := ioutil.ReadFile(file.Name())
 		if err != nil {
@@ -47,7 +47,7 @@ func Test_Load(t *testing.T) {
 		list := List{
 			jobs: []*Job{&testJob},
 		}
-		list.Save()
+		list.save()
 
 		got := NewList()
 		want := 1
@@ -56,7 +56,7 @@ func Test_Load(t *testing.T) {
 			t.Errorf("wrong number of jobs, got:%v, want:%v", got, want)
 		}
 
-		got.Save()
+		got.save()
 		got = NewList()
 
 		if len(got.Jobs()) != want {
@@ -75,11 +75,11 @@ func Test_Load(t *testing.T) {
 
 		got := List{}
 		job := testJob()
-		got.Add(&job)
+		got.add(&job)
 		want := 1
 
 		if len(got.Jobs()) != want {
-			t.Errorf("wrong number of jobs, got:%v, want:%v", got, want)
+			t.Errorf("wrong number of jobs, got:%v, want:%v", got.Jobs(), want)
 		}
 	})
 
@@ -90,13 +90,13 @@ func Test_Load(t *testing.T) {
 		}
 
 		if len(got.Jobs()) != 1 {
-			t.Errorf("wrong number of jobs, got:%v, want:%v", got, "0")
+			t.Errorf("wrong number of jobs, got:%v, want:%v", got.Jobs(), "0")
 		}
 
-		got.Del(&jobExample)
+		got.del(&jobExample)
 
 		if len(got.Jobs()) != 0 {
-			t.Errorf("wrong number of jobs, got:%v, want:%v", got, "0")
+			t.Errorf("wrong number of jobs, got:%v, want:%v", got.Jobs(), "0")
 		}
 	})
 
@@ -106,8 +106,8 @@ func Test_Load(t *testing.T) {
 			jobs: []*Job{&jobExample},
 		}
 
-		if !got.Exists(&jobExample) {
-			t.Errorf("duplicate job returned true, got:%v, want:%v", got.Exists(&jobExample), false)
+		if !got.exists(&jobExample) {
+			t.Errorf("duplicate job returned true, got:%v, want:%v", got.exists(&jobExample), false)
 		}
 	})
 }
