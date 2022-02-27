@@ -81,6 +81,9 @@ func (l *List) add(j *Job) {
 }
 
 func (l *List) exists(j *Job) bool {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
 	for _, job := range l.jobs {
 		if job.Name == j.Name {
 			return true
