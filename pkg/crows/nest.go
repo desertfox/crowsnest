@@ -21,9 +21,9 @@ type Nest struct {
 }
 
 func NewNest(list job.Lister, goc *gocron.Scheduler) *Nest {
-	goc.StartAsync()
-
 	n := &Nest{list: list, gocron: goc}
+
+	n.gocron.StartAsync()
 
 	n.schedule()
 
@@ -31,13 +31,13 @@ func NewNest(list job.Lister, goc *gocron.Scheduler) *Nest {
 }
 
 func (n *Nest) HandleEvent(event job.Event) {
-	go func(n *Nest, event job.Event) {
+	go func(event job.Event) {
 		log.Printf("inbound event: %#v", event)
 
 		n.list.HandleEvent(event)
 
 		n.schedule()
-	}(n, event)
+	}(event)
 }
 
 func (n *Nest) schedule() {
@@ -47,10 +47,10 @@ func (n *Nest) schedule() {
 
 	for _, j := range n.list.Jobs() {
 		wg.Add(1)
-		go func(n *Nest, name string, frequency int, startAt time.Time, f func()) {
+		go func(name string, frequency int, startAt time.Time, f func()) {
 			defer wg.Done()
 			n.add(name, frequency, startAt, f, true)
-		}(n, j.Name, j.Frequency, j.GetOffSetTime(), j.GetFunc())
+		}(j.Name, j.Frequency, j.GetOffSetTime(), j.GetFunc())
 	}
 	wg.Wait()
 }
