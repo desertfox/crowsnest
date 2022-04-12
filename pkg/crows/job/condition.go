@@ -2,6 +2,7 @@ package job
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
 	"time"
@@ -35,14 +36,33 @@ func (c Condition) IsAlertText(r Result) string {
 }
 
 func (c *Condition) Parse(rawSearch []byte) Result {
-	count := bytes.Count(rawSearch, []byte("\n"))
-	if count > 2 {
-		count -= 1
+	if os.Getenv("CROWS_DEBUG") != "" {
+		fmt.Printf("DEBUG: rawSearch %s\n", rawSearch)
+
 	}
 
-	if os.Getenv("CROWS_DEBUG") != "" {
-		fmt.Printf("DEBUG: count %d rawSearch %s\n", count, rawSearch)
+	count := bytes.Count(rawSearch, []byte("\n"))
 
+	//BUG: API sometimes returns complex object?
+	if count == 0 {
+		var hack map[string]int
+		err := json.Unmarshal(rawSearch, &hack)
+		if err != nil {
+			fmt.Println(err)
+
+		}
+
+		if val, ok := hack["total_results"]; ok {
+			return Result{
+				Count: val,
+				When:  time.Now(),
+			}
+		}
+	}
+
+	//Remove csv headers
+	if count > 2 {
+		count -= 1
 	}
 
 	return Result{
