@@ -36,7 +36,7 @@ func (c Condition) IsAlertText(r Result) string {
 
 func (c *Condition) Parse(rawSearch []byte) Result {
 	count := bytes.Count(rawSearch, []byte("\n"))
-	if count > 1 {
+	if count > 2 {
 		count -= 1
 	}
 
