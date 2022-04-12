@@ -45,7 +45,7 @@ func (c *Condition) Parse(rawSearch []byte) Result {
 
 	//BUG: API sometimes returns complex object?
 	if count == 0 {
-		var hack map[string]int
+		var hack map[string]interface{}
 		err := json.Unmarshal(rawSearch, &hack)
 		if err != nil {
 			fmt.Println(err)
@@ -54,7 +54,7 @@ func (c *Condition) Parse(rawSearch []byte) Result {
 
 		if val, ok := hack["total_results"]; ok {
 			return Result{
-				Count: val,
+				Count: val.(int),
 				When:  time.Now(),
 			}
 		}
