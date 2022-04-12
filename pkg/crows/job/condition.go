@@ -54,7 +54,7 @@ func (c *Condition) Parse(rawSearch []byte) Result {
 
 		if val, ok := hack["total_results"]; ok {
 			return Result{
-				Count: val.(int),
+				Count: int(val.(float64)),
 				When:  time.Now(),
 			}
 		}
