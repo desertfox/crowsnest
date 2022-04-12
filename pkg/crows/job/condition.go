@@ -48,8 +48,7 @@ func (c *Condition) Parse(rawSearch []byte) Result {
 		var hack map[string]interface{}
 		err := json.Unmarshal(rawSearch, &hack)
 		if err != nil {
-			fmt.Println(err)
-
+			fmt.Printf("Error parsing json. data:%s\nerr:%s\n", rawSearch, err)
 		}
 
 		if val, ok := hack["total_results"]; ok {
