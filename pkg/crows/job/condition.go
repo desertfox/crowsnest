@@ -44,7 +44,7 @@ func (c *Condition) Parse(rawSearch []byte) Result {
 	count := bytes.Count(rawSearch, []byte("\n"))
 
 	//BUG: API sometimes returns complex object?
-	if count == 0 {
+	if count == 0 && len(rawSearch) > 0 {
 		var hack map[string]interface{}
 		err := json.Unmarshal(rawSearch, &hack)
 		if err != nil {
