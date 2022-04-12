@@ -37,7 +37,7 @@ func (c Condition) IsAlertText(r Result) string {
 func (c *Condition) Parse(rawSearch []byte) Result {
 
 	if os.Getenv("CROWS_DEBUG") != "" {
-		fmt.Printf("DEBUG: rawSearch %s", rawSearch)
+		fmt.Printf("DEBUG: rawSearch %s\n", rawSearch)
 
 	}
 
