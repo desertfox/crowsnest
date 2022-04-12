@@ -3,6 +3,7 @@ package job
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"time"
 )
 
@@ -34,6 +35,12 @@ func (c Condition) IsAlertText(r Result) string {
 }
 
 func (c *Condition) Parse(rawSearch []byte) Result {
+
+	if os.Getenv("CROWS_DEBUG") != "" {
+		fmt.Printf("DEBUG: rawSearch %s", rawSearch)
+
+	}
+
 	count := bytes.Count(rawSearch, []byte("\n"))
 	if count > 1 {
 		count -= 1

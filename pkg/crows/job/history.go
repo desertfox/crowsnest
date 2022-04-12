@@ -1,6 +1,6 @@
 package job
 
-const maxHistory int = 10
+const maxHistory int = 20
 
 type History struct {
 	results []Result
