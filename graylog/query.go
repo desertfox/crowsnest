@@ -50,16 +50,18 @@ func (q Query) execute(authToken string) ([]byte, error) {
 	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
 	request.Header.Set("Authorization", authToken)
 
+	request.Close = true
+
 	response, err := httpClient.Do(request)
 	if err != nil {
-		log.Printf("error making request:%v, error:%v", request, err)
+		log.Printf("error making request:%#v, error:%v", request, err)
 		return []byte{}, err
 	}
 	defer response.Body.Close()
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		log.Printf("error reading response:%v, error:%v", response, err)
+		log.Printf("error reading response:%#v, error:%v", response, err)
 		return []byte{}, err
 	}
 
