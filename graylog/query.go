@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"strconv"
 	"strings"
@@ -61,7 +62,8 @@ func (q Query) execute(authToken string) ([]byte, error) {
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		log.Printf("error reading response:%#v, error:%v", response, err)
+		b, _ := httputil.DumpResponse(response, true)
+		log.Printf("error reading response:%#v, error:%v", b, err)
 		return []byte{}, err
 	}
 
