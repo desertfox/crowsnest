@@ -8,7 +8,7 @@ import (
 
 	"github.com/desertfox/crowsnest/graylog"
 	"github.com/desertfox/crowsnest/teams"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 var JobPath string = os.Getenv("CROWSNEST_CONFIG")
