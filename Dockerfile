@@ -7,11 +7,11 @@ WORKDIR /opt/crowsnest
 
 COPY . .
 
-RUN go build -o crowsnest .
+RUN CGO_ENABLED=0 GOOS=linux go build -o crowsnest .
 
-FROM golang:1.17.5-alpine
+FROM scratch
 
-WORKDIR /root/
+WORKDIR /root
 
 COPY --from=builder /opt/crowsnest/crowsnest ./
 

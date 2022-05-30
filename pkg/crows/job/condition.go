@@ -71,7 +71,7 @@ func (c *Condition) Parse(rawSearch []byte) Result {
 }
 
 func (r Result) From(f int) time.Time {
-	return r.When.Add(time.Duration(-1 * f * int(time.Minute)))
+	return r.When.Add(time.Duration(int64(-1) * int64(f) * int64(time.Minute)))
 }
 
 func (r Result) To() time.Time {
