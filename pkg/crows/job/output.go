@@ -34,7 +34,7 @@ func (o Output) Send(name string, frequency int, s Search, c Condition, r Result
 				frequency,
 				r.Count,
 				c.IsAlertText(r),
-				s.BuildURL(r.From(frequency), r.To()),
+				"ded",
 			),
 		)
 	}

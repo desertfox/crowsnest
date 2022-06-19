@@ -11,7 +11,19 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+const (
+	Add int = iota
+	Del
+	Reload
+)
+
 var JobPath string = os.Getenv("CROWSNEST_CONFIG")
+
+type Event struct {
+	Action int
+	Value  string
+	Job    *Job
+}
 
 type Lister interface {
 	HandleEvent(Event)

@@ -29,12 +29,6 @@ func translate(njr NewJobReq) (job.Job, error) {
 		if err != nil {
 			return job.Job{}, err
 		}
-		/*
-			case "absolute":
-				typeSearch = "absolute"
-				from = parsedQuery["from"][0]
-				to = parsedQuery["to"][0]
-		*/
 	}
 
 	if _, ok := parsedQuery["fields"]; ok {

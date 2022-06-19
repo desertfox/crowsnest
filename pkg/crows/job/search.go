@@ -2,12 +2,10 @@ package job
 
 import (
 	"log"
-	"time"
 )
 
 type SearchService interface {
-	Execute(string, string, string, int, []string) ([]byte, error)
-	//	BuildURL(time.Time, time.Time) string
+	Execute(string, string, int) ([]byte, error)
 }
 
 type Search struct {
@@ -22,9 +20,7 @@ func (s *Search) Run(frequency int) []byte {
 	results, err := s.Client.Execute(
 		s.Query,
 		s.Streamid,
-		s.Type,
 		frequency,
-		s.Fields,
 	)
 	if err != nil {
 		log.Println(err)
@@ -32,8 +28,4 @@ func (s *Search) Run(frequency int) []byte {
 	}
 
 	return results
-}
-
-func (s Search) BuildURL(from, to time.Time) string {
-	return "dep" //s.Client.BuildURL(from, to)
 }

@@ -82,52 +82,7 @@ func (a Api) createJob(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a Api) getJobForm(w http.ResponseWriter) {
-	tmpl, err := template.New("njr_form").Parse(`
-	<html>
-	<h1>New Job Request Translate Form</h1>
-	<a href="/status" target="_blank">Current Job Status Page</a>
-	<div class="cn-form">
-	<form method="POST">
-	<label>Job Name:</label>
-	<input type="text" name="name"><br /><br />
-	<label>GrayLog Query Link:</label><br />
-	<textarea id="querylink" name="querylink" value="https://graylogquery.com?something"></textarea><br /><br />
-	<label>OffSet ##:##:</label>
-	<input type="text" name="offset"><br /><br />
-	<label>Teams Room Name/Label:</label>
-	<input type="text" name="outputname"> <br>
-	<label>Teams URL:</label>
-	<input type="text" name="outputlink" value="https://teamsurl.com">
-	<a href="https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook" target="_blank">webhook instructions</a>
-	<br>
-	OR<br>
-	<select name="exist">
-		<option value="" selected>None</option>
-		{{range .RoomNames}}
-			<option value="{{ . }}">{{ . }}</option>
-		{{end}}
-	</select>
-	<br>
-	<br>
-	<label>When to message room:</label>
-	<select name="verbose">
-    	<option value="0">outside of threshold</option>
-		<option value="1">all</option>
-	</select>
-	<br><br>
-	<label>Number of cases to alert(n):</label>
-	<input type="text" name="threshold" value="0"><br /><br />
-	<label>Condition:</label>
-	<select name="state">
-    	<option value=">">Alert when cases >= n#</option>
-		<option value="<">Alert when cases <= n#</option>
-	</select><br />
-	<br />
-	<input type="submit" method="POST" value="Create Job">
-</form>
-</div>
-</html>`)
-
+	tmpl, err := template.ParseFiles("new_jobform.html")
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -164,7 +119,7 @@ func (a Api) getStatus(w http.ResponseWriter) {
 				i,
 				r.When.In(central).Format(time.RFC822),
 				r.Count,
-				j.Search.BuildURL(r.From(j.Frequency), r.To()),
+				"j.Search.BuildURL(r.From(j.Frequency), r.To())",
 			))
 		}
 
