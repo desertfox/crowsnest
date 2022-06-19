@@ -7,7 +7,7 @@ import (
 
 type SearchService interface {
 	Execute(string, string, string, int, []string) ([]byte, error)
-	BuildURL(time.Time, time.Time) string
+	//	BuildURL(time.Time, time.Time) string
 }
 
 type Search struct {
@@ -35,5 +35,5 @@ func (s *Search) Run(frequency int) []byte {
 }
 
 func (s Search) BuildURL(from, to time.Time) string {
-	return s.Client.BuildURL(from, to)
+	return "dep" //s.Client.BuildURL(from, to)
 }

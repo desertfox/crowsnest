@@ -1,42 +1,50 @@
 package graylog
 
 import (
+	"io"
 	"net/http"
-	"time"
 )
 
-var HttpClient = http.Client{}
-
 type Client struct {
-	session *session
-	query   Query
+	session    *session
+	httpClient *http.Client
 }
 
-func New(h string) *Client {
+func New(host, user, pass string) *Client {
+	var httpClient *http.Client = &http.Client{}
 	return &Client{
-		session: newSession(
-			h,
-		),
+		session:    newSession(host, user, pass, httpClient),
+		httpClient: httpClient,
 	}
 }
 
 func (c *Client) Execute(query, streamid, typ string, frequency int, fields []string) ([]byte, error) {
-	c.query = Query{
+	return c.request(Query{
 		Host:      c.session.loginRequest.Host,
 		Query:     query,
 		Streamid:  streamid,
 		Frequency: frequency,
-		Fields:    fields,
-		Type:      typ,
-	}
+	})
+}
 
-	raw, err := c.query.execute(c.session.authHeader())
+func (c *Client) request(q Query) ([]byte, error) {
+	request, _ := http.NewRequest("GET", q.URL(), q.BodyData())
+	request.Close = true
+
+	request.Header.Set("Authorization", c.session.authHeader())
+	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
+	request.Header.Set("X-Requested-By", "GoGrayLog 1")
+
+	response, err := c.httpClient.Do(request)
 	if err != nil {
 		return []byte{}, err
 	}
-	return raw, nil
-}
+	defer response.Body.Close()
 
-func (c Client) BuildURL(from, to time.Time) string {
-	return c.query.toURL(from, to)
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return body, nil
 }

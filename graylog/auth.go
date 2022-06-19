@@ -7,17 +7,22 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"sync"
 	"time"
 )
 
 const sessionsPath string = "api/system/sessions"
 
+var (
+	lock               = &sync.Mutex{}
+	sessionInstanceMap = make(map[string]*session)
+)
+
 type session struct {
 	basicAuth    string
 	updated      time.Time
 	loginRequest *loginRequest
+	httpClient   *http.Client
 }
 
 type loginRequest struct {
@@ -26,24 +31,18 @@ type loginRequest struct {
 	Password string `json:"password"`
 }
 
-var (
-	lock               = &sync.Mutex{}
-	sessionInstanceMap = make(map[string]*session)
-)
-
-func newSession(h string) *session {
+func newSession(host, user, pass string, httpClient *http.Client) *session {
 	lock.Lock()
 	defer lock.Unlock()
 
-	if _, exists := sessionInstanceMap[h]; !exists {
-		sessionInstanceMap[h] = &session{"", time.Now(), &loginRequest{h, os.Getenv("CROWSNEST_USERNAME"), os.Getenv("CROWSNEST_PASSWORD")}}
+	if _, exists := sessionInstanceMap[host]; !exists {
+		sessionInstanceMap[host] = &session{"", time.Now(), &loginRequest{host, user, pass}, httpClient}
 	}
 
-	return sessionInstanceMap[h]
+	return sessionInstanceMap[host]
 }
-
 func (s *session) authHeader() string {
-	sessionId, err := s.loginRequest.execute()
+	sessionId, err := s.loginRequest.execute(s.httpClient)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -54,18 +53,18 @@ func (s *session) authHeader() string {
 	return s.basicAuth
 }
 
-func (lr loginRequest) execute() (string, error) {
+func (lr loginRequest) execute(httpClient *http.Client) (string, error) {
 	jsonData, err := json.Marshal(lr)
 	if err != nil {
 		return "", err
 	}
 
-	url := fmt.Sprintf("%v/%v", lr.Host, sessionsPath)
+	request, _ := http.NewRequest("POST", fmt.Sprintf("%v/%v", lr.Host, sessionsPath), bytes.NewBuffer(jsonData))
 
-	request, _ := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
 	request.Header.Set("Content-Type", "application/json; charset=UTF-8")
+	request.Header.Set("X-Requested-By", "GoGrayLog 1")
 
-	response, err := HttpClient.Do(request)
+	response, err := httpClient.Do(request)
 	if err != nil {
 		return "", err
 	}
