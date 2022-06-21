@@ -6,7 +6,7 @@ import (
 )
 
 type SearchService interface {
-	Execute(string, string, string, int, []string) ([]byte, error)
+	Execute(string, string, []string, int, int) ([]byte, error)
 	BuildURL(time.Time, time.Time) string
 }
 
@@ -22,9 +22,9 @@ func (s *Search) Run(frequency int) []byte {
 	results, err := s.Client.Execute(
 		s.Query,
 		s.Streamid,
-		s.Type,
-		frequency,
 		s.Fields,
+		10000,
+		frequency,
 	)
 	if err != nil {
 		log.Println(err)
