@@ -15,7 +15,7 @@ RUN mkdir /opt/crowsnest
 
 WORKDIR /opt/crowsnest
 
-COPY --from=builder /opt/crowsnest/crowsnest ./
+COPY --from=builder /opt/crowsnest/crowsnest /opt/crowsnest/
 
 EXPOSE 8080/tcp
 
