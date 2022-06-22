@@ -11,10 +11,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o crowsnest .
 
 FROM scratch
 
-RUN mkdir /opt/crowsnest
-
-WORKDIR /opt/crowsnest
+WORKDIR /root
 
 COPY --from=builder /opt/crowsnest/crowsnest ./
 
-CMD [ "./opt/crowsnestcrowsnest" ]
+CMD [ "./crowsnest" ]
