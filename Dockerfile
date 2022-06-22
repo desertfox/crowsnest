@@ -19,4 +19,4 @@ COPY --from=builder /opt/crowsnest/crowsnest ./
 
 EXPOSE 8080/tcp
 
-CMD [ "./opt/crowsnestcrowsnest" ]
+CMD [ "./crowsnest" ]
