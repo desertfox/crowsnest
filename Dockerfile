@@ -9,6 +9,10 @@ COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o crowsnest .
 
-EXPOSE 8080/tcp
+FROM scratch
+
+WORKDIR /root
+
+COPY --from=builder /opt/crowsnest/crowsnest ./
 
 CMD [ "./crowsnest" ]
