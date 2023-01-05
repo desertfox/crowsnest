@@ -3,6 +3,7 @@ module github.com/desertfox/crowsnest
 go 1.17
 
 require (
+	github.com/desertfox/gograylog v1.0.10
 	github.com/go-co-op/gocron v1.11.0
 	gopkg.in/yaml.v3 v3.0.0
 )

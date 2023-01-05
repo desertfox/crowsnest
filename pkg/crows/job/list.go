@@ -6,8 +6,8 @@ import (
 	"os"
 	"sync"
 
-	"github.com/desertfox/crowsnest/graylog"
 	"github.com/desertfox/crowsnest/teams"
+	"github.com/desertfox/gograylog"
 	"gopkg.in/yaml.v3"
 )
 
@@ -69,7 +69,7 @@ func (l *List) add(j *Job) {
 		return
 	}
 
-	j.Search.Client = graylog.New(j.Host)
+	j.Search.Client = gograylog.New(j.Host, os.Getenv("CROWSNEST_USERNAME"), os.Getenv("CROWSNEST_PASSWORD"))
 
 	j.Output.Client = teams.Client{}
 
