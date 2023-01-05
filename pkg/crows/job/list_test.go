@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 	"testing"
+
+	"github.com/desertfox/gograylog"
 )
 
 func Test_Load(t *testing.T) {
@@ -75,7 +77,7 @@ func Test_Load(t *testing.T) {
 
 		got := List{}
 		job := testJob()
-		got.add(&job)
+		got.add(&job, &gograylog.Client{})
 		want := 1
 
 		if len(got.Jobs()) != want {

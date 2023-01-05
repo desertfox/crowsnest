@@ -3,6 +3,7 @@ package job
 import (
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"sync"
 
@@ -42,14 +43,29 @@ func NewList() *List {
 		log.Fatalf("missing jobs yaml key %s", file)
 	}
 
+	if _, ok := data["jobs"]; !ok {
+		log.Fatalf("missing jobs yaml key %s", file)
+	}
+
 	if len(data["jobs"]) > 0 {
+		host := data["jobs"][0].Host
+
+		g := &gograylog.Client{
+			Host:       host,
+			HttpClient: &http.Client{},
+		}
+		err := g.Login(os.Getenv("CROWSNEST_USERNAME"), os.Getenv("CROWSNEST_PASSWORD"))
+		if err != nil {
+			log.Fatalf(err.Error())
+		}
+
 		var wg sync.WaitGroup
 		for i, job := range data["jobs"] {
 			log.Printf("loaded Job from config %d: %s", i, job.Name)
 			wg.Add(1)
 			go func(job *Job) {
 				defer wg.Done()
-				l.add(job)
+				l.add(job, g)
 			}(job)
 		}
 		wg.Wait()
@@ -64,12 +80,12 @@ func (l *List) Jobs() []*Job {
 	return l.jobs
 }
 
-func (l *List) add(j *Job) {
+func (l *List) add(j *Job, g *gograylog.Client) {
 	if l.exists(j) {
 		return
 	}
 
-	j.Search.Client = gograylog.New(j.Host, os.Getenv("CROWSNEST_USERNAME"), os.Getenv("CROWSNEST_PASSWORD"))
+	j.Search.Client = g
 
 	j.Output.Client = teams.Client{}
 
@@ -126,7 +142,7 @@ func (l *List) HandleEvent(event Event) {
 	case Del:
 		l.del(event.Job)
 	case Add:
-		l.add(event.Job)
+		//l.add(event.Job)
 	}
 	l.save()
 }

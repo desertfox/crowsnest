@@ -3,29 +3,29 @@ package job
 import (
 	"log"
 	"time"
+
+	"github.com/desertfox/gograylog"
 )
 
-type SearchService interface {
-	Execute(string, string, []string, int, int) ([]byte, error)
-	BuildURL(time.Time, time.Time) string
-}
-
 type Search struct {
-	Type     string        `yaml:"type"`
-	Streamid string        `yaml:"streamid"`
-	Query    string        `yaml:"query"`
-	Fields   []string      `yaml:"fields"`
-	Client   SearchService `yaml:"-"`
+	Type     string            `yaml:"type"`
+	Streamid string            `yaml:"streamid"`
+	Query    string            `yaml:"query"`
+	Fields   []string          `yaml:"fields"`
+	Client   *gograylog.Client `yaml:"-"`
 }
 
 func (s *Search) Run(frequency int) []byte {
-	results, err := s.Client.Execute(
-		s.Query,
-		s.Streamid,
-		s.Fields,
-		10000,
-		frequency,
-	)
+
+	q := gograylog.Query{
+		QueryString: s.Query,
+		StreamID:    s.Streamid,
+		Fields:      s.Fields,
+		Frequency:   frequency,
+		Limit:       10000,
+	}
+
+	results, err := s.Client.Search(q)
 	if err != nil {
 		log.Println(err)
 		return []byte{}
@@ -35,5 +35,12 @@ func (s *Search) Run(frequency int) []byte {
 }
 
 func (s Search) BuildURL(from, to time.Time) string {
-	return s.Client.BuildURL(from, to)
+	q := gograylog.Query{
+		QueryString: s.Query,
+		StreamID:    s.Streamid,
+		Fields:      s.Fields,
+		Limit:       10000,
+	}
+
+	return q.Url(s.Client.Host, from, to)
 }

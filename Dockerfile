@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM golang:1.17.5-alpine as builder
+FROM golang:1.19.4-alpine3.16 as builder
 
 RUN mkdir /opt/crowsnest
 
