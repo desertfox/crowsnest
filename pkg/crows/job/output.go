@@ -25,10 +25,10 @@ func (o Output) Send(name string, frequency int, s Search, c Condition, r Result
 	if o.IsVerbose() || c.IsAlert(r) {
 		o.Client.Send(
 			o.URL(),
-			fmt.Sprintf("🔎 Name: %s\n\r"+
-				"⌚ Freq: %d\n\r"+
-				"🧮 Count: %d\n\r"+
-				"📜 Status: %s\n\r"+
+			fmt.Sprintf("🔎 Name: %s<br>"+
+				"⌚ Freq: %d<br>"+
+				"🧮 Count: %d<br>"+
+				"📜 Status: %s<br>"+
 				"🔗 Link: [GrayLog](%s)",
 				name,
 				frequency,
