@@ -25,7 +25,7 @@ func Test_history(t *testing.T) {
 		for _, tt := range tests {
 			tt := tt
 			t.Run(tt.name, func(t *testing.T) {
-				tt.got.Push(tt.push)
+				tt.got.Add(tt.push)
 
 				if len(tt.got.results) != tt.want {
 					t.Fatalf("Incorrect length got: %v, want: %v, results: %v", len(tt.got.results), tt.want, tt.got.results)

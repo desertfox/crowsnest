@@ -18,7 +18,7 @@ var (
 	streamid           string   = "5555555"
 	q                  string   = "\"Error Checking Out\""
 	fields             []string = []string{"source", "message"}
-	verbose            int      = 1
+	verbose            bool     = true
 	room                        = "test room"
 )
 

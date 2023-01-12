@@ -2,21 +2,18 @@ package job
 
 const maxHistory int = 20
 
+// History container for Results
 type History struct {
 	results []Result
 }
 
-func newHistory() *History {
-	return &History{
-		results: []Result{},
-	}
-}
-
+// Results accessor
 func (h History) Results() []Result {
 	return h.results
 }
 
-func (h *History) Push(r Result) {
+// Add
+func (h *History) Add(r Result) {
 	results := []Result{r}
 	results = append(results, h.results...)
 

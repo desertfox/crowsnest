@@ -1,38 +1,54 @@
 package job
 
 import (
+	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"time"
+
+	goteamsnotify "github.com/atc0005/go-teams-notify/v2"
+	"github.com/atc0005/go-teams-notify/v2/messagecard"
 )
 
 type Job struct {
-	Name      string    `yaml:"name"`
-	Host      string    `yaml:"host"`
-	Frequency int       `yaml:"frequency"`
-	Offset    string    `yaml:"offset"`
-	Search    Search    `yaml:"search"`
+	//Name of the job
+	Name string `yaml:"name"`
+	//Host is the graylog endpoint
+	Host string `yaml:"host"`
+	//Frequency is the occurence of the job execution
+	Frequency int `yaml:"frequency"`
+	//Offset if a job is to no begin on startup but at a defered time
+	Offset string `yaml:"offset"`
+	//Search
+	Search Search `yaml:"search"`
+	//Condition
 	Condition Condition `yaml:"condition"`
-	Output    Output    `yaml:"output"`
-	History   *History  `yaml:"-"`
+	//Output
+	Output Output `yaml:"output"`
+	//History
+	History *History `yaml:"-"`
 }
 
-func (j *Job) GetFunc() func() {
+func (j *Job) GetFunc(g SearchClient, t *goteamsnotify.TeamsClient) func() {
 	return func() {
 		j := j
 
-		rawCSV := j.Search.Run(j.Frequency)
+		result := j.Search.Run(g, j.Frequency)
 
-		result := j.Condition.Parse(rawCSV)
+		j.History.Add(result)
 
-		j.History.Push(result)
+		if j.Output.Verbose || j.Condition.IsAlert(result) {
+			card := messagecard.NewMessageCard()
+			card.Title = fmt.Sprintf(TeamsTitleTemplate, "Crowsnest")
+			card.Text = j.Output.format(j.Name, j.Frequency, result.Count, j.Condition.IsAlertText(result), j.Search.BuildURL(j.Host, result.From(j.Frequency), result.To()))
 
-		j.Output.Send(j.Name, j.Frequency, j.Search, j.Condition, result)
+			if err := t.Send(j.Output.URL(), card); err != nil {
+				log.Panicf("unable to send results to webhook %s, %s", j.Name, err.Error())
+			}
+
+		}
 	}
-}
-
-func (j Job) HasOffset() bool {
-	return j.Offset != ""
 }
 
 func (j Job) GetOffSetTime() time.Time {

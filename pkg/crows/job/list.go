@@ -1,148 +1,70 @@
 package job
 
 import (
-	"io/ioutil"
-	"log"
-	"net/http"
 	"os"
-	"sync"
 
-	"github.com/desertfox/crowsnest/teams"
-	"github.com/desertfox/gograylog"
 	"gopkg.in/yaml.v3"
 )
 
-var JobPath string = os.Getenv("CROWSNEST_CONFIG")
-
-type Lister interface {
-	HandleEvent(Event)
-	Jobs() []*Job
-}
-
 type List struct {
-	mu   sync.Mutex
-	jobs []*Job
+	//File path to store jobs
+	File string
+	//Job array
+	Jobs []*Job
 }
 
-func NewList() *List {
-	var l *List = &List{}
-
-	file, err := ioutil.ReadFile(JobPath)
+// Load reads file loaded at List.File and attempts to populate job list
+func (l *List) Load() error {
+	file, err := os.ReadFile(l.File)
 	if err != nil {
-		log.Printf("error unable to config file: %v, error: %s", JobPath, err)
-		return l
+		return err
 	}
 
-	data := make(map[string][]*Job)
-	err = yaml.Unmarshal(file, &data)
+	err = yaml.Unmarshal(file, &l.Jobs)
 	if err != nil {
-		log.Fatalf("unable to load jobs %s", file)
+		return err
 	}
 
-	if _, ok := data["jobs"]; !ok {
-		log.Fatalf("missing jobs yaml key %s", file)
-	}
-
-	if _, ok := data["jobs"]; !ok {
-		log.Fatalf("missing jobs yaml key %s", file)
-	}
-
-	if len(data["jobs"]) > 0 {
-		host := data["jobs"][0].Host
-
-		g := &gograylog.Client{
-			Host:       host,
-			HttpClient: &http.Client{},
-		}
-		err := g.Login(os.Getenv("CROWSNEST_USERNAME"), os.Getenv("CROWSNEST_PASSWORD"))
-		if err != nil {
-			log.Fatalf(err.Error())
-		}
-
-		var wg sync.WaitGroup
-		for i, job := range data["jobs"] {
-			log.Printf("loaded Job from config %d: %s", i, job.Name)
-			wg.Add(1)
-			go func(job *Job) {
-				defer wg.Done()
-				l.add(job, g)
-			}(job)
-		}
-		wg.Wait()
-	}
-
-	return l
+	return nil
 }
+func (l *List) Save() error {
+	data, err := yaml.Marshal(l.Jobs)
+	if err != nil {
+		return err
+	}
 
-func (l *List) Jobs() []*Job {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	return l.jobs
+	if err := os.WriteFile(l.File, data, os.FileMode(int(0644))); err != nil {
+		return err
+	}
+
+	return nil
 }
-
-func (l *List) add(j *Job, g *gograylog.Client) {
+func (l *List) Count() int {
+	return len(l.Jobs)
+}
+func (l *List) Add(j *Job) {
 	if l.exists(j) {
 		return
 	}
 
-	j.Search.Client = g
-
-	j.Output.Client = teams.Client{}
-
-	j.History = newHistory()
-
-	l.mu.Lock()
-	l.jobs = append(l.jobs, j)
-	l.mu.Unlock()
+	l.Jobs = append(l.Jobs, j)
 }
-
+func (l *List) Delete(delJob *Job) {
+	jobs := []*Job(l.Jobs)
+	for i, j := range jobs {
+		if j.Name == delJob.Name {
+			jobs[i] = jobs[len(jobs)-1]
+			jobs = jobs[:len(jobs)-1]
+			l.Jobs = jobs
+			return
+		}
+	}
+}
 func (l *List) exists(j *Job) bool {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-
-	for _, job := range l.jobs {
+	for _, job := range l.Jobs {
 		if job.Name == j.Name {
 			return true
 		}
 	}
 	return false
-}
-
-func (l *List) save() {
-	var jobs = map[string][]*Job{"jobs": l.jobs}
-	data, err := yaml.Marshal(&jobs)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if err := ioutil.WriteFile(JobPath, data, os.FileMode(int(0777))); err != nil {
-		log.Fatal(err)
-	}
-}
-
-func (l *List) del(delJob *Job) {
-	jobs := []*Job(l.jobs)
-	for i, j := range jobs {
-		if j.Name == delJob.Name {
-			jobs[i] = jobs[len(jobs)-1]
-			jobs = jobs[:len(jobs)-1]
-
-			l.mu.Lock()
-			l.jobs = jobs
-			l.mu.Unlock()
-			return
-		}
-	}
-}
-
-func (l *List) HandleEvent(event Event) {
-	switch event.Action {
-	case Reload:
-		l = NewList()
-	case Del:
-		l.del(event.Job)
-	case Add:
-		//l.add(event.Job)
-	}
-	l.save()
 }

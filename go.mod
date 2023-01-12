@@ -1,11 +1,12 @@
 module github.com/desertfox/crowsnest
 
-go 1.17
+go 1.19
 
 require (
+	github.com/atc0005/go-teams-notify/v2 v2.7.0
 	github.com/desertfox/gograylog v1.1.1
 	github.com/go-co-op/gocron v1.11.0
-	gopkg.in/yaml.v3 v3.0.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (

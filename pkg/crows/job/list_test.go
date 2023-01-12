@@ -1,18 +1,15 @@
 package job
 
 import (
-	"io/ioutil"
 	"log"
 	"os"
 	"testing"
-
-	"github.com/desertfox/gograylog"
 )
 
-func Test_Load(t *testing.T) {
+func Test_List(t *testing.T) {
 
 	t.Run("Load.Save", func(t *testing.T) {
-		file, err := ioutil.TempFile("", "LoadSave")
+		file, err := os.CreateTemp("", "LoadSave")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -20,13 +17,13 @@ func Test_Load(t *testing.T) {
 		defer os.Remove(file.Name())
 
 		testJob := testJob()
-		JobPath = file.Name()
 		list := List{
-			jobs: []*Job{&testJob},
+			Jobs: []*Job{&testJob},
+			File: file.Name(),
 		}
-		list.save()
+		list.Save()
 
-		got, err := ioutil.ReadFile(file.Name())
+		got, err := os.ReadFile(file.Name())
 		if err != nil {
 			t.Error(err)
 		}
@@ -37,7 +34,7 @@ func Test_Load(t *testing.T) {
 	})
 
 	t.Run("Load", func(t *testing.T) {
-		file, err := ioutil.TempFile("", "Load")
+		file, err := os.CreateTemp("", "Load")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -45,30 +42,26 @@ func Test_Load(t *testing.T) {
 		defer os.Remove(file.Name())
 
 		testJob := testJob()
-		JobPath = file.Name()
 		list := List{
-			jobs: []*Job{&testJob},
+			Jobs: []*Job{&testJob},
+			File: file.Name(),
 		}
-		list.save()
+		list.Save()
 
-		got := NewList()
+		got := List{
+			File: file.Name(),
+		}
+		got.Load()
 		want := 1
 
-		if len(got.Jobs()) != want {
+		if len(got.Jobs) != want {
 			t.Errorf("wrong number of jobs, got:%v, want:%v", got, want)
-		}
-
-		got.save()
-		got = NewList()
-
-		if len(got.Jobs()) != want {
-			t.Errorf("wrong number of jobs: %#v", got)
 		}
 
 	})
 
 	t.Run("Load.Add", func(t *testing.T) {
-		file, err := ioutil.TempFile("", "LoadAdd")
+		file, err := os.CreateTemp("", "LoadAdd")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -77,35 +70,35 @@ func Test_Load(t *testing.T) {
 
 		got := List{}
 		job := testJob()
-		got.add(&job, &gograylog.Client{})
+		got.Add(&job)
 		want := 1
 
-		if len(got.Jobs()) != want {
-			t.Errorf("wrong number of jobs, got:%v, want:%v", got.Jobs(), want)
+		if len(got.Jobs) != want {
+			t.Errorf("wrong number of jobs, got:%v, want:%v", got.Jobs, want)
 		}
 	})
 
 	t.Run("Load.Del", func(t *testing.T) {
 		jobExample := testJob()
 		got := List{
-			jobs: []*Job{&jobExample},
+			Jobs: []*Job{&jobExample},
 		}
 
-		if len(got.Jobs()) != 1 {
-			t.Errorf("wrong number of jobs, got:%v, want:%v", got.Jobs(), "0")
+		if len(got.Jobs) != 1 {
+			t.Errorf("wrong number of jobs, got:%v, want:%v", got.Jobs, "0")
 		}
 
-		got.del(&jobExample)
+		got.Delete(&jobExample)
 
-		if len(got.Jobs()) != 0 {
-			t.Errorf("wrong number of jobs, got:%v, want:%v", got.Jobs(), "0")
+		if len(got.Jobs) != 0 {
+			t.Errorf("wrong number of jobs, got:%v, want:%v", got.Jobs, "0")
 		}
 	})
 
 	t.Run("Load.Exists", func(t *testing.T) {
 		jobExample := testJob()
 		got := List{
-			jobs: []*Job{&jobExample},
+			Jobs: []*Job{&jobExample},
 		}
 
 		if !got.exists(&jobExample) {

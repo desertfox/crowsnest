@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/desertfox/crowsnest/pkg/crows"
 	"github.com/desertfox/crowsnest/pkg/crows/job"
 )
 
@@ -18,7 +19,7 @@ type NewJobReq struct {
 	OutputName string
 	Threshold  int
 	State      string
-	Verbose    int
+	Verbose    bool
 	OffSet     string
 }
 
@@ -31,7 +32,7 @@ func (a Api) createJob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	verbose, err := strconv.Atoi(r.FormValue("verbose"))
+	verbose, err := strconv.ParseBool(r.FormValue("verbose"))
 	if err != nil {
 		w.Write([]byte("error translating verbose to int " + err.Error()))
 		return
@@ -73,8 +74,8 @@ func (a Api) createJob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.nest.HandleEvent(job.Event{
-		Action: job.Add,
+	a.nest.HandleEvent(crows.Event{
+		Action: crows.Add,
 		Job:    &j,
 	})
 
@@ -160,12 +161,16 @@ func (a Api) getStatus(w http.ResponseWriter) {
 	for _, j := range a.nest.Jobs() {
 		var results template.HTML = template.HTML(fmt.Sprintf("Average: %d<br>", j.History.Avg()))
 		for i, r := range j.History.Results() {
-			results += template.HTML(fmt.Sprintf(`Index: %d, When: %s, Count: %d, Link: <a href="%s" target="_blank">GrayLog</a><br>`,
-				i,
-				r.When.In(central).Format(time.RFC822),
-				r.Count,
-				j.Search.BuildURL(r.From(j.Frequency), r.To()),
-			))
+			results += template.HTML(
+				fmt.Sprintf(
+					`Index: %d, When: %s, Count: %d, Link: <a href="%s" target="_blank">GrayLog</a><br>`,
+					i,
+					r.When.In(central).Format(time.RFC822),
+					r.Count,
+					j.Search.BuildURL(j.Host, r.From(j.Frequency), r.To()),
+				),
+			)
+
 		}
 
 		output += template.HTML(fmt.Sprintf(`
@@ -217,8 +222,8 @@ func (a Api) getStatus(w http.ResponseWriter) {
 }
 
 func (a Api) reloadJobs(w http.ResponseWriter) {
-	a.nest.HandleEvent(job.Event{
-		Action: job.Reload,
+	a.nest.HandleEvent(crows.Event{
+		Action: crows.Reload,
 	})
 
 	a.getStatus(w)
@@ -238,8 +243,8 @@ func (a Api) deleteJob(w http.ResponseWriter, r *http.Request) {
 
 	for _, j := range a.nest.Jobs() {
 		if name == j.Name {
-			a.nest.HandleEvent(job.Event{
-				Action: job.Del,
+			a.nest.HandleEvent(crows.Event{
+				Action: crows.Del,
 				Job:    &job.Job{Name: name},
 			})
 

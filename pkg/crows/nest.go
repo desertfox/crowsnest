@@ -1,108 +1,127 @@
 package crows
 
 import (
-	"errors"
+	"fmt"
 	"log"
+	"os"
 	"sync"
 	"time"
 
+	goteamsnotify "github.com/atc0005/go-teams-notify/v2"
+	"github.com/atc0005/go-teams-notify/v2/messagecard"
+	"github.com/desertfox/crowsnest/pkg/crows/cron"
 	"github.com/desertfox/crowsnest/pkg/crows/job"
-	"github.com/go-co-op/gocron"
+	"github.com/desertfox/gograylog"
 )
 
 var (
 	wg sync.WaitGroup
-	mu sync.Mutex
 )
 
+const (
+	Add int = iota
+	Del
+	Reload
+)
+
+type Event struct {
+	Action int
+	Value  string
+	Job    *job.Job
+}
+
 type Nest struct {
-	list   job.Lister
-	gocron *gocron.Scheduler
+	//List Collection of Jobs
+	List *job.List
+	//Scheduler controller
+	Schedule *cron.Schedule
+	//Teams Client for output
+	MSTeamsClient *goteamsnotify.TeamsClient
+	//Graylog Client for searching
+	GrayLogClient *gograylog.Client
 }
 
-func NewNest(list job.Lister, goc *gocron.Scheduler) *Nest {
-	n := &Nest{list: list, gocron: goc}
+// Start will check if there are Jobs attached to the list struct value, if not it will attempt to List.Load()
+// Schedule will initalize and start schedule control
+// Nest method AssignJobs will then be called.
+func (n *Nest) Start() error {
+	if n.List.Count() == 0 {
+		err := n.List.Load()
+		if err != nil {
+			return err
+		}
+	}
 
-	n.gocron.StartAsync()
+	n.Schedule.Start()
 
-	n.schedule()
+	n.AssignJobs()
 
-	return n
+	return nil
 }
 
-func (n *Nest) HandleEvent(event job.Event) {
-	go func(event job.Event) {
-		log.Printf("inbound event: %#v", event)
-
-		n.list.HandleEvent(event)
-
-		n.schedule()
-	}(event)
-}
-
-func (n *Nest) schedule() {
-	if len(n.list.Jobs()) == 0 {
+// AssignJobs will attach all Jobs to the Schedule
+// Nest will also attach a Status Job here that is not a Job type but a one off reporter
+func (n *Nest) AssignJobs() {
+	if n.List.Count() == 0 {
 		return
 	}
 
-	for _, j := range n.list.Jobs() {
-		wg.Add(1)
+	wg.Add(n.List.Count())
+	for _, j := range n.List.Jobs {
 		go func(name string, frequency int, startAt time.Time, f func()) {
 			defer wg.Done()
-			n.add(name, frequency, startAt, f, true)
-		}(j.Name, j.Frequency, j.GetOffSetTime(), j.GetFunc())
+			n.Schedule.Add(name, frequency, startAt, f, true)
+		}(j.Name, j.Frequency, j.GetOffSetTime(), j.GetFunc(n.GrayLogClient, n.MSTeamsClient))
 	}
 	wg.Wait()
+
+	n.Schedule.Add("Status Job", 60, time.Now(), n.statusJob(), true)
 }
 
-func (n *Nest) add(name string, frequency int, startAt time.Time, do func(), replaceExisting bool) {
-	existingJob, err := n.getCronByTag(name)
-	if err == nil && existingJob.IsRunning() {
-		log.Printf("Job is already running with this tag: %s, replace: %t", name, replaceExisting)
-		if !replaceExisting {
-			return
-		}
-		mu.Lock()
-		n.gocron.Remove(existingJob)
-		mu.Unlock()
-	}
-
-	log.Printf("schedule %s every %d min(s) to begin at %s", name, frequency, startAt)
-
-	mu.Lock()
-	n.gocron.Every(frequency).Minutes().StartAt(startAt).Tag(name).Do(do)
-	mu.Unlock()
-}
-
-func (n *Nest) getCronByTag(tag string) (*gocron.Job, error) {
-	mu.Lock()
-	defer mu.Unlock()
-	for _, cj := range n.gocron.Jobs() {
-		for _, t := range cj.Tags() {
-			if tag == t {
-				return cj, nil
-			}
-		}
-	}
-	return &gocron.Job{}, errors.New("no job found for tag:" + tag)
-}
-
+// Jobs Sugar for accessing List.Jobs
 func (n *Nest) Jobs() []*job.Job {
-	return n.list.Jobs()
+	return n.List.Jobs
 }
 
+// NextRun will query the Schedule to find the given job name
 func (n *Nest) NextRun(name string) time.Time {
-	j, err := n.getCronByTag(name)
-	if err != nil {
-		return time.Now()
-	}
-	return j.NextRun()
+	return n.Schedule.NextRun(name)
 }
 
+// LastRun will query the Schedule to find the given job name
 func (n *Nest) LastRun(name string) time.Time {
-	j, err := n.getCronByTag(name)
-	if err != nil {
-		return time.Now()
+	return n.Schedule.LastRun(name)
+}
+
+// HandleEvent is the watcher for inbound events from web API to interact
+// with running Nest application
+func (n *Nest) HandleEvent(event Event) {
+	go func(event Event) {
+		switch event.Action {
+		case Reload:
+			n.List = &job.List{
+				File: os.Getenv("CROWSNEST_JOBS"),
+			}
+		case Del:
+			n.List.Delete(event.Job)
+		case Add:
+			n.List.Add(event.Job)
+		}
+		n.List.Save()
+
+		n.AssignJobs()
+	}(event)
+}
+
+func (n *Nest) statusJob() func() {
+	return func() {
+		card := messagecard.NewMessageCard()
+		card.Title = "Crowsnest App Status"
+		card.Text = fmt.Sprintf("# Jobs Running: %d<br>Uptime: %s", n.List.Count(), "")
+
+		if err := n.MSTeamsClient.Send(os.Getenv("CROWSNEST_TEAMSURL"), card); err != nil {
+			log.Printf("unable to send results to webhook %s, %s", "status job", err.Error())
+		}
+
 	}
-	return j.LastRun()
 }

@@ -3,6 +3,9 @@ package job
 import (
 	"testing"
 	"time"
+
+	goteamsnotify "github.com/atc0005/go-teams-notify/v2"
+	"github.com/desertfox/gograylog"
 )
 
 func Test_job(t *testing.T) {
@@ -19,7 +22,7 @@ func Test_job(t *testing.T) {
 		for _, tt := range tests {
 			tt := tt
 			t.Run(tt.name, func(t *testing.T) {
-				tt.job.GetFunc()
+				tt.job.GetFunc(&gograylog.Client{}, goteamsnotify.NewTeamsClient())
 			})
 		}
 	})
@@ -63,7 +66,6 @@ func Test_OffSet(t *testing.T) {
 func testJob() Job {
 	return Job{
 		Name:      "Test Job",
-		Host:      "https://host.com",
 		Frequency: 15,
 		Offset:    "13:00",
 		Search: Search{
@@ -77,7 +79,7 @@ func testJob() Job {
 			State:     ">",
 		},
 		Output: Output{
-			Verbose: 1,
+			Verbose: true,
 			Teams: Teams{
 				Url:  "https://mircosoft.com",
 				Name: "Room Name",
