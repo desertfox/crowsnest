@@ -45,6 +45,11 @@ func translate(njr NewJobReq) (job.Job, error) {
 		Name:      njr.Name,
 		Host:      "https://" + urlObj.Hostname(),
 		Frequency: frequency / 60,
+		Verbose:   njr.Verbose,
+		Teams: job.Teams{
+			Url:  njr.OutputLink,
+			Name: njr.OutputName,
+		},
 		Search: job.Search{
 			Type:     typeSearch,
 			Streamid: getSteamId(urlObj.EscapedPath()),
@@ -54,13 +59,6 @@ func translate(njr NewJobReq) (job.Job, error) {
 		Condition: job.Condition{
 			Threshold: njr.Threshold,
 			State:     njr.State,
-		},
-		Output: job.Output{
-			Verbose: njr.Verbose,
-			Teams: job.Teams{
-				Url:  njr.OutputLink,
-				Name: njr.OutputName,
-			},
 		},
 	}, nil
 }

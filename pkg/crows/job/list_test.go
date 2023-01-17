@@ -1,8 +1,10 @@
 package job
 
 import (
+	"fmt"
 	"log"
 	"os"
+	"sync"
 	"testing"
 )
 
@@ -16,7 +18,7 @@ func Test_List(t *testing.T) {
 		file.Close()
 		defer os.Remove(file.Name())
 
-		testJob := testJob()
+		testJob := testJob("LoadSave")
 		list := List{
 			Jobs: []*Job{&testJob},
 			File: file.Name(),
@@ -33,33 +35,6 @@ func Test_List(t *testing.T) {
 		}
 	})
 
-	t.Run("Load", func(t *testing.T) {
-		file, err := os.CreateTemp("", "Load")
-		if err != nil {
-			log.Fatal(err)
-		}
-		file.Close()
-		defer os.Remove(file.Name())
-
-		testJob := testJob()
-		list := List{
-			Jobs: []*Job{&testJob},
-			File: file.Name(),
-		}
-		list.Save()
-
-		got := List{
-			File: file.Name(),
-		}
-		got.Load()
-		want := 1
-
-		if len(got.Jobs) != want {
-			t.Errorf("wrong number of jobs, got:%v, want:%v", got, want)
-		}
-
-	})
-
 	t.Run("Load.Add", func(t *testing.T) {
 		file, err := os.CreateTemp("", "LoadAdd")
 		if err != nil {
@@ -69,9 +44,17 @@ func Test_List(t *testing.T) {
 		defer os.Remove(file.Name())
 
 		got := List{}
-		job := testJob()
-		got.Add(&job)
-		want := 1
+		var wg sync.WaitGroup
+		wg.Add(10)
+		for i := 0; i < 10; i++ {
+			go func(d int) {
+				job := testJob(fmt.Sprintf("%d", d))
+				got.Add(&job)
+				wg.Done()
+			}(i)
+		}
+		wg.Wait()
+		want := 10
 
 		if len(got.Jobs) != want {
 			t.Errorf("wrong number of jobs, got:%v, want:%v", got.Jobs, want)
@@ -79,16 +62,27 @@ func Test_List(t *testing.T) {
 	})
 
 	t.Run("Load.Del", func(t *testing.T) {
-		jobExample := testJob()
-		got := List{
-			Jobs: []*Job{&jobExample},
+		got := List{}
+		var wg sync.WaitGroup
+		wg.Add(10)
+		for i := 0; i < 10; i++ {
+			go func(d int) {
+				job := testJob(fmt.Sprintf("%d", d))
+				got.Add(&job)
+				wg.Done()
+			}(i)
 		}
+		wg.Wait()
 
-		if len(got.Jobs) != 1 {
-			t.Errorf("wrong number of jobs, got:%v, want:%v", got.Jobs, "0")
+		wg.Add(10)
+		for i := 0; i < 10; i++ {
+			go func(d int) {
+				job := testJob(fmt.Sprintf("%d", d))
+				got.Delete(&job)
+				wg.Done()
+			}(i)
 		}
-
-		got.Delete(&jobExample)
+		wg.Wait()
 
 		if len(got.Jobs) != 0 {
 			t.Errorf("wrong number of jobs, got:%v, want:%v", got.Jobs, "0")
@@ -96,7 +90,7 @@ func Test_List(t *testing.T) {
 	})
 
 	t.Run("Load.Exists", func(t *testing.T) {
-		jobExample := testJob()
+		jobExample := testJob("Exists")
 		got := List{
 			Jobs: []*Job{&jobExample},
 		}

@@ -11,6 +11,11 @@ import (
 	"github.com/atc0005/go-teams-notify/v2/messagecard"
 )
 
+const (
+	TeamsBodyTemplate  string = "🔎 Name: %s<br>⌚ Freq: %d<br>🧮 Count: %d<br>📜 Status: %s<br>🔗 Link: [GrayLog](%s)"
+	TeamsTitleTemplate string = "<%s>"
+)
+
 type Job struct {
 	//Name of the job
 	Name string `yaml:"name"`
@@ -18,16 +23,23 @@ type Job struct {
 	Host string `yaml:"host"`
 	//Frequency is the occurence of the job execution
 	Frequency int `yaml:"frequency"`
+	//Verbose If true will send message to teams room regardless of condition eval
+	Verbose bool `yaml:"verbose"`
+	//Teams
+	Teams Teams `yaml:"teams"`
 	//Offset if a job is to no begin on startup but at a defered time
 	Offset string `yaml:"offset"`
 	//Search
 	Search Search `yaml:"search"`
 	//Condition
 	Condition Condition `yaml:"condition"`
-	//Output
-	Output Output `yaml:"output"`
 	//History
 	History *History `yaml:"-"`
+}
+
+type Teams struct {
+	Name string `yaml:"name"`
+	Url  string `yaml:"url"`
 }
 
 func (j *Job) GetFunc(g SearchClient, t *goteamsnotify.TeamsClient) func() {
@@ -38,12 +50,12 @@ func (j *Job) GetFunc(g SearchClient, t *goteamsnotify.TeamsClient) func() {
 
 		j.History.Add(result)
 
-		if j.Output.Verbose || j.Condition.IsAlert(result) {
+		if j.Verbose || j.Condition.IsAlert(result) {
 			card := messagecard.NewMessageCard()
 			card.Title = fmt.Sprintf(TeamsTitleTemplate, "Crowsnest")
-			card.Text = j.Output.format(j.Name, j.Frequency, result.Count, j.Condition.IsAlertText(result), j.Search.BuildURL(j.Host, result.From(j.Frequency), result.To()))
+			card.Text = fmt.Sprintf(TeamsBodyTemplate, j.Name, j.Frequency, result.Count, j.Condition.IsAlertText(result), j.Search.BuildURL(j.Host, result.From(j.Frequency), result.To()))
 
-			if err := t.Send(j.Output.URL(), card); err != nil {
+			if err := t.Send(j.Teams.Url, card); err != nil {
 				log.Panicf("unable to send results to webhook %s, %s", j.Name, err.Error())
 			}
 

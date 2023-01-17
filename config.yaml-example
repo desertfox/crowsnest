@@ -1,19 +1,4 @@
-- name: test
-  host: https://something.com
-  frequency: 0
-  offset: 24:00
-  search:
-    type: ""
-    streamid: "55555"
-    query: '"ERROR"'
-    fields:
-    - message
-    - source
-  condition:
-    threshold: 0
-    state: '>'
-  output:
-    verbose: 0
-    teams:
-      name: Teams room name
-      url: https://teamsurl.com
+jobspath: ./jobs.yaml-example
+host: https://graylog.com
+username: desertfox
+password: secret

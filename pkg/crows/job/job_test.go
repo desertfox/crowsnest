@@ -10,7 +10,7 @@ import (
 
 func Test_job(t *testing.T) {
 	t.Run("Job", func(t *testing.T) {
-		j := testJob()
+		j := testJob("Job")
 
 		tests := []struct {
 			name string
@@ -30,7 +30,7 @@ func Test_job(t *testing.T) {
 
 func Test_OffSet(t *testing.T) {
 	t.Run("Job", func(t *testing.T) {
-		j := testJob()
+		j := testJob("OffSet")
 
 		now := time.Now()
 
@@ -63,11 +63,16 @@ func Test_OffSet(t *testing.T) {
 	})
 }
 
-func testJob() Job {
+func testJob(postFixTag string) Job {
 	return Job{
-		Name:      "Test Job",
+		Name:      "Test Job " + postFixTag,
 		Frequency: 15,
 		Offset:    "13:00",
+		Verbose:   true,
+		Teams: Teams{
+			Url:  "https://mircosoft.com",
+			Name: "Room Name",
+		},
 		Search: Search{
 			Type:     "relative",
 			Streamid: "abcd12345",
@@ -77,13 +82,6 @@ func testJob() Job {
 		Condition: Condition{
 			Threshold: 1,
 			State:     ">",
-		},
-		Output: Output{
-			Verbose: true,
-			Teams: Teams{
-				Url:  "https://mircosoft.com",
-				Name: "Room Name",
-			},
 		},
 	}
 }

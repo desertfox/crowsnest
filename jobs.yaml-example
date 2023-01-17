@@ -1,0 +1,18 @@
+- name: test
+  host: https://something.com
+  frequency: 0
+  offset: 24:00
+  verbose: 0
+  teams:
+    name: Teams room name
+    url: https://teamsurl.com
+  search:
+    type: ""
+    streamid: "55555"
+    query: '"ERROR"'
+    fields:
+    - message
+    - source
+  condition:
+    threshold: 0
+    state: '>'

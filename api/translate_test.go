@@ -36,6 +36,11 @@ func Test_translate(t *testing.T) {
 			Frequency: frequency,
 			Host:      host,
 			Offset:    "11:00",
+			Teams: job.Teams{
+				Url:  outputLink,
+				Name: room,
+			},
+			Verbose: verbose,
 			Search: job.Search{
 				Type:     searchTypeRelative,
 				Streamid: streamid,
@@ -44,13 +49,6 @@ func Test_translate(t *testing.T) {
 			},
 			Condition: job.Condition{
 				Threshold: threshold,
-			},
-			Output: job.Output{
-				Teams: job.Teams{
-					Url:  outputLink,
-					Name: room,
-				},
-				Verbose: verbose,
 			},
 		}
 
@@ -64,10 +62,6 @@ func Test_translate(t *testing.T) {
 
 		if got.Condition.Threshold != want.Condition.Threshold {
 			t.Errorf("error got: %#v, want %#v", got.Condition.Threshold, want.Condition.Threshold)
-		}
-
-		if got.Output.URL() != want.Output.URL() {
-			t.Errorf("error got: %#v, want %#v", got.Output.URL(), want.Output.URL())
 		}
 
 		if got.Host != want.Host {

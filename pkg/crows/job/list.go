@@ -2,6 +2,7 @@ package job
 
 import (
 	"os"
+	"sync"
 
 	"gopkg.in/yaml.v3"
 )
@@ -11,6 +12,7 @@ type List struct {
 	File string
 	//Job array
 	Jobs []*Job
+	mux  sync.Mutex
 }
 
 // Load reads file loaded at List.File and attempts to populate job list
@@ -43,6 +45,9 @@ func (l *List) Count() int {
 	return len(l.Jobs)
 }
 func (l *List) Add(j *Job) {
+	l.mux.Lock()
+	defer l.mux.Unlock()
+
 	if l.exists(j) {
 		return
 	}
@@ -50,6 +55,9 @@ func (l *List) Add(j *Job) {
 	l.Jobs = append(l.Jobs, j)
 }
 func (l *List) Delete(delJob *Job) {
+	l.mux.Lock()
+	defer l.mux.Unlock()
+
 	jobs := []*Job(l.Jobs)
 	for i, j := range jobs {
 		if j.Name == delJob.Name {
