@@ -10,27 +10,28 @@ import (
 
 func Test_List(t *testing.T) {
 
-	t.Run("Load.Save", func(t *testing.T) {
-		file, err := os.CreateTemp("", "LoadSave")
+	t.Run("Save, Load", func(t *testing.T) {
+		file, err := os.CreateTemp("", "SaveLoad")
 		if err != nil {
 			log.Fatal(err)
 		}
 		file.Close()
 		defer os.Remove(file.Name())
 
-		testJob := testJob("LoadSave")
+		testJob := testJob("SaveLoad")
 		list := List{
 			Jobs: []*Job{&testJob},
 			File: file.Name(),
 		}
 		list.Save()
 
-		got, err := os.ReadFile(file.Name())
-		if err != nil {
-			t.Error(err)
+		list = List{
+			File: file.Name(),
 		}
+		list.Load()
+		got := list.Count()
 
-		if len(got) == 1 {
+		if got != 1 {
 			t.Errorf("wrong number of jobs, got:%v, want:%v", got, "<1")
 		}
 	})
@@ -100,3 +101,21 @@ func Test_List(t *testing.T) {
 		}
 	})
 }
+
+/*
+func ExampleLoad() {
+	job := testJob("example")
+
+	data, err := yaml.Marshal(job)
+	if err != nil {
+		panic(err)
+	}
+
+
+	fmt.Println(Condition{
+		Threshold: 1,
+		State:     "<",
+	})
+
+}
+*/
