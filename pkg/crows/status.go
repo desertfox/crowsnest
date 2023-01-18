@@ -34,6 +34,9 @@ func (n *Nest) statusJob() func() {
 		)
 
 		for _, j := range n.Jobs() {
+			if j.Name == "" {
+				continue
+			}
 			rows = append(rows, jobRow{j.Name, len(j.History.Results()), j.History.Avg()})
 		}
 

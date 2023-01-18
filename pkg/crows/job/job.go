@@ -1,12 +1,10 @@
 package job
 
 import (
-	"bytes"
 	"fmt"
 	"log"
 	"strconv"
 	"strings"
-	"text/template"
 	"time"
 
 	goteamsnotify "github.com/atc0005/go-teams-notify/v2"
@@ -14,14 +12,8 @@ import (
 )
 
 var (
-	jobHeaders     []string = []string{"Frequency", "Count", "   Status   ", "Graylog Link"}
-	jobTemplateStr          = `<table><tr>{{ range .Headers }}<th>{{.}}</th>{{end}}</tr><tr><td>{{ .Frequency }}</td><td>{{ .Count }}</td><td>{{ .Alert }}</td><td>[GrayLog]({{ .Link }})</td></tr></table>`
-	jobTemplate    *template.Template
+	TeamsBodyTemplate string = "🔎 Name: %s<br>⌚ Freq: %d<br>🧮 Count: %d<br>📜 Status: %s<br>Link: [GrayLog](%s)"
 )
-
-func init() {
-	jobTemplate, _ = template.New("teams").Parse(jobTemplateStr)
-}
 
 type Job struct {
 	//Name of the job
@@ -60,25 +52,7 @@ func (j *Job) GetFunc(g SearchClient, t *goteamsnotify.TeamsClient) func() {
 		if j.Verbose || j.Condition.IsAlert(result) {
 			card := messagecard.NewMessageCard()
 			card.Title = fmt.Sprintf("Crowsnest: %s", j.Name)
-
-			var b bytes.Buffer
-			err := jobTemplate.Execute(&b, struct {
-				Headers   []string
-				Frequency int
-				Count     int
-				Alert     string
-				Link      string
-			}{
-				Headers:   jobHeaders,
-				Frequency: j.Frequency,
-				Count:     result.Count,
-				Alert:     j.Condition.IsAlertText(result),
-				Link:      j.Search.BuildURL(j.Host, result.From(j.Frequency), result.To()),
-			})
-			if err != nil {
-				log.Println(err)
-			}
-			card.Text = b.String()
+			card.Text = fmt.Sprintf(TeamsBodyTemplate, j.Name, j.Frequency, result.Count, j.Condition.IsAlertText(result), j.Search.BuildURL(j.Host, result.From(j.Frequency), result.To()))
 
 			if err := t.Send(j.Teams.Url, card); err != nil {
 				log.Panicf("unable to send results to webhook %s, %s", j.Name, err.Error())
