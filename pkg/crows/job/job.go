@@ -14,8 +14,8 @@ import (
 )
 
 var (
-	jobHeaders     []string = []string{"Frequency", "Count", "Status", "Graylog Link"}
-	jobTemplateStr          = `<table><tr>{{ range .Headers }}<th>{{.}}</th>{{end}}</tr><tr><td>{{ .Frequency }}</td><td>{{ .Count }}</td><td>{{ .Alert }}</td><td>{{ .Link }}</td></tr></table>`
+	jobHeaders     []string = []string{"Frequency", "Count", "   Status   ", "Graylog Link"}
+	jobTemplateStr          = `<table><tr>{{ range .Headers }}<th>{{.}}</th>{{end}}</tr><tr><td>{{ .Frequency }}</td><td>{{ .Count }}</td><td>{{ .Alert }}</td><td>[GrayLog]({{ .Link }})</td></tr></table>`
 	jobTemplate    *template.Template
 )
 
@@ -78,6 +78,7 @@ func (j *Job) GetFunc(g SearchClient, t *goteamsnotify.TeamsClient) func() {
 			if err != nil {
 				log.Println(err)
 			}
+			card.Text = b.String()
 
 			if err := t.Send(j.Teams.Url, card); err != nil {
 				log.Panicf("unable to send results to webhook %s, %s", j.Name, err.Error())

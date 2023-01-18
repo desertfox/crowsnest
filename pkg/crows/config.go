@@ -33,6 +33,11 @@ func (c *Config) Load(path string) error {
 		return err
 	}
 
+	err = yaml.Unmarshal(file, c)
+	if err != nil {
+		return err
+	}
+
 	err = yaml.Unmarshal(file, c.graylog)
 	if err != nil {
 		return err
