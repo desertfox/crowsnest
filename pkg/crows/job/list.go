@@ -27,6 +27,12 @@ func (l *List) Load() error {
 		return err
 	}
 
+	for _, j := range l.Jobs {
+		j.History = &History{
+			results: make([]Result, maxHistory),
+		}
+	}
+
 	return nil
 }
 func (l *List) Save() error {

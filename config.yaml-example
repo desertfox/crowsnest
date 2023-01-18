@@ -1,4 +1,5 @@
 jobspath: ./jobs.yaml-example
 host: https://graylog.com
+teamsurl:
 username: desertfox
 password: secret

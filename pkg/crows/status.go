@@ -49,7 +49,7 @@ func (n *Nest) statusJob() func() {
 		}
 
 		card := messagecard.NewMessageCard()
-		card.Title = fmt.Sprintf("Status Job, Running: %d", n.list.Count())
+		card.Title = fmt.Sprintf("Crowsnest Status: jobs running %d", n.list.Count())
 		card.Text = b.String()
 
 		if err := n.MSTeamsClient.Send(n.TeamsURL, card); err != nil {
