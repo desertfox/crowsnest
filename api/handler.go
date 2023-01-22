@@ -89,41 +89,66 @@ func (a Api) getJobForm(w http.ResponseWriter) {
 	<a href="/status" target="_blank">Current Job Status Page</a>
 	<div class="cn-form">
 	<form method="POST">
-	<label>Job Name:</label>
-	<input type="text" name="name"><br /><br />
-	<label>GrayLog Query Link:</label><br />
-	<textarea id="querylink" name="querylink" value="https://graylogquery.com?something"></textarea><br /><br />
-	<label>OffSet ##:##:</label>
-	<input type="text" name="offset"><br /><br />
-	<label>Teams Room Name/Label:</label>
-	<input type="text" name="outputname"> <br>
-	<label>Teams URL:</label>
-	<input type="text" name="outputlink" value="https://teamsurl.com">
-	<a href="https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook" target="_blank">webhook instructions</a>
-	<br>
-	OR<br>
-	<select name="exist">
+	<table>
+	<tr>
+		<td><label>Job Name:</label></td>
+		<td><input type="text" name="name"></td>
+	</tr>
+
+	<tr>
+		<td><label>GrayLog Query Link:</label></td>
+		<td><textarea id="querylink" name="querylink" value="https://graylogquery.com?something"></textarea></td>
+	</tr>
+
+	<tr>
+		<td><label>OffSet ##:##:</label></td>
+		<td><input type="text" name="offset"></td>
+	</tr>
+
+	<tr>
+		<td><label>Teams Room Name/Label:</label></td>
+		<td><input type="text" name="outputname"></td>
+	</tr>
+
+	<tr>
+		<td><label>Teams URL:</label></td>
+		<td><input type="text" name="outputlink" value="https://teamsurl.com"></td>
+		<td><a href="https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook" target="_blank">webhook instructions</a></td>
+		<td>OR 	<select name="exist">
 		<option value="" selected>None</option>
 		{{range .RoomNames}}
 			<option value="{{ . }}">{{ . }}</option>
 		{{end}}
 	</select>
-	<br>
-	<br>
-	<label>When to message room:</label>
-	<select name="verbose">
-    	<option value="0">outside of threshold</option>
-		<option value="1">all</option>
-	</select>
-	<br><br>
-	<label>Number of cases to alert(n):</label>
-	<input type="text" name="threshold" value="0"><br /><br />
-	<label>Condition:</label>
-	<select name="state">
-    	<option value=">">Alert when cases >= n#</option>
-		<option value="<">Alert when cases <= n#</option>
-	</select><br />
-	<br />
+		</td>
+	</tr>
+
+	<tr>
+		<td><label>When to message room:</label></td>
+		<td>
+			<select name="verbose">
+				<option value="0">outside of threshold</option>
+				<option value="1">all</option>
+			</select>
+		</td>
+	</tr>
+
+	<tr>
+		<td><label>Number of cases to alert(n):</label></td>
+		<td><input type="text" name="threshold" value="0">
+		</td>
+	</tr>
+
+	<tr>
+		<td><label>Condition:</label></td>
+		<td>
+			<select name="state">
+				<option value=">">Alert when cases >= n#</option>
+				<option value="<">Alert when cases <= n#</option>
+			</select>
+		</td>
+	</tr>
+	</table>
 	<input type="submit" method="POST" value="Create Job">
 </form>
 </div>
@@ -201,8 +226,9 @@ func (a Api) getStatus(w http.ResponseWriter) {
 
 	tmpl, err := template.New("status_form").Parse(`
 	<html>
-	<h1>Crowsnest Status Now: {{ .Now}}</h1>
-	{{ .Output}}
+	<h1>Crowsnest Status Now: {{ .Now }}</h1>
+	{{ .Output }}
+	{{ .Status }}
 	<form method="POST">
 		<label>ReloadJobs</label><br />
 		<input type="submit">
@@ -215,9 +241,11 @@ func (a Api) getStatus(w http.ResponseWriter) {
 	tmpl.Execute(w, struct {
 		Now    string
 		Output template.HTML
+		Status template.HTML
 	}{
 		time.Now().Format(time.RFC822),
 		output,
+		template.HTML(a.nest.StatusJobOuput()),
 	})
 }
 

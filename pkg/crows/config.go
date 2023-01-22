@@ -2,7 +2,6 @@ package crows
 
 import (
 	"crypto/tls"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -33,12 +32,12 @@ func (c *Config) Load(path string) error {
 		return err
 	}
 
-	err = yaml.Unmarshal(file, c)
+	err = yaml.Unmarshal(file, &c)
 	if err != nil {
 		return err
 	}
 
-	err = yaml.Unmarshal(file, c.graylog)
+	err = yaml.Unmarshal(file, &c.graylog)
 	if err != nil {
 		return err
 	}
@@ -60,17 +59,14 @@ func (c *Config) BuildNest() *Nest {
 
 func (c *Config) buildGraylogClient() *gograylog.Client {
 	g := &gograylog.Client{
-		Host: c.graylog.Host,
+		Host:     c.graylog.Host,
+		Username: c.graylog.Username,
+		Password: c.graylog.Password,
 		HttpClient: &http.Client{
 			Transport: &http.Transport{
 				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 			},
 		},
-	}
-
-	err := g.Login(c.graylog.Username, c.graylog.Password)
-	if err != nil {
-		log.Fatalf(err.Error())
 	}
 
 	return g

@@ -62,7 +62,7 @@ func (n *Nest) AssignJobs() {
 	}
 	wg.Wait()
 
-	n.schedule.Add("Status Job", 60, time.Now(), n.statusJob(), true)
+	n.schedule.Add("Status Job", 60, time.Now(), n.StatusJob(), true)
 }
 
 // Jobs Sugar for accessing List.Jobs
