@@ -2,6 +2,7 @@ package crows
 
 import (
 	"crypto/tls"
+	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -34,12 +35,12 @@ func (c *Config) Load(path string) error {
 
 	err = yaml.Unmarshal(file, &c)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to read Config, %w", err)
 	}
 
 	err = yaml.Unmarshal(file, &c.graylog)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to read graylog config, %w", err)
 	}
 
 	return nil
