@@ -45,21 +45,23 @@ func (j *Job) GetFunc(g SearchClient, t *goteamsnotify.TeamsClient) func() {
 	return func() {
 		j := j
 
-		result := j.Search.Run(g, j.Frequency)
+		r := j.Search.Run(g, j.Frequency)
 
-		j.History.Add(result)
+		j.History.Add(r)
 
-		if j.Verbose || j.Condition.IsAlert(result) {
-			card := messagecard.NewMessageCard()
-			card.Title = fmt.Sprintf("Crowsnest: %s", j.Name)
-			card.Text = fmt.Sprintf(TeamsBodyTemplate, j.Name, j.Frequency, result.Count, j.Condition.IsAlertText(result), j.Search.BuildURL(j.Host, result.From(j.Frequency), result.To()))
-
-			if err := t.Send(j.Teams.Url, card); err != nil {
-				log.Panicf("unable to send results to webhook %s, %s", j.Name, err.Error())
+		if j.Verbose || j.Condition.IsAlert(r) {
+			if err := t.Send(j.Teams.Url, createTeamsCard(j, r)); err != nil {
+				log.Printf("unable to send results to webhook %s, %s", j.Name, err.Error())
 			}
-
 		}
 	}
+}
+
+func createTeamsCard(j *Job, r Result) *messagecard.MessageCard {
+	card := messagecard.NewMessageCard()
+	card.Title = fmt.Sprintf("Crowsnest: %s", j.Name)
+	card.Text = fmt.Sprintf(TeamsBodyTemplate, j.Name, j.Frequency, r.Count, j.Condition.IsAlertText(r), j.Search.BuildURL(j.Host, r.From(j.Frequency), r.To()))
+	return card
 }
 
 func (j Job) GetOffSetTime() time.Time {

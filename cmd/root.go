@@ -28,8 +28,7 @@ func Execute() {
 
 	if configPath != "" {
 		log.Println("Loading config", configPath)
-		err := c.Load(configPath)
-		if err != nil {
+		if err := c.Load(configPath); err != nil {
 			log.Fatal(err)
 		}
 	}

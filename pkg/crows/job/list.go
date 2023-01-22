@@ -1,6 +1,7 @@
 package job
 
 import (
+	"fmt"
 	"os"
 	"sync"
 
@@ -19,12 +20,11 @@ type List struct {
 func (l *List) Load() error {
 	file, err := os.ReadFile(l.File)
 	if err != nil {
-		return err
+		return fmt.Errorf("unable to load list from file, %w", err)
 	}
 
-	err = yaml.Unmarshal(file, &l.Jobs)
-	if err != nil {
-		return err
+	if err := yaml.Unmarshal(file, &l.Jobs); err != nil {
+		return fmt.Errorf("unable to load list from yaml, %w", err)
 	}
 
 	for _, j := range l.Jobs {
