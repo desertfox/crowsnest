@@ -26,11 +26,7 @@ func init() {
 
 func (n *Nest) StatusJob() func() {
 	return func() {
-		var (
-			n    *Nest                    = n
-			card *messagecard.MessageCard = messagecard.NewMessageCard()
-		)
-
+		var card *messagecard.MessageCard = messagecard.NewMessageCard()
 		card.Title = fmt.Sprintf("Crowsnest Status: jobs running %d", n.list.Count())
 		card.Text = n.StatusJobOuput()
 

@@ -45,8 +45,7 @@ func (s *Search) Run(g SearchClient, frequency int) Result {
 
 	if count == 0 && len(b) > 0 {
 		var j map[string]interface{}
-		err := json.Unmarshal(b, &j)
-		if err != nil {
+		if err := json.Unmarshal(b, &j); err != nil {
 			fmt.Printf("Error parsing json. data:%s\nerr:%s\n", b, err)
 		}
 
