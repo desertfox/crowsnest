@@ -46,13 +46,17 @@ func (j *Job) GetFunc(g gograylog.ClientInterface, t *goteamsnotify.TeamsClient,
 	return func() {
 		j := j
 
+		log.Infow("job run", "name", j.Name)
+
 		r := j.Search.Run(g, j.Frequency)
+
+		log.Infow("search results", "count", r.Count)
 
 		j.History.Add(r)
 
 		if j.Verbose || j.Condition.IsAlert(r) {
 			if err := t.Send(j.Teams.Url, createTeamsCard(j, r)); err != nil {
-				log.Errorw("unable to send results to webhook", j.Name)
+				log.Errorw("unable to send results to webhook", "name", j.Name)
 			}
 		}
 	}

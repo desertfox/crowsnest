@@ -7,6 +7,12 @@ WORKDIR /opt/src
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o crowsnest .
+RUN go mod download
+
+ENV CGO_ENABLED=0
+
+ENV GOOS=linux
+
+RUN go build -o crowsnest .
 
 CMD [ "./crowsnest" ]

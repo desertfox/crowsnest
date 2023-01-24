@@ -58,13 +58,13 @@ func (n *Nest) AssignJobs() {
 		return
 	}
 
-	n.log.Info("assigning jobs", zap.Int("job count", n.list.Count()))
+	n.log.Infow("assigning jobs", "job count", n.list.Count())
 	wg.Add(n.list.Count())
 	for _, j := range n.list.Jobs {
 		go func(name string, frequency int, startAt time.Time, f func()) {
 			defer wg.Done()
 
-			n.log.Infow("adding job", name, frequency, startAt)
+			n.log.Infow("adding job", "name", name, "frequency", frequency, "startAt", startAt)
 			n.schedule.Add(name, frequency, startAt, f, true)
 
 		}(j.Name, j.Frequency, j.GetOffSetTime(), j.GetFunc(n.GrayLogClient, n.MSTeamsClient, n.log))
