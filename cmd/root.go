@@ -27,12 +27,14 @@ func Execute() {
 	}
 
 	if configPath != "" {
-		log.Println("Loading config", configPath)
 		if err := c.Load(configPath); err != nil {
 			log.Fatal(err)
 		}
 	}
 
-	log.Println("Starting API")
-	api.New(c.BuildNest()).Start()
+	n := c.BuildNest()
+
+	n.Start()
+
+	api.New(n).Start()
 }
