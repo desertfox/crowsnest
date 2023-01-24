@@ -22,7 +22,7 @@ type Nest struct {
 	//Teams Client for output
 	MSTeamsClient *goteamsnotify.TeamsClient
 	//Graylog Client for searching
-	GrayLogClient *gograylog.Client
+	GrayLogClient gograylog.ClientInterface
 	//Event channel for sending signals to an instance
 	eventChan chan Event
 	log       *zap.SugaredLogger
@@ -64,10 +64,10 @@ func (n *Nest) AssignJobs() {
 		go func(name string, frequency int, startAt time.Time, f func()) {
 			defer wg.Done()
 
-			n.log.Info("adding job", zap.String("name", name), zap.Int("frequency", frequency), zap.Time("startAt", startAt))
+			n.log.Infow("adding job", name, frequency, startAt)
 			n.schedule.Add(name, frequency, startAt, f, true)
 
-		}(j.Name, j.Frequency, j.GetOffSetTime(), j.GetFunc(n.GrayLogClient, n.MSTeamsClient))
+		}(j.Name, j.Frequency, j.GetOffSetTime(), j.GetFunc(n.GrayLogClient, n.MSTeamsClient, n.log))
 	}
 	wg.Wait()
 

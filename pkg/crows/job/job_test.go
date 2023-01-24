@@ -6,6 +6,7 @@ import (
 
 	goteamsnotify "github.com/atc0005/go-teams-notify/v2"
 	"github.com/desertfox/gograylog"
+	"go.uber.org/zap"
 )
 
 func Test_job(t *testing.T) {
@@ -22,7 +23,7 @@ func Test_job(t *testing.T) {
 		for _, tt := range tests {
 			tt := tt
 			t.Run(tt.name, func(t *testing.T) {
-				tt.job.GetFunc(&gograylog.Client{}, goteamsnotify.NewTeamsClient())
+				tt.job.GetFunc(&gograylog.Client{}, goteamsnotify.NewTeamsClient(), &zap.SugaredLogger{})
 			})
 		}
 	})

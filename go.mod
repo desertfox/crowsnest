@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/atc0005/go-teams-notify/v2 v2.7.0
-	github.com/desertfox/gograylog v1.2.0
+	github.com/desertfox/gograylog v1.3.0
 	github.com/go-co-op/gocron v1.11.0
 	github.com/spf13/cobra v1.6.1
 	gopkg.in/yaml.v3 v3.0.1

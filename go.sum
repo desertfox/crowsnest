@@ -9,6 +9,8 @@ github.com/desertfox/gograylog v1.1.1 h1:EW0qVm5yHEhRVMYBtCOapJ+/QUW8yaTkFOmh/zX
 github.com/desertfox/gograylog v1.1.1/go.mod h1:RJBEo76LMuDme/jVKtw3sq2mUDW6MosKI0EI4cLm2JE=
 github.com/desertfox/gograylog v1.2.0 h1:H+fTk2SZ8UTxf9EM4bLzqL+3x6RJfbF4CCEaA9ZQVB4=
 github.com/desertfox/gograylog v1.2.0/go.mod h1:RJBEo76LMuDme/jVKtw3sq2mUDW6MosKI0EI4cLm2JE=
+github.com/desertfox/gograylog v1.3.0 h1:IF1Hto4OqOQZq+mjFpjFKxES/YPtvYlqUNDIekw+urg=
+github.com/desertfox/gograylog v1.3.0/go.mod h1:RJBEo76LMuDme/jVKtw3sq2mUDW6MosKI0EI4cLm2JE=
 github.com/go-co-op/gocron v1.11.0 h1:ujOMubCpGcTxnnR/9vJIPIEpgwuAjbueAYqJRNr+nHg=
 github.com/go-co-op/gocron v1.11.0/go.mod h1:qtlsoMpHlSdIZ3E/xuZzrrAbeX3u5JtPvWf2TcdutU0=
 github.com/inconshreveable/mousetrap v1.0.1 h1:U3uMjPSQEBMNp1lFxmllqCPM6P5u/Xq7Pgzkat/bFNc=

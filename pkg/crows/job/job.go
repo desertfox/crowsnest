@@ -2,13 +2,14 @@ package job
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 	"time"
 
 	goteamsnotify "github.com/atc0005/go-teams-notify/v2"
 	"github.com/atc0005/go-teams-notify/v2/messagecard"
+	"github.com/desertfox/gograylog"
+	"go.uber.org/zap"
 )
 
 var (
@@ -41,7 +42,7 @@ type Teams struct {
 	Url  string `yaml:"url"`
 }
 
-func (j *Job) GetFunc(g SearchClient, t *goteamsnotify.TeamsClient) func() {
+func (j *Job) GetFunc(g gograylog.ClientInterface, t *goteamsnotify.TeamsClient, log *zap.SugaredLogger) func() {
 	return func() {
 		j := j
 
@@ -51,7 +52,7 @@ func (j *Job) GetFunc(g SearchClient, t *goteamsnotify.TeamsClient) func() {
 
 		if j.Verbose || j.Condition.IsAlert(r) {
 			if err := t.Send(j.Teams.Url, createTeamsCard(j, r)); err != nil {
-				log.Printf("unable to send results to webhook %s, %s", j.Name, err.Error())
+				log.Errorw("unable to send results to webhook", j.Name)
 			}
 		}
 	}

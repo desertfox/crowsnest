@@ -22,11 +22,7 @@ type Result struct {
 	When  time.Time
 }
 
-type SearchClient interface {
-	Search(gograylog.Query) ([]byte, error)
-}
-
-func (s *Search) Run(g SearchClient, frequency int) Result {
+func (s *Search) Run(g gograylog.ClientInterface, frequency int) Result {
 	q := gograylog.Query{
 		QueryString: s.Query,
 		StreamID:    s.Streamid,
