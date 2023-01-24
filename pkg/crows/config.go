@@ -12,6 +12,7 @@ import (
 	"github.com/desertfox/crowsnest/pkg/crows/job"
 	"github.com/desertfox/gograylog"
 	"github.com/go-co-op/gocron"
+	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
 )
 
@@ -47,6 +48,8 @@ func (c *Config) Load(path string) error {
 }
 
 func (c *Config) BuildNest() *Nest {
+	z, _ := zap.NewDevelopment()
+
 	return &Nest{
 		Config: c,
 		list:   c.BuildList(),
@@ -55,6 +58,7 @@ func (c *Config) BuildNest() *Nest {
 		},
 		MSTeamsClient: c.buildTeamsClient(),
 		GrayLogClient: c.buildGraylogClient(),
+		log:           z.Sugar(),
 	}
 }
 

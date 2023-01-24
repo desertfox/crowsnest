@@ -8,6 +8,7 @@ import (
 	"github.com/desertfox/crowsnest/pkg/crows/cron"
 	"github.com/desertfox/crowsnest/pkg/crows/job"
 	"github.com/desertfox/gograylog"
+	"go.uber.org/zap"
 )
 
 var (
@@ -24,6 +25,7 @@ type Nest struct {
 	GrayLogClient *gograylog.Client
 	//Event channel for sending signals to an instance
 	eventChan chan Event
+	log       *zap.SugaredLogger
 }
 
 // Start will check if there are Jobs attached to the list struct value, if not it will attempt to List.Load()
@@ -31,14 +33,17 @@ type Nest struct {
 // Nest method AssignJobs will then be called.
 func (n *Nest) Start() error {
 	if n.list.Count() == 0 {
+		n.log.Info("Job list empty")
 		err := n.list.Load()
 		if err != nil {
 			return err
 		}
 	}
 
+	n.log.Info("schedule started")
 	n.schedule.Start()
 
+	n.log.Info("assign jobs")
 	n.AssignJobs()
 
 	go handleEvent(n)
@@ -53,16 +58,20 @@ func (n *Nest) AssignJobs() {
 		return
 	}
 
+	n.log.Info("assigning jobs", zap.Int("job count", n.list.Count()))
 	wg.Add(n.list.Count())
 	for _, j := range n.list.Jobs {
 		go func(name string, frequency int, startAt time.Time, f func()) {
 			defer wg.Done()
+
+			n.log.Info("adding job", zap.String("name", name), zap.Int("frequency", frequency), zap.Time("startAt", startAt))
 			n.schedule.Add(name, frequency, startAt, f, true)
+
 		}(j.Name, j.Frequency, j.GetOffSetTime(), j.GetFunc(n.GrayLogClient, n.MSTeamsClient))
 	}
 	wg.Wait()
 
-	n.schedule.Add("Status Job", 60, time.Now(), n.StatusJob(), true)
+	n.schedule.Add("Status Job", 60, time.Now().Add(-1*time.Minute), n.StatusJob(), true)
 }
 
 // Jobs Sugar for accessing List.Jobs
