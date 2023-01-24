@@ -9,6 +9,4 @@ COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o crowsnest .
 
-ENV CROWSNET_CONFIG="./config.yaml"
-
-CMD [ "./crowsnest", "--config", "${CROWSNET_CONFIG}" ]
+CMD [ "./crowsnest" ]
