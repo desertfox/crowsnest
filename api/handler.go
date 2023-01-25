@@ -228,7 +228,6 @@ func (a Api) getStatus(w http.ResponseWriter) {
 	<html>
 	<h1>Crowsnest Status Now: {{ .Now }}</h1>
 	{{ .Output }}
-	{{ .Status }}
 	<form method="POST">
 		<label>ReloadJobs</label><br />
 		<input type="submit">
@@ -241,11 +240,9 @@ func (a Api) getStatus(w http.ResponseWriter) {
 	tmpl.Execute(w, struct {
 		Now    string
 		Output template.HTML
-		Status template.HTML
 	}{
 		time.Now().Format(time.RFC822),
 		output,
-		template.HTML(a.nest.StatusJobOuput()),
 	})
 }
 
