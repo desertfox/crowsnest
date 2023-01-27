@@ -59,7 +59,7 @@ func createTeamsCard(j *Job, r Result) *messagecard.MessageCard {
 	card := messagecard.NewMessageCard()
 	card.Title = fmt.Sprintf("Crowsnest: %s", j.Name)
 	card.Text = fmt.Sprintf(
-		"🔎 Name: %s<br>⌚ Freq: %d<br>🧮 Count: %d<br>🚨 Alerts: %d<br>📜 Status: %s<br>Link: [GrayLog](%s)",
+		"🔎 Name: %s<br>⌚ Freq: %d<br>🧮 Count: %d<br>🚨 Alerts: %d<br>📜 Status: %s<br>🔗 Link: [GrayLog](%s)",
 		j.Name,
 		j.Frequency,
 		r.Count,
