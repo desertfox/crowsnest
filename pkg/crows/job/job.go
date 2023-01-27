@@ -2,6 +2,7 @@ package job
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -11,6 +12,8 @@ import (
 	"github.com/desertfox/gograylog"
 	"go.uber.org/zap"
 )
+
+var CROWSNEST_STATUS_URL string = os.Getenv("CROWSNEST_STATUS_URL")
 
 type Job struct {
 	//Name of the job
@@ -57,7 +60,7 @@ func (j *Job) GetFunc(g gograylog.ClientInterface, t *goteamsnotify.TeamsClient,
 
 func createTeamsCard(j *Job, r Result) *messagecard.MessageCard {
 	card := messagecard.NewMessageCard()
-	card.Title = fmt.Sprintf("Crowsnest: %s", j.Name)
+	card.Title = fmt.Sprintf("[Crowsnest](%s): %s", CROWSNEST_STATUS_URL, j.Name)
 	card.Text = fmt.Sprintf(
 		"🔎 Name: %s<br>⌚ Freq: %d<br>🧮 Count: %d<br>🚨 Alerts: %d<br>📜 Status: %s<br>🔗 Link: [GrayLog](%s)",
 		j.Name,
