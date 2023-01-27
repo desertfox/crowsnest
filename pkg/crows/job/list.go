@@ -28,8 +28,8 @@ func (l *List) Load() error {
 	}
 
 	for _, j := range l.Jobs {
-		j.History = &History{
-			results: make([]Result, maxHistory),
+		j.Search.History = &History{
+			results: make([]Result, 0, maxHistory),
 		}
 	}
 

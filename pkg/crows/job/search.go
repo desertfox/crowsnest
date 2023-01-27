@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/desertfox/gograylog"
@@ -15,6 +14,7 @@ type Search struct {
 	Streamid string   `yaml:"streamid"`
 	Query    string   `yaml:"query"`
 	Fields   []string `yaml:"fields"`
+	History  *History `yaml:"-"`
 }
 
 type Result struct {
@@ -22,7 +22,7 @@ type Result struct {
 	When  time.Time
 }
 
-func (s *Search) Run(g gograylog.ClientInterface, frequency int) Result {
+func (s *Search) Run(g gograylog.ClientInterface, frequency int) (Result, error) {
 	q := gograylog.Query{
 		QueryString: s.Query,
 		StreamID:    s.Streamid,
@@ -33,8 +33,7 @@ func (s *Search) Run(g gograylog.ClientInterface, frequency int) Result {
 
 	b, err := g.Search(q)
 	if err != nil {
-		log.Println(err)
-		return Result{}
+		return Result{}, err
 	}
 
 	count := bytes.Count(b, []byte("\n"))
@@ -49,7 +48,7 @@ func (s *Search) Run(g gograylog.ClientInterface, frequency int) Result {
 			return Result{
 				Count: int(val.(float64)),
 				When:  time.Now(),
-			}
+			}, nil
 		}
 	}
 
@@ -58,10 +57,14 @@ func (s *Search) Run(g gograylog.ClientInterface, frequency int) Result {
 		count -= 1
 	}
 
-	return Result{
+	r := Result{
 		Count: count,
 		When:  time.Now(),
 	}
+
+	s.History.Add(r)
+
+	return r, nil
 }
 
 func (s Search) BuildURL(host string, from, to time.Time) string {

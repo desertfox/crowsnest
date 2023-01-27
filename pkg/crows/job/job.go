@@ -12,10 +12,6 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	TeamsBodyTemplate string = "🔎 Name: %s<br>⌚ Freq: %d<br>🧮 Count: %d<br>📜 Status: %s<br>Link: [GrayLog](%s)"
-)
-
 type Job struct {
 	//Name of the job
 	Name string `yaml:"name"`
@@ -33,8 +29,6 @@ type Job struct {
 	Search Search `yaml:"search"`
 	//Condition
 	Condition Condition `yaml:"condition"`
-	//History
-	History *History `yaml:"-"`
 }
 
 type Teams struct {
@@ -46,17 +40,16 @@ func (j *Job) GetFunc(g gograylog.ClientInterface, t *goteamsnotify.TeamsClient,
 	return func() {
 		j := j
 
-		log.Infow("job run", "name", j.Name)
+		r, err := j.Search.Run(g, j.Frequency)
+		if err != nil {
+			log.Errorw("unable to compelte search", "name", j.Name, "error", err)
+		}
 
-		r := j.Search.Run(g, j.Frequency)
-
-		log.Infow("search results", "count", r.Count)
-
-		j.History.Add(r)
+		log.Infow("job run", "name", j.Name, "count", r.Count, "IsAlert", j.Condition.IsAlert(r))
 
 		if j.Verbose || j.Condition.IsAlert(r) {
 			if err := t.Send(j.Teams.Url, createTeamsCard(j, r)); err != nil {
-				log.Errorw("unable to send results to webhook", "name", j.Name)
+				log.Errorw("unable to send results to webhook", "name", j.Name, "error", err)
 			}
 		}
 	}
@@ -65,8 +58,30 @@ func (j *Job) GetFunc(g gograylog.ClientInterface, t *goteamsnotify.TeamsClient,
 func createTeamsCard(j *Job, r Result) *messagecard.MessageCard {
 	card := messagecard.NewMessageCard()
 	card.Title = fmt.Sprintf("Crowsnest: %s", j.Name)
-	card.Text = fmt.Sprintf(TeamsBodyTemplate, j.Name, j.Frequency, r.Count, j.Condition.IsAlertText(r), j.Search.BuildURL(j.Host, r.From(j.Frequency), r.To()))
+	card.Text = fmt.Sprintf(
+		"🔎 Name: %s<br>⌚ Freq: %d<br>🧮 Count: %d<br>🚨 Alerts: %d<br>📜 Status: %s<br>Link: [GrayLog](%s)",
+		j.Name,
+		j.Frequency,
+		r.Count,
+		j.Alerting(),
+		j.Condition.IsAlertText(r),
+
+		j.Search.BuildURL(j.Host, r.From(j.Frequency), r.To()),
+	)
 	return card
+}
+
+// Alerting returns the count of Condition.IsAlert of History Results until it finds a non alerting result
+func (j Job) Alerting() int {
+	var count int = 0
+	for _, r := range j.Search.History.Results() {
+		if j.Condition.IsAlert(r) {
+			count++
+			continue
+		}
+		break
+	}
+	return count
 }
 
 func (j Job) GetOffSetTime() time.Time {
