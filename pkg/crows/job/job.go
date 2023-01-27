@@ -60,16 +60,16 @@ func (j *Job) GetFunc(g gograylog.ClientInterface, t *goteamsnotify.TeamsClient,
 
 func createTeamsCard(j *Job, r Result) *messagecard.MessageCard {
 	card := messagecard.NewMessageCard()
-	card.Title = fmt.Sprintf("[Crowsnest](%s): %s", CROWSNEST_STATUS_URL, j.Name)
+	card.Title = fmt.Sprintf("Crowsnest: %s", j.Name)
 	card.Text = fmt.Sprintf(
-		"🔎 Name: %s<br>⌚ Freq: %d<br>🧮 Count: %d<br>🚨 Alerts: %d<br>📜 Status: %s<br>🔗 Link: [GrayLog](%s)",
+		"🔎 Name: %s<br>⌚ Freq: %d<br>🧮 Count: %d<br>🚨 Alerts: %d<br>📜 Status: %s<br>🔗 Link: [GrayLog](%s)<br><br>[Crowsnest Status Page](%s)",
 		j.Name,
 		j.Frequency,
 		r.Count,
 		j.Alerting(),
 		j.Condition.IsAlertText(r),
-
 		j.Search.BuildURL(j.Host, r.From(j.Frequency), r.To()),
+		CROWSNEST_STATUS_URL,
 	)
 	return card
 }
