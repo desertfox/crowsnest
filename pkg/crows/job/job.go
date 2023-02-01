@@ -31,7 +31,8 @@ type Job struct {
 	//Search
 	Search Search `yaml:"search"`
 	//Condition
-	Condition Condition `yaml:"condition"`
+	Condition  Condition `yaml:"condition"`
+	alertCount int
 }
 
 type Teams struct {
@@ -62,11 +63,11 @@ func createTeamsCard(j *Job, r Result) *messagecard.MessageCard {
 	card := messagecard.NewMessageCard()
 	card.Title = fmt.Sprintf("Crowsnest: %s", j.Name)
 	card.Text = fmt.Sprintf(
-		"🔎 Name: %s<br>⌚ Freq: %d<br>🧮 Count: %d<br>🚨 Alerts: %d<br>📜 Status: %s<br>🔗 Link: [GrayLog](%s)<br><br>[Crowsnest Status Page](%s)",
+		"🔎 Name: %s<br>⌚ Freq: %dm<br>🧮 Count: %d<br>🚨 Alerts: %d<br>📜 Status: %s<br>🔗 Link: [GrayLog](%s)<br><br>[Crowsnest Status Page](%s)",
 		j.Name,
 		j.Frequency,
 		r.Count,
-		j.Alerting(),
+		j.Alerting(r),
 		j.Condition.IsAlertText(r),
 		j.Search.BuildURL(j.Host, r.From(j.Frequency), r.To()),
 		CROWSNEST_STATUS_URL,
@@ -74,17 +75,15 @@ func createTeamsCard(j *Job, r Result) *messagecard.MessageCard {
 	return card
 }
 
-// Alerting returns the count of Condition.IsAlert of History Results until it finds a non alerting result
-func (j Job) Alerting() int {
-	var count int = 0
-	for _, r := range j.Search.History.Results() {
-		if j.Condition.IsAlert(r) {
-			count++
-			continue
-		}
-		break
+func (j Job) Alerting(r Result) int {
+	if j.Condition.IsAlert(r) {
+		j.alertCount++
+
+		return j.alertCount
 	}
-	return count
+	j.alertCount = 0
+
+	return j.alertCount
 }
 
 func (j Job) GetOffSetTime() time.Time {
