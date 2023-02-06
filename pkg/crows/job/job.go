@@ -32,7 +32,7 @@ type Job struct {
 	Search Search `yaml:"search"`
 	//Condition
 	Condition  Condition `yaml:"condition"`
-	alertCount int
+	alertCount *int
 }
 
 type Teams struct {
@@ -77,13 +77,13 @@ func createTeamsCard(j *Job, r Result) *messagecard.MessageCard {
 
 func (j Job) Alerting(r Result) int {
 	if j.Condition.IsAlert(r) {
-		j.alertCount++
+		*j.alertCount++
 
-		return j.alertCount
+		return *j.alertCount
 	}
-	j.alertCount = 0
+	j.alertCount = new(int)
 
-	return j.alertCount
+	return *j.alertCount
 }
 
 func (j Job) GetOffSetTime() time.Time {
