@@ -31,6 +31,7 @@ func (l *List) Load() error {
 		j.Search.History = &History{
 			results: make([]Result, 0, maxHistory),
 		}
+		j.alertCount = new(int)
 	}
 
 	return nil
