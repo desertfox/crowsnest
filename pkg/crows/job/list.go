@@ -27,6 +27,7 @@ func (l *List) Load() error {
 		return fmt.Errorf("unable to load list from yaml, %w", err)
 	}
 
+	//Init
 	for _, j := range l.Jobs {
 		j.Search.History = &History{
 			results: make([]Result, 0, maxHistory),

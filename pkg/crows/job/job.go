@@ -51,6 +51,12 @@ func (j *Job) GetFunc(g gograylog.ClientInterface, t *goteamsnotify.TeamsClient,
 
 		log.Infow("job run", "name", j.Name, "count", r.Count, "IsAlert", j.Condition.IsAlert(r))
 
+		if j.Condition.IsAlert(r) {
+			*j.alertCount++
+		} else {
+			*j.alertCount = 0
+		}
+
 		if j.Verbose || j.Condition.IsAlert(r) {
 			if err := t.Send(j.Teams.Url, createTeamsCard(j, r)); err != nil {
 				log.Errorw("unable to send results to webhook", "name", j.Name, "error", err)
@@ -67,23 +73,12 @@ func createTeamsCard(j *Job, r Result) *messagecard.MessageCard {
 		j.Name,
 		j.Frequency,
 		r.Count,
-		j.Alerting(r),
+		*j.alertCount,
 		j.Condition.IsAlertText(r),
 		j.Search.BuildURL(j.Host, r.From(j.Frequency), r.To()),
 		CROWSNEST_STATUS_URL,
 	)
 	return card
-}
-
-func (j Job) Alerting(r Result) int {
-	if j.Condition.IsAlert(r) {
-		*j.alertCount++
-
-		return *j.alertCount
-	}
-	j.alertCount = new(int)
-
-	return *j.alertCount
 }
 
 func (j Job) GetOffSetTime() time.Time {
