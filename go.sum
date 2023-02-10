@@ -6,8 +6,8 @@ github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ3
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/desertfox/gograylog v1.3.1 h1:CSjsA/LBAuiT3uz/Sz5rf7do0P7bvTGtOVKfxX8XkwQ=
-github.com/desertfox/gograylog v1.3.1/go.mod h1:RJBEo76LMuDme/jVKtw3sq2mUDW6MosKI0EI4cLm2JE=
+github.com/desertfox/gograylog v1.3.2 h1:0FZ5jxkwmPZ1R3UEo3jHWxwMygA4kku0FY+ZV/NinPY=
+github.com/desertfox/gograylog v1.3.2/go.mod h1:RJBEo76LMuDme/jVKtw3sq2mUDW6MosKI0EI4cLm2JE=
 github.com/go-co-op/gocron v1.11.0 h1:ujOMubCpGcTxnnR/9vJIPIEpgwuAjbueAYqJRNr+nHg=
 github.com/go-co-op/gocron v1.11.0/go.mod h1:qtlsoMpHlSdIZ3E/xuZzrrAbeX3u5JtPvWf2TcdutU0=
 github.com/inconshreveable/mousetrap v1.0.1 h1:U3uMjPSQEBMNp1lFxmllqCPM6P5u/Xq7Pgzkat/bFNc=
