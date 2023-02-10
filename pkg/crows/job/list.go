@@ -30,6 +30,7 @@ func (l *List) Load() error {
 	//Init
 	for _, j := range l.Jobs {
 		j.History = newHistory()
+		j.Search.buildQuery(j.Frequency)
 	}
 
 	return nil

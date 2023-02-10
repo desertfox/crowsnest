@@ -17,9 +17,9 @@ func Test_history(t *testing.T) {
 			got  *History
 			want int
 		}{
-			{"One", &Result{Count: 1}, &History{alertCount: new(int)}, 1},
-			{"Five", &Result{Count: 1}, &History{results: results[:5], alertCount: new(int)}, 6},
-			{"Max", &Result{Count: 1}, &History{results: results, alertCount: new(int)}, maxHistory},
+			{"One", &Result{Count: 1}, &History{alertCount: 0}, 1},
+			{"Five", &Result{Count: 1}, &History{results: results[:5], alertCount: 0}, 6},
+			{"Max", &Result{Count: 1}, &History{results: results, alertCount: 0}, maxHistory},
 		}
 
 		for _, tt := range tests {

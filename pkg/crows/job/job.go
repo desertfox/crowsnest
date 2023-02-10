@@ -1,6 +1,8 @@
 package job
 
 import (
+	"bytes"
+	"encoding/csv"
 	"fmt"
 	"os"
 	"strconv"
@@ -40,24 +42,37 @@ type Teams struct {
 	Url  string `yaml:"url"`
 }
 
-func (j *Job) GetFunc(goclient gograylog.ClientInterface, t *goteamsnotify.TeamsClient, log *zap.SugaredLogger) func() {
+func (j *Job) GetFunc(goclient gograylog.ClientInterface, teamsclient *goteamsnotify.TeamsClient, log *zap.SugaredLogger) func() {
 	return func() {
 		j := j
 
-		r, err := j.Search.Run(goclient, j.Frequency)
+		b, err := goclient.Search(j.Search.query)
 		if err != nil {
 			log.Errorw("unable to complete search", "name", j.Name, "error", err)
+			return
+		}
+
+		numLines, err := parseCSV(b)
+		if err != nil {
+			log.Errorw("unable to parse search results", "name", j.Name, "dataPartial", b[64:], "error", err)
+			return
+		}
+
+		r := &Result{
+			Count: numLines,
+			When:  time.Now(),
 		}
 
 		j.Condition.IsAlert(r)
 
 		j.History.Add(r)
 
-		log.Infow("job run", "name", j.Name, "count", r.Count, "IsAlert", r.Alert)
+		log.Infow("job run", "name", j.Name, "count", r.Count, "IsAlert", r.Alert, "AlertCount", j.History.alertCount)
 
 		if j.Verbose || r.Alert {
-			if err := t.Send(j.Teams.Url, createTeamsCard(j, r)); err != nil {
+			if err := teamsclient.Send(j.Teams.Url, createTeamsCard(j, r)); err != nil {
 				log.Errorw("unable to send results to webhook", "name", j.Name, "error", err)
+				return
 			}
 		}
 	}
@@ -71,7 +86,7 @@ func createTeamsCard(j *Job, r *Result) *messagecard.MessageCard {
 		j.Name,
 		j.Frequency,
 		r.Count,
-		j.History.AlertCount(),
+		j.History.alertCount,
 		j.Condition.IsAlertText(r),
 		j.Search.BuildURL(j.Host, r.From(j.Frequency), r.To()),
 		CROWSNEST_STATUS_URL,
@@ -90,4 +105,12 @@ func (j Job) GetOffSetTime() time.Time {
 	min, _ := strconv.Atoi(offSet[1])
 
 	return time.Date(today.Year(), today.Month(), today.Day(), hour, min, 0, 0, time.UTC)
+}
+
+func parseCSV(b []byte) (int, error) {
+	records, err := csv.NewReader(bytes.NewBuffer(b)).ReadAll()
+	if err != nil {
+		return 0, err
+	}
+	return len(records) - 1, nil
 }

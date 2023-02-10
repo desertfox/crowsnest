@@ -7,7 +7,7 @@ const maxHistory int = 20
 // History container for Results
 type History struct {
 	results    []*Result
-	alertCount *int
+	alertCount int
 }
 
 type Result struct {
@@ -19,7 +19,7 @@ type Result struct {
 func newHistory() *History {
 	return &History{
 		results:    make([]*Result, 0, maxHistory),
-		alertCount: new(int),
+		alertCount: 0,
 	}
 }
 
@@ -28,16 +28,12 @@ func (h History) Results() []*Result {
 	return h.results
 }
 
-func (h *History) AlertCount() int {
-	return *h.alertCount
-}
-
 // Add
 func (h *History) Add(r *Result) {
 	if r.Alert {
-		*h.alertCount++
+		h.alertCount++
 	} else {
-		*h.alertCount = 0
+		h.alertCount = 0
 	}
 
 	results := []*Result{r}
@@ -61,4 +57,12 @@ func (h History) Avg() int {
 	}
 
 	return sum / len(h.results)
+}
+
+func (r Result) From(f int) time.Time {
+	return r.When.Add(time.Duration(int64(-1) * int64(f) * int64(time.Minute)))
+}
+
+func (r Result) To() time.Time {
+	return r.When
 }
