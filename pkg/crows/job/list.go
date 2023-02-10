@@ -29,10 +29,7 @@ func (l *List) Load() error {
 
 	//Init
 	for _, j := range l.Jobs {
-		j.Search.History = &History{
-			results: make([]Result, 0, maxHistory),
-		}
-		j.alertCount = new(int)
+		j.History = newHistory()
 	}
 
 	return nil

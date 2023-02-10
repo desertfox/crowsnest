@@ -31,8 +31,8 @@ type Job struct {
 	//Search
 	Search Search `yaml:"search"`
 	//Condition
-	Condition  Condition `yaml:"condition"`
-	alertCount *int
+	Condition Condition `yaml:"condition"`
+	History   *History  `yaml:"-"`
 }
 
 type Teams struct {
@@ -40,24 +40,22 @@ type Teams struct {
 	Url  string `yaml:"url"`
 }
 
-func (j *Job) GetFunc(g gograylog.ClientInterface, t *goteamsnotify.TeamsClient, log *zap.SugaredLogger) func() {
+func (j *Job) GetFunc(goclient gograylog.ClientInterface, t *goteamsnotify.TeamsClient, log *zap.SugaredLogger) func() {
 	return func() {
 		j := j
 
-		r, err := j.Search.Run(g, j.Frequency)
+		r, err := j.Search.Run(goclient, j.Frequency)
 		if err != nil {
-			log.Errorw("unable to compelte search", "name", j.Name, "error", err)
+			log.Errorw("unable to complete search", "name", j.Name, "error", err)
 		}
 
-		log.Infow("job run", "name", j.Name, "count", r.Count, "IsAlert", j.Condition.IsAlert(r))
+		j.Condition.IsAlert(r)
 
-		if j.Condition.IsAlert(r) {
-			*j.alertCount++
-		} else {
-			*j.alertCount = 0
-		}
+		j.History.Add(r)
 
-		if j.Verbose || j.Condition.IsAlert(r) {
+		log.Infow("job run", "name", j.Name, "count", r.Count, "IsAlert", r.Alert)
+
+		if j.Verbose || r.Alert {
 			if err := t.Send(j.Teams.Url, createTeamsCard(j, r)); err != nil {
 				log.Errorw("unable to send results to webhook", "name", j.Name, "error", err)
 			}
@@ -65,7 +63,7 @@ func (j *Job) GetFunc(g gograylog.ClientInterface, t *goteamsnotify.TeamsClient,
 	}
 }
 
-func createTeamsCard(j *Job, r Result) *messagecard.MessageCard {
+func createTeamsCard(j *Job, r *Result) *messagecard.MessageCard {
 	card := messagecard.NewMessageCard()
 	card.Title = fmt.Sprintf("Crowsnest: %s", j.Name)
 	card.Text = fmt.Sprintf(
@@ -73,7 +71,7 @@ func createTeamsCard(j *Job, r Result) *messagecard.MessageCard {
 		j.Name,
 		j.Frequency,
 		r.Count,
-		*j.alertCount,
+		j.History.AlertCount(),
 		j.Condition.IsAlertText(r),
 		j.Search.BuildURL(j.Host, r.From(j.Frequency), r.To()),
 		CROWSNEST_STATUS_URL,

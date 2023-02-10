@@ -6,20 +6,20 @@ import (
 
 func Test_history(t *testing.T) {
 	t.Run("Push", func(t *testing.T) {
-		var results []Result
+		var results []*Result
 		for i := 0; i < maxHistory; i++ {
-			results = append(results, Result{Count: 0})
+			results = append(results, &Result{Count: 0})
 		}
 
 		tests := []struct {
 			name string
-			push Result
-			got  History
+			push *Result
+			got  *History
 			want int
 		}{
-			{"One", Result{Count: 1}, History{}, 1},
-			{"Five", Result{Count: 1}, History{results[:5]}, 6},
-			{"Max", Result{Count: 1}, History{results: results}, maxHistory},
+			{"One", &Result{Count: 1}, &History{alertCount: new(int)}, 1},
+			{"Five", &Result{Count: 1}, &History{results: results[:5], alertCount: new(int)}, 6},
+			{"Max", &Result{Count: 1}, &History{results: results, alertCount: new(int)}, maxHistory},
 		}
 
 		for _, tt := range tests {

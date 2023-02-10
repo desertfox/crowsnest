@@ -14,15 +14,19 @@ type Search struct {
 	Streamid string   `yaml:"streamid"`
 	Query    string   `yaml:"query"`
 	Fields   []string `yaml:"fields"`
-	History  *History `yaml:"-"`
 }
 
-type Result struct {
-	Count int
-	When  time.Time
+func (s *Search) GoGraylogQuery(frequency int) gograylog.Query {
+	return gograylog.Query{
+		QueryString: s.Query,
+		StreamID:    s.Streamid,
+		Fields:      s.Fields,
+		Frequency:   frequency,
+		Limit:       10000,
+	}
 }
 
-func (s *Search) Run(g gograylog.ClientInterface, frequency int) (Result, error) {
+func (s *Search) Run(g gograylog.ClientInterface, frequency int) (*Result, error) {
 	q := gograylog.Query{
 		QueryString: s.Query,
 		StreamID:    s.Streamid,
@@ -33,7 +37,7 @@ func (s *Search) Run(g gograylog.ClientInterface, frequency int) (Result, error)
 
 	b, err := g.Search(q)
 	if err != nil {
-		return Result{}, err
+		return &Result{}, err
 	}
 
 	count := bytes.Count(b, []byte("\n"))
@@ -45,7 +49,7 @@ func (s *Search) Run(g gograylog.ClientInterface, frequency int) (Result, error)
 		}
 
 		if val, ok := j["total_results"]; ok {
-			return Result{
+			return &Result{
 				Count: int(val.(float64)),
 				When:  time.Now(),
 			}, nil
@@ -57,12 +61,10 @@ func (s *Search) Run(g gograylog.ClientInterface, frequency int) (Result, error)
 		count -= 1
 	}
 
-	r := Result{
+	r := &Result{
 		Count: count,
 		When:  time.Now(),
 	}
-
-	s.History.Add(r)
 
 	return r, nil
 }
