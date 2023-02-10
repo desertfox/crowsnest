@@ -3,7 +3,6 @@ package job
 import (
 	"bytes"
 	"encoding/csv"
-	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -115,7 +114,7 @@ func parseCSV(b []byte) (int, error) {
 	}
 
 	if len(records) == 0 {
-		return 0, errors.New("response was not text/csv")
+		return 0, nil
 	}
 
 	return len(records) - 1, nil
