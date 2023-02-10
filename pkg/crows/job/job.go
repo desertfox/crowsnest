@@ -55,7 +55,7 @@ func (j *Job) GetFunc(goclient gograylog.ClientInterface, teamsclient *goteamsno
 
 		numLines, err := parseCSV(b)
 		if err != nil {
-			log.Errorw("unable to parse search results", "name", j.Name, "dataPartial", b[64:], "error", err)
+			log.Errorw("unable to parse search results", "name", j.Name, "data", string(b), "error", err)
 			return
 		}
 
