@@ -71,7 +71,7 @@ func (j *Job) GetFunc(goclient gograylog.ClientInterface, teamsclient *goteamsno
 
 		if j.Verbose || r.Alert {
 			if err := teamsclient.Send(j.Teams.Url, createTeamsCard(j, r)); err != nil {
-				log.Errorw("unable to send results to webhook", "name", j.Name, "error", err)
+				log.Errorw("unable to send results to webhook", "name", j.Name, "teams", j.Teams, "error", err)
 				return
 			}
 		}
