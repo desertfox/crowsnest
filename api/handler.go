@@ -76,6 +76,8 @@ func (a Api) createJob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Println(njr)
+
 	a.nest.Send(crows.Event{
 		Action: crows.Add,
 		Job:    &j,
