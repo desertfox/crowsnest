@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"net/url"
 	"strconv"
 	"strings"
@@ -41,6 +42,11 @@ func translate(njr NewJobReq) (job.Job, error) {
 		fields = strings.Split(parsedQuery["fields"][0], ",")
 	}
 
+	streamid, err := getSteamId(urlObj.EscapedPath())
+	if err != nil {
+		return job.Job{}, err
+	}
+
 	return job.Job{
 		Name:      njr.Name,
 		Host:      "https://" + urlObj.Hostname(),
@@ -52,7 +58,7 @@ func translate(njr NewJobReq) (job.Job, error) {
 		},
 		Search: job.Search{
 			Type:     typeSearch,
-			Streamid: getSteamId(urlObj.EscapedPath()),
+			Streamid: streamid,
 			Query:    parsedQuery["q"][0],
 			Fields:   fields,
 		},
@@ -63,6 +69,10 @@ func translate(njr NewJobReq) (job.Job, error) {
 	}, nil
 }
 
-func getSteamId(s string) string {
-	return strings.Split(s, "/")[2]
+func getSteamId(s string) (string, error) {
+	parts := strings.Split(s, "/")
+	if len(parts) == 1 {
+		return "", errors.New("unexpected format: " + s)
+	}
+	return strings.Split(s, "/")[2], nil
 }
