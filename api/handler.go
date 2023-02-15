@@ -28,13 +28,13 @@ func (a Api) createJob(w http.ResponseWriter, r *http.Request) {
 
 	threshold, err := strconv.Atoi(r.FormValue("threshold"))
 	if err != nil {
-		w.Write([]byte("error translating threshold to int " + err.Error()))
+		http.Error(w, "error translating threshold to int "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	verbose, err := strconv.ParseBool(r.FormValue("verbose"))
 	if err != nil {
-		w.Write([]byte("error translating verbose to int " + err.Error()))
+		http.Error(w, "error translating verbose to int "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -70,7 +70,7 @@ func (a Api) createJob(w http.ResponseWriter, r *http.Request) {
 
 	j, err := translate(njr)
 	if err != nil {
-		w.Write([]byte("error translating job" + err.Error()))
+		http.Error(w, "error translating job"+err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -155,7 +155,9 @@ func (a Api) getJobForm(w http.ResponseWriter) {
 </html>`)
 
 	if err != nil {
+		http.Error(w, "sys error, notify admin", http.StatusBadGateway)
 		log.Fatalln(err.Error())
+		return
 	}
 
 	var (
@@ -179,7 +181,9 @@ func (a Api) getJobForm(w http.ResponseWriter) {
 func (a Api) getStatus(w http.ResponseWriter) {
 	central, err := time.LoadLocation("America/Chicago")
 	if err != nil {
+		http.Error(w, "sys error, notify admin", http.StatusBadGateway)
 		log.Fatalf(err.Error())
+		return
 	}
 
 	var output template.HTML
@@ -234,7 +238,9 @@ func (a Api) getStatus(w http.ResponseWriter) {
 	</form>	
 	</html>`)
 	if err != nil {
+		http.Error(w, "sys error, notify admin", http.StatusBadGateway)
 		log.Fatalln(err.Error())
+		return
 	}
 
 	tmpl.Execute(w, struct {
@@ -263,7 +269,9 @@ func (a Api) deleteJob(w http.ResponseWriter, r *http.Request) {
 	{{ .Output}}
 	</html>`)
 	if err != nil {
+		http.Error(w, "sys error, notify admin", http.StatusBadGateway)
 		log.Fatalln(err.Error())
+		return
 	}
 
 	for _, j := range a.nest.Jobs() {
