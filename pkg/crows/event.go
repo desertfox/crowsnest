@@ -28,4 +28,5 @@ func handleEvent(n *Nest) {
 
 		n.AssignJobs()
 	}
+	close(n.eventChan)
 }
