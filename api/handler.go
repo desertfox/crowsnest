@@ -68,6 +68,8 @@ func (a Api) createJob(w http.ResponseWriter, r *http.Request) {
 		OffSet:     r.FormValue("offset"),
 	}
 
+	log.Println(njr)
+
 	j, err := translate(njr)
 	if err != nil {
 		http.Error(w, "error translating job"+err.Error(), http.StatusBadRequest)
