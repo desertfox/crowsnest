@@ -90,5 +90,4 @@ func (n *Nest) LastRun(name string) time.Time {
 
 func (n *Nest) Send(e Event) {
 	n.eventChan <- e
-	close(n.eventChan)
 }
