@@ -14,21 +14,18 @@ type Event struct {
 	Job    *job.Job
 }
 
-func handleEvent(n *Nest) {
-	for e := range n.eventChan {
+func (n *Nest) HandleEvent(e Event) {
+	n.log.Infow("inbound event", "event", e)
 
-		n.log.Infow("inbound event", "event", e)
-
-		switch e.Action {
-		case Reload:
-			n.list = n.BuildList()
-		case Del:
-			n.list.Delete(e.Job)
-		case Add:
-			n.list.Add(e.Job)
-		}
-		n.list.Save()
-
-		n.AssignJobs()
+	switch e.Action {
+	case Reload:
+		n.list = n.BuildList()
+	case Del:
+		n.list.Delete(e.Job)
+	case Add:
+		n.list.Add(e.Job)
 	}
+	n.list.Save()
+
+	n.AssignJobs()
 }

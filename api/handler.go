@@ -78,7 +78,7 @@ func (a Api) createJob(w http.ResponseWriter, r *http.Request) {
 
 	log.Println(j)
 
-	a.nest.Send(crows.Event{
+	a.nest.HandleEvent(crows.Event{
 		Action: crows.Add,
 		Job:    &j,
 	})
@@ -257,7 +257,7 @@ func (a Api) getStatus(w http.ResponseWriter) {
 }
 
 func (a Api) reloadJobs(w http.ResponseWriter) {
-	a.nest.Send(crows.Event{
+	a.nest.HandleEvent(crows.Event{
 		Action: crows.Reload,
 	})
 
@@ -280,7 +280,7 @@ func (a Api) deleteJob(w http.ResponseWriter, r *http.Request) {
 
 	for _, j := range a.nest.Jobs() {
 		if name == j.Name {
-			a.nest.Send(crows.Event{
+			a.nest.HandleEvent(crows.Event{
 				Action: crows.Del,
 				Job:    &job.Job{Name: name},
 			})

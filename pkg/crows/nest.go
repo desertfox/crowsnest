@@ -46,8 +46,6 @@ func (n *Nest) Start() error {
 	n.log.Info("assign jobs")
 	n.AssignJobs()
 
-	go handleEvent(n)
-
 	return nil
 }
 
@@ -86,8 +84,4 @@ func (n *Nest) NextRun(name string) time.Time {
 // LastRun will query the Schedule to find the given job name
 func (n *Nest) LastRun(name string) time.Time {
 	return n.schedule.LastRun(name)
-}
-
-func (n *Nest) Send(e Event) {
-	n.eventChan <- e
 }
