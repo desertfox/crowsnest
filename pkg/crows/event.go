@@ -16,6 +16,9 @@ type Event struct {
 
 func handleEvent(n *Nest) {
 	for e := range n.eventChan {
+
+		n.log.Infow("inbound event", "event", e)
+
 		switch e.Action {
 		case Reload:
 			n.list = n.BuildList()
@@ -28,5 +31,4 @@ func handleEvent(n *Nest) {
 
 		n.AssignJobs()
 	}
-	close(n.eventChan)
 }
