@@ -34,7 +34,10 @@ func Execute() {
 
 	n := c.BuildNest()
 
-	n.Start()
+	err := n.Start()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	api.New(n).Start()
 }
