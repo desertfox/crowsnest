@@ -75,14 +75,13 @@ func testJob(postFixTag string) Job {
 			Name: "Room Name",
 		},
 		Search: Search{
-			Type:     "relative",
 			Streamid: "abcd12345",
 			Query:    "error",
 			Fields:   []string{"source", "message"},
 		},
 		Condition: Condition{
 			Threshold: 1,
-			State:     ">",
+			Operator:  ">",
 		},
 	}
 }

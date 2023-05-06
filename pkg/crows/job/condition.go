@@ -6,12 +6,12 @@ import (
 
 type Condition struct {
 	Threshold int    `yaml:"threshold"`
-	State     string `yaml:"state"`
+	Operator  string `yaml:"operator"`
 }
 
 // Takes a Result and operates using configured threshold and state condition attributes.
 func (c Condition) IsAlert(r *Result) {
-	switch c.State {
+	switch c.Operator {
 	case ">":
 		r.Alert = r.Count >= c.Threshold
 	case "<":
@@ -23,7 +23,7 @@ func (c Condition) IsAlert(r *Result) {
 
 func (c Condition) IsAlertText(r *Result) string {
 	if r.Alert {
-		return fmt.Sprintf("🔥%d %s= %d🔥", r.Count, c.State, c.Threshold)
+		return fmt.Sprintf("🔥%d %s= %d🔥", r.Count, c.Operator, c.Threshold)
 	}
-	return fmt.Sprintf("✔️%d %s= %d✔️", r.Count, c.State, c.Threshold)
+	return fmt.Sprintf("✔️%d %s= %d✔️", r.Count, c.Operator, c.Threshold)
 }

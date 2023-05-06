@@ -19,22 +19,22 @@ var CROWSNEST_STATUS_URL string = os.Getenv("CROWSNEST_STATUS_URL")
 
 type Job struct {
 	//Name of the job
-	Name string `yaml:"name"`
+	Name string `json:"name" yaml:"name"`
 	//Host is the graylog endpoint
-	Host string `yaml:"host"`
+	Host string `json:"host" yaml:"host"`
 	//Frequency is the occurence of the job execution
-	Frequency int `yaml:"frequency"`
+	Frequency int `json:"frequency" yaml:"frequency"`
 	//Verbose If true will send message to teams room regardless of condition eval
-	Verbose bool `yaml:"verbose"`
+	Verbose bool `json:"verbose" yaml:"verbose"`
 	//Teams
-	Teams Teams `yaml:"teams"`
+	Teams Teams `json:"teams" yaml:"teams"`
 	//Offset if a job is to no begin on startup but at a defered time
-	Offset string `yaml:"offset"`
+	Offset string `json:"offset" yaml:"offset"`
 	//Search
-	Search Search `yaml:"search"`
+	Search Search `json:"search" yaml:"search"`
 	//Condition
-	Condition Condition `yaml:"condition"`
-	History   *History  `yaml:"-"`
+	Condition Condition `json:"condition" yaml:"condition"`
+	History   *History  `json:"history" yaml:"-"`
 }
 
 type Teams struct {
@@ -42,11 +42,11 @@ type Teams struct {
 	Url  string `yaml:"url"`
 }
 
-func (j *Job) GetFunc(goclient gograylog.ClientInterface, teamsclient *goteamsnotify.TeamsClient, log *zap.SugaredLogger) func() {
+func (j *Job) GetFunc(graylogclient gograylog.ClientInterface, teamsclient *goteamsnotify.TeamsClient, log *zap.SugaredLogger) func() {
 	return func() {
 		j := j
 
-		b, err := goclient.Search(j.Search.query)
+		b, err := graylogclient.Search(j.Search.query)
 		if err != nil {
 			log.Errorw("unable to complete search", "name", j.Name, "error", err)
 			return
@@ -55,7 +55,7 @@ func (j *Job) GetFunc(goclient gograylog.ClientInterface, teamsclient *goteamsno
 		numLines, err := parseCSV(b)
 		if err != nil {
 			log.Errorw("unable to parse search results", "name", j.Name, "data", string(b), "error", err)
-			return
+			numLines = -1
 		}
 
 		r := &Result{
@@ -67,7 +67,7 @@ func (j *Job) GetFunc(goclient gograylog.ClientInterface, teamsclient *goteamsno
 
 		j.History.Add(r)
 
-		log.Infow("job run", "name", j.Name, "count", r.Count, "IsAlert", r.Alert, "AlertCount", j.History.alertCount)
+		log.Infow("job run", "name", j.Name, "count", r.Count, "IsAlert", r.Alert, "AlertCount", j.History.AlertCount)
 
 		if j.Verbose || r.Alert {
 			if err := teamsclient.Send(j.Teams.Url, createTeamsCard(j, r)); err != nil {
@@ -86,7 +86,7 @@ func createTeamsCard(j *Job, r *Result) *messagecard.MessageCard {
 		j.Name,
 		j.Frequency,
 		r.Count,
-		j.History.alertCount,
+		j.History.AlertCount,
 		j.Condition.IsAlertText(r),
 		j.Search.BuildURL(j.Host, r.From(j.Frequency), r.To()),
 		CROWSNEST_STATUS_URL,

@@ -7,7 +7,6 @@ import (
 )
 
 type Search struct {
-	Type     string   `yaml:"type"`
 	Streamid string   `yaml:"streamid"`
 	Query    string   `yaml:"query"`
 	Fields   []string `yaml:"fields"`

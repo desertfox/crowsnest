@@ -26,6 +26,7 @@ type Nest struct {
 	//Event channel for sending signals to an instance
 	eventChan chan Event
 	log       *zap.SugaredLogger
+	StartTime time.Time
 }
 
 // Start will check if there are Jobs attached to the list struct value, if not it will attempt to List.Load()

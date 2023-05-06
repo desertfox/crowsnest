@@ -20,34 +20,39 @@ func New(nest *crows.Nest) Api {
 }
 
 func (a Api) Start() {
-	a.SetupRoute()
+	a.jobRoutes()
+	a.crowsnestRoutes()
+
+	a.mux.Handle("/", http.FileServer(http.Dir("./crowsnest-ui/build")))
 
 	log.Fatal(http.ListenAndServe(":8080", a.mux))
 }
 
-func (a Api) SetupRoute() {
-	a.mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+func (a Api) jobRoutes() {
+	a.mux.HandleFunc("/api/jobs", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
-		case "POST":
-			a.createJob(w, r)
 		case "GET":
-			a.getJobForm(w)
+			a.getJobs(w)
 		}
 	})
+	a.mux.HandleFunc("/api/job", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case "GET":
+			a.getJob(w, r)
+		case "PUT":
+			a.updateJob(w, r)
+		case "POST":
+			a.createJob(w, r)
+		}
+	})
+}
 
-	a.mux.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
+func (a Api) crowsnestRoutes() {
+	a.mux.HandleFunc("/api/status", func(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case "GET":
 			a.getStatus(w)
-		case "POST":
-			a.reloadJobs(w)
 		}
 	})
 
-	a.mux.HandleFunc("/delete", func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case "POST":
-			a.deleteJob(w, r)
-		}
-	})
 }

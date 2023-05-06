@@ -1,8 +1,8 @@
-- name: test
-  host: https://something.com
-  frequency: 0
-  offset: 24:00
-  verbose: 0
+- name: ExampleJob
+  host: https://nowhere.com
+  frequency: 15
+  offset: 00:00
+  verbose: false
   teams:
     name: Teams room name
     url: https://teamsurl.com

@@ -1,6 +1,8 @@
 # syntax=docker/dockerfile:1
 FROM golang:1.19.4-alpine3.16
 
+ARG CROWSNET_CONFIG=/opt/crowsnest/config.yaml
+
 RUN mkdir /opt/src
 
 WORKDIR /opt/src
@@ -15,4 +17,4 @@ ENV GOOS=linux
 
 RUN go build -o crowsnest .
 
-CMD [ "./crowsnest" ]
+CMD [ "./crowsnest config $CROWSNET_CONFIG" ]

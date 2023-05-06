@@ -3,3 +3,4 @@ host: https://graylog.com
 teamsurl:
 username: desertfox
 password: secret
+crowurl: https://somethign.com

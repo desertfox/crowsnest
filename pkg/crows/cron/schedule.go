@@ -23,7 +23,8 @@ func (s *Schedule) Add(name string, frequency int, startAt time.Time, do func(),
 		}
 		s.Remove(existingJob)
 	}
-	s.Every(frequency).Minutes().StartAt(startAt).Tag(name).Do(do)
+	//s.Every(frequency).Minutes().StartAt(startAt).Tag(name).Do(do)
+	s.Every(frequency).Minutes().Tag(name).Do(do)
 }
 func (s *Schedule) NextRun(name string) time.Time {
 	j, err := s.get(name)

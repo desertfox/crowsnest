@@ -42,7 +42,6 @@ func Test_translate(t *testing.T) {
 			},
 			Verbose: verbose,
 			Search: job.Search{
-				Type:     searchTypeRelative,
 				Streamid: streamid,
 				Query:    q,
 				Fields:   fields,
@@ -66,10 +65,6 @@ func Test_translate(t *testing.T) {
 
 		if got.Host != want.Host {
 			t.Errorf("error got: %#v, want %#v", got.Host, want.Host)
-		}
-
-		if got.Search.Type != want.Search.Type {
-			t.Errorf("error got: %#v, want %#v", got.Search.Type, want.Search.Type)
 		}
 
 		if got.Search.Streamid != want.Search.Streamid {

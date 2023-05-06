@@ -58,6 +58,9 @@ func (l *List) Add(j *Job) {
 		return
 	}
 
+	j.History = newHistory()
+	j.Search.buildQuery(j.Frequency)
+
 	l.Jobs = append(l.Jobs, j)
 }
 func (l *List) Delete(delJob *Job) {

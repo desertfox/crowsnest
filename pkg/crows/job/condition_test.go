@@ -16,7 +16,7 @@ func Test_condition(t *testing.T) {
 		tests := []struct {
 			result    *Result
 			threshold int
-			state     string
+			Operator  string
 			alert     bool
 			alertStr  string
 		}{
@@ -30,10 +30,10 @@ func Test_condition(t *testing.T) {
 
 		for _, tt := range tests {
 			tt := tt
-			t.Run(fmt.Sprintf("%d %s= %d", tt.result.Count, tt.state, tt.threshold), func(t *testing.T) {
+			t.Run(fmt.Sprintf("%d %s= %d", tt.result.Count, tt.Operator, tt.threshold), func(t *testing.T) {
 				got := Condition{
 					Threshold: tt.threshold,
-					State:     tt.state,
+					Operator:  tt.Operator,
 				}
 
 				got.IsAlert(tt.result)
@@ -53,7 +53,7 @@ func Test_condition(t *testing.T) {
 func ExampleCondition() {
 	fmt.Println(Condition{
 		Threshold: 1,
-		State:     "<",
+		Operator:  "<",
 	})
 	//Output: {1 <}
 }

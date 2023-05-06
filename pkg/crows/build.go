@@ -50,6 +50,8 @@ func (c *Config) Load(path string) error {
 func (c *Config) BuildNest() *Nest {
 	z, _ := zap.NewDevelopment()
 
+	loc, _ := time.LoadLocation("America/Chicago")
+
 	return &Nest{
 		Config: c,
 		list:   c.BuildList(),
@@ -59,6 +61,7 @@ func (c *Config) BuildNest() *Nest {
 		MSTeamsClient: c.buildTeamsClient(),
 		GrayLogClient: c.buildGraylogClient(),
 		log:           z.Sugar(),
+		StartTime:     time.Now().In(loc),
 	}
 }
 

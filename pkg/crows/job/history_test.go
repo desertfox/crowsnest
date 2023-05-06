@@ -17,9 +17,9 @@ func Test_history(t *testing.T) {
 			got  *History
 			want int
 		}{
-			{"One", &Result{Count: 1}, &History{alertCount: 0}, 1},
-			{"Five", &Result{Count: 1}, &History{results: results[:5], alertCount: 0}, 6},
-			{"Max", &Result{Count: 1}, &History{results: results, alertCount: 0}, maxHistory},
+			{"One", &Result{Count: 1}, &History{AlertCount: 0}, 1},
+			{"Five", &Result{Count: 1}, &History{Results: results[:5], AlertCount: 0}, 6},
+			{"Max", &Result{Count: 1}, &History{Results: results, AlertCount: 0}, maxHistory},
 		}
 
 		for _, tt := range tests {
@@ -27,12 +27,12 @@ func Test_history(t *testing.T) {
 			t.Run(tt.name, func(t *testing.T) {
 				tt.got.Add(tt.push)
 
-				if len(tt.got.results) != tt.want {
-					t.Fatalf("Incorrect length got: %v, want: %v, results: %v", len(tt.got.results), tt.want, tt.got.results)
+				if len(tt.got.Results) != tt.want {
+					t.Fatalf("Incorrect length got: %v, want: %v, results: %v", len(tt.got.Results), tt.want, tt.got.Results)
 				}
 
-				if tt.push != tt.got.results[0] {
-					t.Fatalf("New results go on bottom got: %v, want: %v", tt.push, tt.got.results[0])
+				if tt.push != tt.got.Results[0] {
+					t.Fatalf("New results go on bottom got: %v, want: %v", tt.push, tt.got.Results[0])
 				}
 			})
 		}

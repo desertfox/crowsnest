@@ -1,0 +1,3 @@
+[submodule "crowsnest-ui"]
+	path = crowsnest-ui
+	url = https://github.com/desertfox/crowsnest-ui.git

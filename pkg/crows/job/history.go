@@ -6,57 +6,52 @@ const maxHistory int = 20
 
 // History container for Results
 type History struct {
-	results    []*Result
-	alertCount int
+	Results    []*Result `json:"results"`
+	AlertCount int       `json:"alertCount"`
 }
 
 type Result struct {
-	Count int
-	When  time.Time
-	Alert bool
+	Count int       `json:"Count"`
+	When  time.Time `json:"When"`
+	Alert bool      `json:"Alert"`
 }
 
 func newHistory() *History {
 	return &History{
-		results:    make([]*Result, 0, maxHistory),
-		alertCount: 0,
+		Results:    make([]*Result, 0, maxHistory),
+		AlertCount: 0,
 	}
-}
-
-// Results accessor
-func (h History) Results() []*Result {
-	return h.results
 }
 
 // Add
 func (h *History) Add(r *Result) {
 	if r.Alert {
-		h.alertCount++
+		h.AlertCount++
 	} else {
-		h.alertCount = 0
+		h.AlertCount = 0
 	}
 
 	results := []*Result{r}
-	results = append(results, h.results...)
+	results = append(results, h.Results...)
 
-	if len(h.results) >= maxHistory {
+	if len(h.Results) >= maxHistory {
 		results = results[:maxHistory]
 	}
 
-	h.results = results
+	h.Results = results
 }
 
 func (h History) Avg() int {
-	if len(h.results) == 0 {
+	if len(h.Results) == 0 {
 		return 0
 	}
 
 	var sum int = 0
-	for _, v := range h.results {
+	for _, v := range h.Results {
 		sum += v.Count
 	}
 
-	return sum / len(h.results)
+	return sum / len(h.Results)
 }
 
 func (r Result) From(f int) time.Time {
