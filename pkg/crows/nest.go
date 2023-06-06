@@ -12,7 +12,8 @@ import (
 )
 
 var (
-	wg sync.WaitGroup
+	wg    sync.WaitGroup
+	mutex sync.Mutex
 )
 
 type Nest struct {
@@ -23,10 +24,8 @@ type Nest struct {
 	MSTeamsClient *goteamsnotify.TeamsClient
 	//Graylog Client for searching
 	GrayLogClient gograylog.ClientInterface
-	//Event channel for sending signals to an instance
-	eventChan chan Event
-	log       *zap.SugaredLogger
-	StartTime time.Time
+	log           *zap.SugaredLogger
+	StartTime     time.Time
 }
 
 // Start will check if there are Jobs attached to the list struct value, if not it will attempt to List.Load()
@@ -66,7 +65,7 @@ func (n *Nest) AssignJobs() {
 			n.log.Infow("adding job", "name", name, "frequency", frequency, "startAt", startAt)
 			n.schedule.Add(name, frequency, startAt, f, true)
 
-		}(j.Name, j.Frequency, j.GetOffSetTime(), j.GetFunc(n.GrayLogClient, n.MSTeamsClient, n.log))
+		}(j.Name, j.Frequency, j.GetOffSetTime(), j.GetFunc(n.GrayLogClient, n.MSTeamsClient, n.log, &mutex))
 	}
 	wg.Wait()
 

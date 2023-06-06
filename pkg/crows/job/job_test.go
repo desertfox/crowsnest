@@ -1,6 +1,7 @@
 package job
 
 import (
+	"sync"
 	"testing"
 	"time"
 
@@ -23,7 +24,7 @@ func Test_job(t *testing.T) {
 		for _, tt := range tests {
 			tt := tt
 			t.Run(tt.name, func(t *testing.T) {
-				tt.job.GetFunc(&gograylog.Client{}, goteamsnotify.NewTeamsClient(), &zap.SugaredLogger{})
+				tt.job.GetFunc(&gograylog.Client{}, goteamsnotify.NewTeamsClient(), &zap.SugaredLogger{}, &sync.Mutex{})
 			})
 		}
 	})

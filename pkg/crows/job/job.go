@@ -7,6 +7,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	goteamsnotify "github.com/atc0005/go-teams-notify/v2"
@@ -42,11 +43,13 @@ type Teams struct {
 	Url  string `yaml:"url"`
 }
 
-func (j *Job) GetFunc(graylogclient gograylog.ClientInterface, teamsclient *goteamsnotify.TeamsClient, log *zap.SugaredLogger) func() {
+func (j *Job) GetFunc(graylogclient gograylog.ClientInterface, teamsclient *goteamsnotify.TeamsClient, log *zap.SugaredLogger, m *sync.Mutex) func() {
 	return func() {
 		j := j
 
+		m.Lock()
 		b, err := graylogclient.Search(j.Search.query)
+		m.Unlock()
 		if err != nil {
 			log.Errorw("unable to complete search", "name", j.Name, "error", err)
 			return
