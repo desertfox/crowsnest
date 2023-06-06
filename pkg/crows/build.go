@@ -20,6 +20,7 @@ type Config struct {
 	graylog  *graylog
 	JobsPath string `yaml:"jobspath"`
 	TeamsURL string `yaml:"teamsurl"`
+	HttpDir  string `yaml:"httpdir"`
 }
 
 type graylog struct {

@@ -23,7 +23,7 @@ func (a Api) Start() {
 	a.jobRoutes()
 	a.crowsnestRoutes()
 
-	a.mux.Handle("/", http.FileServer(http.Dir("./crowsnest-ui/build")))
+	a.mux.Handle("/", http.FileServer(http.Dir(a.nest.HttpDir)))
 
 	log.Fatal(http.ListenAndServe(":8080", a.mux))
 }

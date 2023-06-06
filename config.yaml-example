@@ -1,6 +1,6 @@
 jobspath: ./jobs.yaml-example
 host: https://graylog.com
-teamsurl:
+teamsurl: https:://microsoft.com
 username: desertfox
 password: secret
-crowurl: https://somethign.com
+httpdir: ./crowsnest-ui/build
