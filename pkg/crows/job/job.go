@@ -55,18 +55,16 @@ func (j *Job) GetFunc(graylogclient gograylog.ClientInterface, teamsclient *gote
 			return
 		}
 
-		numLines, err := parseCSV(b)
+		nLines, err := parseCSV(b)
 		if err != nil {
 			log.Errorw("unable to parse search results", "name", j.Name, "data", string(b), "error", err)
-			numLines = -1
 		}
 
 		r := &Result{
-			Count: numLines,
+			Count: nLines,
 			When:  time.Now(),
+			Alert: j.Condition.IsAlert(nLines),
 		}
-
-		j.Condition.IsAlert(r)
 
 		j.History.Add(r)
 
@@ -90,7 +88,7 @@ func createTeamsCard(j *Job, r *Result) *messagecard.MessageCard {
 		j.Frequency,
 		r.Count,
 		j.History.AlertCount,
-		j.Condition.IsAlertText(r),
+		j.Condition.IsAlertText(r.Alert, r.Count),
 		j.Search.BuildURL(j.Host, r.From(j.Frequency), r.To()),
 		CROWSNEST_STATUS_URL,
 	)
@@ -112,13 +110,6 @@ func (j Job) GetOffSetTime() time.Time {
 
 func parseCSV(b []byte) (int, error) {
 	records, err := csv.NewReader(bytes.NewBuffer(b)).ReadAll()
-	if err != nil {
-		return 0, err
-	}
 
-	if len(records) == 0 {
-		return 0, nil
-	}
-
-	return len(records) - 1, nil
+	return len(records) - 1, err
 }

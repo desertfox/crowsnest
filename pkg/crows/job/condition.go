@@ -10,20 +10,20 @@ type Condition struct {
 }
 
 // Takes a Result and operates using configured threshold and state condition attributes.
-func (c Condition) IsAlert(r *Result) {
+func (c Condition) IsAlert(count int) bool {
 	switch c.Operator {
 	case ">":
-		r.Alert = r.Count >= c.Threshold
+		return count >= c.Threshold
 	case "<":
-		r.Alert = r.Count <= c.Threshold
+		return count <= c.Threshold
 	default:
-		r.Alert = false
+		return false
 	}
 }
 
-func (c Condition) IsAlertText(r *Result) string {
-	if r.Alert {
-		return fmt.Sprintf("🔥%d %s= %d🔥", r.Count, c.Operator, c.Threshold)
+func (c Condition) IsAlertText(alert bool, count int) string {
+	if alert {
+		return fmt.Sprintf("🔥%d %s= %d🔥", count, c.Operator, c.Threshold)
 	}
-	return fmt.Sprintf("✔️%d %s= %d✔️", r.Count, c.Operator, c.Threshold)
+	return fmt.Sprintf("✔️%d %s= %d✔️", count, c.Operator, c.Threshold)
 }

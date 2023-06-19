@@ -27,10 +27,9 @@ func (l *List) Load() error {
 		return fmt.Errorf("unable to load list from yaml, %w", err)
 	}
 
-	//Init
-	for _, j := range l.Jobs {
-		j.History = newHistory()
-		j.Search.buildQuery(j.Frequency)
+	for i := 0; i < len(l.Jobs); i++ {
+		l.Jobs[i].History = newHistory()
+		l.Jobs[i].Search.buildQuery(l.Jobs[i].Frequency)
 	}
 
 	return nil
@@ -47,9 +46,7 @@ func (l *List) Save() error {
 
 	return nil
 }
-func (l *List) Count() int {
-	return len(l.Jobs)
-}
+
 func (l *List) Add(j *Job) {
 	l.mux.Lock()
 	defer l.mux.Unlock()
@@ -63,25 +60,26 @@ func (l *List) Add(j *Job) {
 
 	l.Jobs = append(l.Jobs, j)
 }
+
 func (l *List) Delete(delJob *Job) {
 	l.mux.Lock()
 	defer l.mux.Unlock()
 
-	jobs := []*Job(l.Jobs)
-	for i, j := range jobs {
-		if j.Name == delJob.Name {
-			jobs[i] = jobs[len(jobs)-1]
-			jobs = jobs[:len(jobs)-1]
-			l.Jobs = jobs
+	for i := 0; i < len(l.Jobs); i++ {
+		if l.Jobs[i].Name == delJob.Name {
+			l.Jobs[i] = l.Jobs[len(l.Jobs)-1]
+			l.Jobs = l.Jobs[:len(l.Jobs)-1]
 			return
 		}
 	}
 }
+
 func (l *List) exists(j *Job) bool {
-	for _, job := range l.Jobs {
-		if job.Name == j.Name {
+	for i := 0; i < len(l.Jobs); i++ {
+		if l.Jobs[i].Name == j.Name {
 			return true
 		}
 	}
+
 	return false
 }

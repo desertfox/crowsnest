@@ -36,14 +36,12 @@ func Test_condition(t *testing.T) {
 					Operator:  tt.Operator,
 				}
 
-				got.IsAlert(tt.result)
-
-				if tt.result.Alert != tt.alert {
+				if got.IsAlert(tt.result.Count) != tt.alert {
 					t.Fatalf("got: %v, want: %v", tt.result.Alert, tt.alert)
 				}
 
-				if !strings.Contains(got.IsAlertText(tt.result), tt.alertStr) {
-					t.Fatalf("got: %v, want: %v", got.IsAlertText(tt.result), tt.alertStr)
+				if !strings.Contains(got.IsAlertText(tt.result.Alert, tt.result.Count), tt.alertStr) {
+					t.Fatalf("got: %v, want: %v", got.IsAlertText(tt.result.Alert, tt.result.Count), tt.alertStr)
 				}
 			})
 		}

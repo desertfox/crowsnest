@@ -32,7 +32,7 @@ type Nest struct {
 // Schedule will initalize and start schedule control
 // Nest method AssignJobs will then be called.
 func (n *Nest) Start() error {
-	if n.list.Count() == 0 {
+	if len(n.list.Jobs) == 0 {
 		n.log.Info("Job list empty")
 		err := n.list.Load()
 		if err != nil {
@@ -52,12 +52,12 @@ func (n *Nest) Start() error {
 // AssignJobs will attach all Jobs to the Schedule
 // Nest will also attach a Status Job here that is not a Job type but a one off reporter
 func (n *Nest) AssignJobs() {
-	if n.list.Count() == 0 {
+	if len(n.list.Jobs) == 0 {
 		return
 	}
 
-	n.log.Infow("assigning jobs", "job count", n.list.Count())
-	wg.Add(n.list.Count())
+	n.log.Infow("assigning jobs", "job count", len(n.list.Jobs))
+	wg.Add(len(n.list.Jobs))
 	for _, j := range n.list.Jobs {
 		go func(name string, frequency int, startAt time.Time, f func()) {
 			defer wg.Done()

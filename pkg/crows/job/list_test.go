@@ -29,7 +29,7 @@ func Test_List(t *testing.T) {
 			File: file.Name(),
 		}
 		list.Load()
-		got := list.Count()
+		got := len(list.Jobs)
 
 		if got != 1 {
 			t.Errorf("wrong number of jobs, got:%v, want:%v", got, "<1")

@@ -46,9 +46,9 @@ func (h History) Avg() int {
 		return 0
 	}
 
-	var sum int = 0
-	for _, v := range h.Results {
-		sum += v.Count
+	sum := 0
+	for i := 0; i < len(h.Results); i++ {
+		sum += h.Results[i].Count
 	}
 
 	return sum / len(h.Results)
