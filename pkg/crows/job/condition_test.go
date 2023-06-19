@@ -40,8 +40,8 @@ func Test_condition(t *testing.T) {
 					t.Fatalf("got: %v, want: %v", tt.result.Alert, tt.alert)
 				}
 
-				if !strings.Contains(got.IsAlertText(tt.result.Alert, tt.result.Count), tt.alertStr) {
-					t.Fatalf("got: %v, want: %v", got.IsAlertText(tt.result.Alert, tt.result.Count), tt.alertStr)
+				if !strings.Contains(got.IsAlertText(got.IsAlert(tt.result.Count), tt.result.Count), tt.alertStr) {
+					t.Fatalf("got: %v, want: %v", got.IsAlertText(got.IsAlert(tt.result.Count), tt.result.Count), tt.alertStr)
 				}
 			})
 		}
